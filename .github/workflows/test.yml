@@ -1,0 +1,48 @@
+name: full check suite
+on:
+  push:
+
+jobs:
+  rubocop:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.5.1
+      - name: Cache Gems
+        uses: actions/cache@v2
+        with:
+          path: vendor/bundle
+          key: v1-${{ runner.os }}-event_source-gems-${{ hashFiles('**/Gemfile.lock') }}-${{ hashFiles('**/Gemfile' ) }}
+          restore-keys: |
+            v1-${{ runner.os }}-event_source-gems-${{ hashFiles('**/Gemfile.lock') }}-${{ hashFiles('**/Gemfile' ) }}
+      - name: bundle install
+        run: |
+          bundle config path vendor/bundle
+          bundle check || bundle install
+      - name: Run rubocop
+        run: bundle exec rubocop
+  rspec:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.5.1
+      - uses: wbari/start-mongoDB@v0.2
+        with:
+          mongoDBVersion: '3.6'
+      - name: Cache Gems
+        uses: actions/cache@v2
+        with:
+          path: vendor/bundle
+          key: v1-${{ runner.os }}-event_source-gems-${{ hashFiles('**/Gemfile.lock') }}-${{ hashFiles('**/Gemfile' ) }}
+          restore-keys: |
+            v1-${{ runner.os }}-event_source-gems-${{ hashFiles('**/Gemfile.lock') }}-${{ hashFiles('**/Gemfile' ) }}
+      - name: bundle install
+        run: |
+          bundle config path vendor/bundle
+          bundle check || bundle install
+      - name: Run rspec
+        run: bundle exec rspec
