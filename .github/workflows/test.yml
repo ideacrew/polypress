@@ -14,9 +14,9 @@ jobs:
         uses: actions/cache@v2
         with:
           path: vendor/bundle
-          key: v1-${{ runner.os }}-event_source-gems-${{ hashFiles('**/Gemfile.lock') }}-${{ hashFiles('**/Gemfile' ) }}
+          key: v1-${{ runner.os }}-polypress-gems-${{ hashFiles('**/Gemfile.lock') }}-${{ hashFiles('**/Gemfile' ) }}
           restore-keys: |
-            v1-${{ runner.os }}-event_source-gems-${{ hashFiles('**/Gemfile.lock') }}-${{ hashFiles('**/Gemfile' ) }}
+            v1-${{ runner.os }}-polypress-gems-${{ hashFiles('**/Gemfile.lock') }}-${{ hashFiles('**/Gemfile' ) }}
       - name: bundle install
         run: |
           bundle config path vendor/bundle
@@ -37,9 +37,9 @@ jobs:
         uses: actions/cache@v2
         with:
           path: vendor/bundle
-          key: v1-${{ runner.os }}-event_source-gems-${{ hashFiles('**/Gemfile.lock') }}-${{ hashFiles('**/Gemfile' ) }}
+          key: v1-${{ runner.os }}-polypress-gems-${{ hashFiles('**/Gemfile.lock') }}-${{ hashFiles('**/Gemfile' ) }}
           restore-keys: |
-            v1-${{ runner.os }}-event_source-gems-${{ hashFiles('**/Gemfile.lock') }}-${{ hashFiles('**/Gemfile' ) }}
+            v1-${{ runner.os }}-polypress-gems-${{ hashFiles('**/Gemfile.lock') }}-${{ hashFiles('**/Gemfile' ) }}
       - name: bundle install
         run: |
           bundle config path vendor/bundle
