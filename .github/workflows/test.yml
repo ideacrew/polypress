@@ -8,8 +8,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 2.5.1
       - name: Cache Gems
         uses: actions/cache@v2
         with:
