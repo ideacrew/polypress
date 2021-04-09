@@ -2,9 +2,16 @@
   "name": "polypress",
   "private": true,
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^5.15.3",
     "@rails/actioncable": "^6.0.0",
-    "@rails/ujs": "^6.0.0",
     "@rails/webpacker": "5.2.1",
+    "bootstrap": "^4.6.0",
+    "ckeditor4": "^4.16.0",
+    "jquery": "^3.6.0",
+    "jquery-ui": "^1.12.1",
+    "jquery-ui-dist": "^1.12.1",
+    "popper.js": "^1.16.1",
+    "rails-ujs": "^5.2.5",
     "turbolinks": "^5.2.0"
   },
   "version": "0.1.0",
