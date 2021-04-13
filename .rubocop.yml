@@ -6,6 +6,8 @@ AllCops:
   Exclude:
     - "bin/**/*"
     - "vendor/**/*"
+    - "project_gems/**/*"
+    - "node_modules/**/*"
 
 Layout/EmptyLineAfterGuardClause:
   Enabled: false

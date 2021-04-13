@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative "boot"
 
 require "rails"
@@ -21,6 +23,7 @@ require 'aca_entities'
 Bundler.require(*Rails.groups)
 
 module Polypress
+  # application.rb
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 6.0

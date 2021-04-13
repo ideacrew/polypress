@@ -1,3 +1,6 @@
+# frozen_string_literal: true
+
+# Template
 class Template
   include Mongoid::Document
   include Mongoid::Timestamps

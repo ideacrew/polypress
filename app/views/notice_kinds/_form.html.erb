@@ -84,7 +84,7 @@
   function update_placeholders(config) {  
     $.ajax({
       type:"GET",
-      url:"notice_kinds/get_placeholders",
+      url:"notice_kinds/fetch_placeholders",
       dataType:"json",
       async: false,
       data: {builder: $('#notice_kind_recipient').val(), market_kind: $('#notice_kind_market_kind').val()},
@@ -109,7 +109,7 @@
   function update_tokens(config) {
     $.ajax({
       type:"GET",
-      url:"notice_kinds/get_tokens",
+      url:"notice_kinds/fetch_tokens",
       dataType:"json",
       async: false,
       data: {builder: $('#notice_kind_recipient').val(), market_kind: $('#notice_kind_market_kind').val()},
@@ -123,7 +123,7 @@
   $('#notice_kind_market_kind').change(function() {
     $.ajax({
       type:"GET",
-      url:"notice_kinds/get_recipients",
+      url:"notice_kinds/fetch_recipients",
       dataType:"json",
       data: {market_kind: $('#notice_kind_market_kind').val()},
       complete:function(result){

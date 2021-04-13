@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 Rails.application.routes.draw do
   devise_for :accounts
   # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html
@@ -12,9 +14,9 @@ Rails.application.routes.draw do
 
     collection do
       get :download_notices
-      get :get_tokens
-      get :get_placeholders
-      get :get_recipients
+      get :fetch_tokens
+      get :fetch_placeholders
+      get :fetch_recipients
       # post :delete_notices
       post :upload_notices
     end

@@ -1,3 +1,6 @@
+# frozen_string_literal: true
+
+# Stores notice information
 class NoticeKind
   include Mongoid::Document
   include Mongoid::Timestamps
@@ -12,9 +15,9 @@ class NoticeKind
     # "Broker" => "BrokerProfile",
     # "Broker Agency" => "BrokerAgencyProfile",
     # "GeneralAgency" => "GeneralAgency"
-  }
+  }.freeze
 
-  MARKET_KINDS = [:aca_individual, :aca_shop]
+  MARKET_KINDS = [:aca_individual, :aca_shop].freeze
 
   field :title, type: String
   field :description, type: String
@@ -34,54 +37,62 @@ class NoticeKind
   validates_uniqueness_of :event_name, :allow_blank => true
 
   validates :market_kind,
-    inclusion:  { in: MARKET_KINDS, message: "%{value} is not a valid market kind" },
-    allow_nil:  false
+            inclusion: { in: MARKET_KINDS, message: "%<value> is not a valid market kind" },
+            allow_nil: false
 
   before_save :set_data_elements
 
   # scope :published,         ->{ any_in(aasm_state: ['published']) }
   # scope :archived,          ->{ any_in(aasm_state: ['archived']) }
 
-  scope :shop,              ->{ where(:market_kind.ne => :aca_individual) }
-  scope :individual,        ->{ where(:market_kind => :aca_individual) }
+  scope :shop,              -> { where(:market_kind.ne => :aca_individual) }
+  scope :individual,        -> { where(:market_kind => :aca_individual) }
 
   attr_accessor :resource, :payload
 
   def tokens
-    template.raw_body.scan(/\#\{([\w|\.|\s|\+|\-]*)\}/).flatten.reject{|element| element.scan(/Settings/).any?}.uniq.map(&:strip)
+    template.raw_body.scan(/\#\{([\w|.\s+\-]*)\}/).flatten.reject {|element| element.scan(/Settings/).any?}.uniq.map(&:strip)
   end
 
   def conditional_tokens
-    keywords = {'if' => '', 'else' => '', 'end' => '', 'elsif' => '', 'unless' => ''}
-    template.raw_body.scan(/\[\[([\s|\w|\.|?]*)/).flatten.map(&:strip).collect{|ele| ele.gsub(/\w+/) { |m| keywords.fetch(m,m) }}.map(&:strip).reject(&:blank?).uniq
+    keywords = { 'if' => '', 'else' => '', 'end' => '', 'elsif' => '', 'unless' => '' }
+    template.raw_body.scan(/\[\[([\s|\w.?]*)/).flatten.map(&:strip).collect do |ele|
+      ele.gsub(/\w+/) do |m|
+        keywords.fetch(m, m)
+      end
+    end.map(&:strip).reject(&:blank?).uniq
   end
 
   def set_data_elements
-    if template.present?
-      conditional_token_loops = []
-      iterator_subloop_tokens = []
-      loop_tokens = []
-      loop_iterators = conditional_tokens.inject([]) do |iterators, conditional_token|
-        iterators unless conditional_token.match(/(.+)\.each/i)
-        loop_match = conditional_token.match(/\|(.+)\|/i)
-        if loop_match.present?
-          loop_token = conditional_token.match(/(.+)\.each/i)[1]
-          loop_tokens << loop_token
-          iterator_subloop_tokens << loop_token if iterators.any?{|iterator| loop_token.match(/^#{iterator}\.(.*)$/i).present? }
-          conditional_token_loops << conditional_token
-          iterators << loop_match[1].strip
-        else
-          iterators
-        end
-      end
+    return unless template.present?
 
-      filtered_conditional_tokens = conditional_tokens - conditional_token_loops
-      data_elements = (tokens + filtered_conditional_tokens + loop_tokens).reject{|token| loop_iterators.any?{|iterator| token.match(/^#{iterator}\.(.*)$/i).present? && token.match(/(.+)\.each/i).blank?} }
-      template.data_elements = data_elements + iterator_subloop_tokens
+    conditional_token_loops = []
+    iterator_subloop_tokens = []
+    loop_tokens = []
+    loop_iterators = conditional_tokens.inject([]) do |iterators, conditional_token|
+      iterators unless conditional_token.match(/(.+)\.each/i)
+      loop_match = conditional_token.match(/\|(.+)\|/i)
+      if loop_match.present?
+        loop_token = conditional_token.match(/(.+)\.each/i)[1]
+        loop_tokens << loop_token
+        iterator_subloop_tokens << loop_token if iterators.any? {|iterator| loop_token.match(/^#{iterator}\.(.*)$/i).present? }
+        conditional_token_loops << conditional_token
+        iterators << loop_match[1].strip
+      else
+        iterators
+      end
     end
+
+    filtered_conditional_tokens = conditional_tokens - conditional_token_loops
+    data_elements = (tokens + filtered_conditional_tokens + loop_tokens).reject do |token|
+      loop_iterators.any? do |iterator|
+        token.match(/^#{iterator}\.(.*)$/i).present? && token.match(/(.+)\.each/i).blank?
+      end
+    end
+    template.data_elements = data_elements + iterator_subloop_tokens
   end
 
-  def execute_notice(event_name, payload)
+  def execute_notice(_event_name, payload)
     # finder_mapping = ApplicationEventMapper.lookup_resource_mapping(event_name)
     # if finder_mapping.nil?
     #   raise ArgumentError.new("BOGUS EVENT...could n't find resoure mapping for event #{event_name}.")
@@ -91,9 +102,7 @@ class NoticeKind
     # @resource = finder_mapping.mapped_class.send(finder_mapping.search_method, payload[finder_mapping.identifier_key.to_s])
     @resource = @payload
 
-    if @resource.blank?
-      raise ArgumentError.new("Bad Payload...could n't find resource.")
-    end
+    raise ArgumentError, "Bad Payload...could n't find resource." if @resource.blank?
 
     generate_pdf_notice
     upload_and_send_secure_message
@@ -122,7 +131,8 @@ class NoticeKind
       csv << ['Market Kind', 'Notice Number', 'Title', 'Description', 'Recipient', 'Event Name', 'Notice Template']
 
       all.each do |notice|
-        csv << [notice.market_kind, notice.notice_number, notice.title, notice.description, notice.recipient, notice.event_name, notice.template.try(:raw_body)]
+        csv << [notice.market_kind, notice.notice_number, notice.title, notice.description, notice.recipient, notice.event_name,
+                notice.template.try(:raw_body)]
       end
     end
   end
