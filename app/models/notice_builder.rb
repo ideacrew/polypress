@@ -368,8 +368,6 @@ module NoticeBuilder
     initial_invoice? ? 'initial_invoice' : 'notice'
   end
 
-
-  # rubocop:disable Lint/Syntax
   def create_secure_inbox_message(notice)
     receiver = resource
     receiver = resource.person if sub_resource?
@@ -378,15 +376,18 @@ module NoticeBuilder
       if initial_invoice?
         "Your Initial invoice is now available in your employer profile under Billing tab. Thank You"
       else
-        "<br>You can download the notice by clicking this link " \"<a href=" +
-          "#{authorized_download_path(receiver, notice)}?content_type=#{notice.format}&filename=#{notice.title.gsub(/[^0-9a-z]/i, '')}.pdf&disposition=inline" +
-          "target='_blank'>" + notice.title.gsub(/[^0-9a-z]/i, '') + "</a>"
+        path = authorized_download_path(receiver, notice)
+        "<br>You can download the notice by clicking this link " \
+          "<a href=" \
+          "#{path}?content_type=#{notice.format}&filename=#{notice.title.gsub(/[^0-9a-z]/i, '')}.pdf&disposition=inline" \
+          "target='_blank'>" \
+          "#{notice.title.gsub(/[^0-9a-z]/i, '')}" \
+          "</a>"
       end
 
     message = receiver.inbox.messages.build({ subject: subject, body: body, from: site_short_name })
     message.save!
   end
-  # rubocop:enable Lint/Syntax
 
   def authorized_download_path(receiver, notice)
     Rails.application.routes.url_helpers.authorized_document_download_path(receiver.class.to_s, receiver.id, 'documents', notice.id)
@@ -434,10 +435,12 @@ module NoticeBuilder
     shop_market? ? Settings.notices.shop.partials.footer : Settings.notices.individual.partials.footer
   end
 
-
-  # rubocop:disable Naming/VariableNumber
   def stubbed_object(klass)
-    person_hash = {
+    klass.new(person_hash)
+  end
+
+  def person_hash
+    {
       first_name: 'Ivl40',
       last_name: '41',
       dob: Date.today.prev_year,
@@ -447,25 +450,29 @@ module NoticeBuilder
       same_with_primary: true,
       indian_tribe_member: true,
       citizen_status: 'true',
-      addresses: [
-        {
-          kind: 'home',
-          address_1: '123',
-          address_2: '',
-          address_3: '',
-          city: 'was',
-          county: '',
-          state: 'DC',
-          location_state_code: nil,
-          full_text: nil,
-          zip: '12321',
-          country_name: '',
-          has_fixed_address: true
-        }
-      ],
+      addresses: address_hash,
       phones: [], emails: []
     }
-    klass.new(person_hash)
+  end
+
+  # rubocop:disable Naming/VariableNumber
+  def address_hash
+    [
+      {
+        kind: 'home',
+        address_1: '123',
+        address_2: '',
+        address_3: '',
+        city: 'was',
+        county: '',
+        state: 'DC',
+        location_state_code: nil,
+        full_text: nil,
+        zip: '12321',
+        country_name: '',
+        has_fixed_address: true
+      }
+    ]
   end
   # rubocop:enable Naming/VariableNumber
 
