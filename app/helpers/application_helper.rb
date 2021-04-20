@@ -3,16 +3,16 @@
 # Application Helper
 module ApplicationHelper
 
-  def prepend_glyph_to_text(test)
-    if test.event_name
-      "<i class='fa fa-link' data-toggle='tooltip' title='#{test.event_name}'></i>&nbsp;&nbsp;&nbsp;&nbsp;#{path_for_notice_preview}".html_safe
+  def prepend_glyph_to_text(template)
+    if template.key
+      "<i class='fa fa-link' data-toggle='tooltip' title='#{template.key}'></i>&nbsp;&nbsp;&nbsp;&nbsp;#{path_for_notice_preview(template)}".html_safe
     else
-      "<i class='fa fa-link' data-toggle='tooltip' style='color: silver'></i>&nbsp;&nbsp;&nbsp;&nbsp;#{path_for_notice_preview}".html_safe
+      "<i class='fa fa-link' data-toggle='tooltip' style='color: silver'></i>&nbsp;&nbsp;&nbsp;&nbsp;#{path_for_notice_preview(template)}".html_safe
     end
   end
 
-  def path_for_notice_preview
-    link_to test.notice_number, preview_notice_kind_path(test), target: '_blank'
+  def path_for_notice_preview(template)
+    link_to template.subject, preview_template_path(template), target: '_blank'
   end
 
   def individual_market(_recipient)

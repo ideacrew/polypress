@@ -7,7 +7,7 @@ module Services
     def recipients
       {
         "User" => "::User",
-        "ConsumerRole" => "AcaEntities::ConsumerRole"
+        'Family' => 'AcaEntities::Families::Family'
       }
     end
 

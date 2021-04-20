@@ -10,6 +10,7 @@
   "placeholder",
   "placeholder_select",
   "lineheight",
+  "liquid",
 ].forEach((element) => {
   CKEDITOR.plugins.addExternal(
     element,
@@ -23,7 +24,7 @@ CKEDITOR.editorConfig = function (config) {
     "Form,Checkbox,Radio,TextField,Textarea,Select,Button,ImageButton,HiddenField,About,Print,Save,NewPage,Preview,Save,Language,Flash,Smiley,Image,Iframe";
 
   config.extraPlugins =
-    "fontawesome,button,lineutils,widgetselection,notification,toolbar,widget,dialogui,dialog,clipboard,token,placeholder,placeholder_select,lineheight";
+    "fontawesome,button,lineutils,widgetselection,notification,toolbar,widget,dialogui,dialog,clipboard,token,placeholder,placeholder_select,lineheight,liquid";
   CKEDITOR.dtd.$removeEmpty.span = 0;
   CKEDITOR.dtd.$removeEmpty.i = 0;
   config.allowedContent = true;
@@ -37,6 +38,6 @@ CKEDITOR.editorConfig = function (config) {
     "Verdana;";
   config.language = "en";
 
-  config.tokenStart = "#{";
-  config.tokenEnd = "}";
+  config.tokenStart = "{{";
+  config.tokenEnd = "}}";
 };

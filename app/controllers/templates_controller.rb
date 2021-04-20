@@ -1,18 +1,15 @@
 # frozen_string_literal: true
 
-# NoticeKindsController
-class NoticeKindsController < ::ApplicationController
+# TemplatesController
+class TemplatesController < ::ApplicationController
   include ::DataTablesAdapter
   # include ::DataTablesSearch
-  require 'aca_entities/contracts/person_contract'
-  require 'aca_entities/contracts/consumer_role_contract'
-  require 'aca_entities/contracts/qualifying_life_event_kind_contract'
   # before_action :check_hbx_staff_role
   protect_from_forgery :except => [:new], with: :exception
   layout 'application'
 
   def index
-    @notice_kinds = NoticeKind.all
+    @notice_kinds = Template.all
     @datatable = Effective::Datatables::NoticesDatatable.new
     @errors = []
   end
@@ -20,31 +17,28 @@ class NoticeKindsController < ::ApplicationController
   def show
     return unless params['id'] == 'upload_notices'
 
-    redirect_to notice_kinds_path
+    redirect_to templates_path
   end
 
   def new
-    @notice_kind = NoticeKind.new
-    @notice_kind.template = Template.new
+    @template = Template.new
+    # @notice_kind.template = Template.new
   end
 
   def edit
-    @notice_kind = NoticeKind.find(params[:id])
+    @template = Template.find(params[:id])
     render :layout => 'application'
   end
 
   def create
-    template = Template.new(notice_params.delete('template'))
-    notice_kind = NoticeKind.new(notice_params)
-    notice_kind.template = template
-
-    if notice_kind.save
+    template = Templates::Create.new.call(template_params.to_h)
+    if template.success?
       flash[:notice] = 'Notice created successfully'
-      redirect_to notice_kinds_path
+      redirect_to templates_path
     else
-      @errors = notice_kind.errors.messages
+      @errors = Array.wrap(template.failure)
 
-      @notice_kinds = NoticeKind.all
+      @templates = Template.all
       @datatable = Effective::Datatables::NoticesDatatable.new
 
       render :action => 'index'
@@ -52,34 +46,43 @@ class NoticeKindsController < ::ApplicationController
   end
 
   def update
-    notice_kind = NoticeKind.find(params['id'])
-    notice_kind.update_attributes(notice_params)
+    template = Template.find(params['id'])
+    template.update_attributes(template_params)
     flash[:notice] = 'Notice content updated successfully'
-    redirect_to notice_kinds_path
+    redirect_to templates_path
   end
 
   def preview
-    notice_kind = NoticeKind.find(params[:id])
-    notice_kind.generate_pdf_notice
-    send_file "#{Rails.root}/tmp/#{notice_kind.notice_recipient.hbx_id}_#{notice_kind.title.titleize.gsub(/\s+/, '_')}.pdf",
-              :type => 'application/pdf',
-              :disposition => 'inline'
+    documents_operation = Documents::Create.new.call({ id: params[:id], preview: 'true' })
+
+    if documents_operation.success?
+      file, template = documents_operation.success
+      send_file file.path,
+                :type => template.content_type,
+                :disposition => 'inline'
+    else
+      flash[:error] = 'Failed to load preview.'
+      @notice_kinds = Template.all
+      @datatable = Effective::Datatables::NoticesDatatable.new
+
+      render :action => 'index'
+    end
   end
 
   def delete_notice
     # NoticeKind.where(:id.in => params['ids']).each do |notice|
     #   notice.delete
     # end
-    NoticeKind.where(:id => params['id']).first.delete
+    Template.where(:id => params['id']).first.delete
 
     flash[:notice] = 'Notices deleted successfully'
-    redirect_to notice_kinds_path
+    redirect_to templates_path
   end
 
   def download_notices
-    notices = NoticeKind.where(:id.in => params['ids'].split(","))
+    templates = Template.where(:id.in => params['ids'].split(","))
 
-    send_data notices.to_csv,
+    send_data templates.to_csv,
               :filename => "notices_#{Date.today.strftime('%m_%d_%Y')}.csv",
               :disposition => 'attachment',
               :type => 'text/csv'
@@ -89,17 +92,16 @@ class NoticeKindsController < ::ApplicationController
     @errors = []
 
     if file_content_type == 'text/csv'
-      notices = Roo::Spreadsheet.open(params[:file].tempfile.path)
+      templates = Roo::Spreadsheet.open(params[:file].tempfile.path)
 
-      notices.each do |notice_row|
-        next if notice_row[1] == 'Notice Number'
+      templates.each do |template_row|
+        next if template_row[1] == 'Notice Number'
 
-        if NoticeKind.where(notice_number: notice_row[1]).blank?
-          notice = build_notice_kind(notice_row)
-          notice.template = Template.new(raw_body: notice_row[6])
-          @errors << "Notice #{notice_row[1]} got errors: #{notice.errors}" unless notice.save
+        if Template.where(subject: template_row[1]).blank?
+          template = build_notice_kind(template_row)
+          @errors << "Notice #{template_row[1]} got errors: #{template.errors}" unless template.save
         else
-          @errors << "Notice #{notice_row[1]} already exists."
+          @errors << "Notice #{template_row[1]} already exists."
         end
       end
     else
@@ -108,20 +110,22 @@ class NoticeKindsController < ::ApplicationController
 
     flash[:notice] = 'Notices loaded successfully.' if @errors.empty?
 
-    @notice_kinds = NoticeKind.all
+    @notice_kinds = Template.all
     @datatable = Effective::Datatables::NoticesDatatable.new
 
     render :action => 'index'
   end
 
-  def build_notice_kind(notice_row)
-    NoticeKind.new(
-      market_kind: notice_row[0],
-      notice_number: notice_row[1],
-      title: notice_row[2],
-      description: notice_row[3],
-      recipient: notice_row[4],
-      event_name: notice_row[5]
+  def build_notice_kind(template_row)
+    Template.new(
+      category: template_row[0],
+      subject: template_row[1],
+      title: template_row[2],
+      description: template_row[3],
+      recipient: template_row[4],
+      key: template_row[5],
+      body: template_row[6],
+      content_type: template_row[7]
     )
   end
 
@@ -159,7 +163,7 @@ class NoticeKindsController < ::ApplicationController
   private
 
   def file_content_type
-    params[:file].content_type
+    params[:file]&.content_type
   end
 
   def check_hbx_staff_role
@@ -169,14 +173,14 @@ class NoticeKindsController < ::ApplicationController
                 :flash => { :error => "You must be an HBX staff member" }
   end
 
-  def notice_params
-    params.require(:notice_kind).permit(:title, :market_kind, :description, :notice_number, :recipient, :event_name, { :template => [:raw_body] })
+  def template_params
+    params.require(:template).permit(:content_type, :category, :subject, :title, :description, :key, :recipient, :body)
   end
 
   def entities_contracts_mapping
     {
       "::User" => "Contracts::UserContract",
-      "AcaEntities::ConsumerRole" => "AcaEntities::Contracts::ConsumerRoleContract",
+      "AcaEntities::Families::Family" => "AcaEntities::Contracts::Families::FamilyContract",
       "AcaEntities::QualifyingLifeEventKind" => "AcaEntities::Contracts::QualifyingLifeEventKindContract"
     }
   end
