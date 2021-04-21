@@ -8,10 +8,11 @@ class RenderLiquid
 
   # @param [Templates::Template] :template
   # @param [Array<Dry::Struct>] :entities
+  # @param [Hash] :options
   # @return [Dry::Monads::Result] Parsed template as string
   def call(params)
     parsed_template = yield parse(params)
-    template = yield render(parsed_template, params[:entity])
+    template = yield render(parsed_template, params)
 
     Success(template)
   end
@@ -24,8 +25,9 @@ class RenderLiquid
     template ? Success(template) : Failure('Unable to parse template')
   end
 
-  def render(parsed_template, entity)
-    rendered_template = parsed_template.render(entity.to_h)
+  def render(parsed_template, params)
+    rendered_template = parsed_template.render(params[:entity].to_h, params[:options])
+
     Success(rendered_template)
   end
 end

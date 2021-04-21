@@ -39,12 +39,22 @@ CKEDITOR.plugins.add("placeholder_select", {
 
         var format = defaultConfig.format;
 
-        if (config.placeholders[i].type == "loop") {
-          format = "{% %placeholder%.each do |%iterator%| %} <br /> {% end %}";
+        if (config.placeholders[i].type == "iterator") {
+          format = "{% for item in collection.items %} <br /> {% endfor %}";
         }
 
-        if (config.placeholders[i].type == "condition") {
-          format = "{% if %placeholder% %} <br /> {% else %} <br /> {% end %}";
+        if (config.placeholders[i].type == "if") {
+          format =
+            "{% if attribute %} <br /> {% elsif attribute_two %} <br /> {% else %} <br /> {% endif %}";
+        }
+
+        if (config.placeholders[i].type == "tablerow") {
+          format =
+            "<table> {% tablerow item in collection.items %} <br /> {% endtablerow %} </table>";
+        }
+
+        if (config.placeholders[i].type == "comment") {
+          format = "{% comment %} <br /> {% endcomment %}";
         }
 
         var placeholder = format.replace(
