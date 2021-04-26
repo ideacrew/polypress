@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'yaml'
-
 # RenderLiquid
 class RenderLiquid
   send(:include, Dry::Monads[:result, :do])
