@@ -1,11 +1,5 @@
 # frozen_string_literal: true
 
-require 'aca_entities/email'
-require 'aca_entities/phone'
-require 'aca_entities/person'
-require 'aca_entities/consumer_role'
-require 'aca_entities/qualifying_life_event_kind'
-
 # rubocop:disable Metrics/ModuleLength
 # Builds notice with all the required information
 module NoticeBuilder
