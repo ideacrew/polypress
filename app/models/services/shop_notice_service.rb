@@ -7,10 +7,6 @@ module Services
     def recipients
       {
         "QLE" => "AcaEntities::QualifyingLifeEventKind"
-        # "Employee" => "EmployeeProfile",
-        # "Broker" => "BrokerProfile",
-        # "Broker Agency" => "BrokerAgencyProfile",
-        # "GeneralAgency" => "GeneralAgency"
       }
     end
 

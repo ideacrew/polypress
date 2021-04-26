@@ -179,13 +179,11 @@ class TemplatesController < ::ApplicationController
 
   def entities_contracts_mapping
     {
-      "::User" => "Contracts::UserContract",
       "AcaEntities::Families::Family" => "AcaEntities::Contracts::Families::FamilyContract",
-      "AcaEntities::QualifyingLifeEventKind" => "AcaEntities::Contracts::QualifyingLifeEventKindContract"
     }
   end
 
   def builder_param
-    params['builder'].present? ? entities_contracts_mapping[params['builder']] : 'Contracts::UserContract'
+    params['builder'].present? ? entities_contracts_mapping[params['builder']] : 'AcaEntities::Contracts::Families::FamilyContract'
   end
 end
