@@ -60,7 +60,6 @@ group :development, :test do
   gem 'rspec-rails',            '~> 4.0'
   gem 'shoulda-matchers',       '~> 3'
   gem 'yard'
-  gem 'pry-byebug'
 end
 gem 'pry-byebug'
 
