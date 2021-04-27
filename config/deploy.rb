@@ -11,6 +11,7 @@ set :repo_url, "https://github.com/ideacrew/polypress.git"
 
 # Default deploy_to directory is /var/www/my_app_name
 set :deploy_to, "/var/www/deployments/polypress"
+set :rails_env, 'production'
 
 # Default value for :format is :airbrussh.
 # set :format, :airbrussh
@@ -19,15 +20,19 @@ set :deploy_to, "/var/www/deployments/polypress"
 # These are the defaults.
 # set :format_options, command_output: true, log_file: "log/capistrano.log", color: :auto, truncate: :auto
 
+set :bundle_binstubs, false
+set :bundle_flags, "--quiet"
+set :bundle_path, nil
+
 # Default value for :pty is false
 set :pty, true
 
 # Default value for :linked_files is []
 # append :linked_files, "config/database.yml"
-set :linked_files, (fetch(:linked_files, []) | ['config/mongoid.yml', 'config/initializers/devise.rb', "config/environments/production.rb"])
+set :linked_files, (fetch(:linked_files, []) | ['config/mongoid.yml', 'config/initializers/devise.rb', "config/environments/production.rb", "config/unicorn.rb", "eyes/polypress.eye.rb"])
 
 # Default value for linked_dirs is []
-append :linked_dirs, "log", "tmp/pids", "tmp/sockets", "public/sbc"
+append :linked_dirs, "log", "tmp/pids", "tmp/sockets", "public/sbc", "eye"
 
 # Default value for default_env is {}
 # set :default_env, { path: "/opt/ruby/bin:$PATH" }
@@ -49,7 +54,7 @@ namespace :assets do
         with rails_env: fetch(:rails_env) do
           execute("cd #{release_path} && rm -rf node_modules && rm -f package-lock.json")
           execute("cd #{release_path} && nvm use 10 && yarn install")
-          execute :rake, "assets:clobber"
+          #execute :rake, "assets:clobber"
           execute("cd #{release_path} && nvm use 10 && RAILS_ENV=production NODE_ENV=production bundle exec rake assets:precompile")
         end
       end
@@ -57,3 +62,19 @@ namespace :assets do
   end
 end
 after "deploy:updated", "assets:refresh"
+
+namespace :deploy do
+  desc 'Restart application'
+  task :restart do
+    on roles(:app), in: :sequence, wait: 20 do
+      sudo "service eye_rails reload"
+    end
+  end
+
+  after :restart, :clear_cache do
+    on roles(:web), in: :groups, limit: 3, wait: 10 do
+    end
+  end
+end
+
+after "deploy:publishing", "deploy:restart"
