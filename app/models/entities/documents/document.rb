@@ -25,7 +25,7 @@ module Documents
 
   class Document < Dry::Struct
 
-    attribute :document, Types::String
+    attribute :document, ::Types::String
 
   end
 
