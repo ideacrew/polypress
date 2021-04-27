@@ -71,8 +71,3 @@ module Entities
     end
   end
 end
-# entities - contracts for tokens
-# - create basic notice template
-#   - output to pdf
-#   - output to txt
-#   - output to csv
