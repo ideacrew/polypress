@@ -4,6 +4,9 @@
  */
 
 [
+  "widget",
+  "dialog",
+  "dialogui",
   "fontawesome",
   "lineutils",
   "token",
@@ -11,6 +14,8 @@
   "placeholder_select",
   "lineheight",
   "liquid",
+  "strinsert",
+  "preview",
 ].forEach((element) => {
   CKEDITOR.plugins.addExternal(
     element,
@@ -21,12 +26,18 @@
 CKEDITOR.editorConfig = function (config) {
   update_tokens(config);
   config.removeButtons =
-    "Form,Checkbox,Radio,TextField,Textarea,Select,Button,ImageButton,HiddenField,About,Print,Save,NewPage,Preview,Save,Language,Flash,Smiley,Image,Iframe";
+    "Form,Checkbox,Radio,TextField,Textarea,Select,Button,ImageButton,HiddenField,About,Print,Save,NewPage,Save,Language,Flash,Smiley,Image,Iframe";
 
   config.extraPlugins =
-    "fontawesome,button,lineutils,widgetselection,notification,toolbar,widget,dialogui,dialog,clipboard,token,placeholder,placeholder_select,lineheight,liquid";
+    "dialogui,dialog,preview,fontawesome,button,lineutils,widgetselection,notification,toolbar,widget,clipboard,token,placeholder,placeholder_select,lineheight,liquid,strinsert";
   CKEDITOR.dtd.$removeEmpty.span = 0;
   CKEDITOR.dtd.$removeEmpty.i = 0;
+
+  // config.contentsCss = [
+  //   CKEDITOR.basePath + "contents.css",
+  //   "/path/to/custom.css",
+  // ];
+
   config.allowedContent = true;
   config.font_names =
     "Open Sans;" +
@@ -38,6 +49,6 @@ CKEDITOR.editorConfig = function (config) {
     "Verdana;";
   config.language = "en";
 
-  config.tokenStart = "{{";
-  config.tokenEnd = "}}";
+  config.tokenStart = "{{ ";
+  config.tokenEnd = " }}";
 };

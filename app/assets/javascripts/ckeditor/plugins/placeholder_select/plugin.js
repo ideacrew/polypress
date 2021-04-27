@@ -19,7 +19,7 @@ CKEDITOR.plugins.add("placeholder_select", {
 
       // init the default config - empty placeholders
       var defaultConfig = {
-        format: "{{%placeholder%}}",
+        format: "{{ %placeholder% }}",
         placeholders: [],
         title: "Select Placeholder",
         key: "placeholder_select",

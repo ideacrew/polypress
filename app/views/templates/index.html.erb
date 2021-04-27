@@ -94,6 +94,18 @@
         $('input:submit').attr("disabled", true);
       }
     })
+
+    CKEDITOR.on('dialogDefinition', function (e) {
+      var dialogName = e.data.name;
+      if(dialogName == 'token'){
+        var dialogDefinition = e.data.definition;
+        dialogDefinition.onShow = function () {
+            $("select.cke_dialog_ui_input_select option").each(function( index ) {
+              $(this).html($(this).text());
+            });
+        };
+      }
+    });
   })
 
 </script>

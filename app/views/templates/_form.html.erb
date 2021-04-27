@@ -51,8 +51,9 @@
   <div class="form-group col-xs-12">
     <div class="pull-right">
     <%= link_to 'Cancel', templates_path, class: "btn btn-primary" %>
+    <input type='button' id='instant_preview' class="btn btn-primary" value='Preview'>
     <button type="submit" class="btn btn-primary">Submit</button>
-  </div>
+    </div>
   </div>
 <% end %>
 </div>
@@ -68,7 +69,7 @@
     });
 
     CKEDITOR.editorConfig = function (config) {
-      config.extraPlugins = "fontawesome,button,lineutils,widgetselection,notification,toolbar,widget,dialogui,dialog,clipboard,token,placeholder,placeholder_select,lineheight";
+      config.extraPlugins = "dialogui,dialog,preview,fontawesome,button,lineutils,widgetselection,notification,toolbar,widget,clipboard,token,placeholder,placeholder_select,lineheight";
       config.placeholder_selects = [
         {
           key: "select_system_settings",
@@ -123,6 +124,17 @@
       }
     });
   }
+
+  $('#instant_preview').click(function(e) {
+    $.ajax({
+      type:"GET",
+      url: "templates/instant_preview",
+      dataType: 'json',
+      data: { body: CKEDITOR.instances.template_body.getData() },
+      success: function(result){
+      }
+    })
+  })
 
   $('#template_category').change(function() {
     $.ajax({

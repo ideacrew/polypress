@@ -52,6 +52,9 @@ class TemplatesController < ::ApplicationController
     redirect_to templates_path
   end
 
+  def instant_preview
+  end
+
   def preview
     documents_operation = Documents::Create.new.call({ id: params[:id], preview: 'true' })
 
