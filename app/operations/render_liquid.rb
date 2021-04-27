@@ -19,13 +19,18 @@ class RenderLiquid
 
   def parse(params)
     template = Liquid::Template.parse(params[:body])
-
-    template ? Success(template) : Failure('Unable to parse template')
+    Success(template)
+  rescue StandardError => e
+    Failure(e)
   end
 
   def render(parsed_template, params)
-    rendered_template = parsed_template.render(params[:entity].to_h, params[:options])
+    rendered_template = parsed_template.render(params[:entity].to_h, { strict_variables: true })
 
-    Success(rendered_template)
+    if parsed_template.errors.present?
+      Failure(parsed_template.errors)
+    else
+      Success(rendered_template)
+    end
   end
 end

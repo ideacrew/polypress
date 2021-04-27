@@ -67,8 +67,7 @@ class TemplatesController < ::ApplicationController
       flash[:error] = 'Failed to load preview.'
       @notice_kinds = Template.all
       @datatable = Effective::Datatables::NoticesDatatable.new
-
-      render :action => 'index'
+      redirect_back(fallback_location: root_path, :flash => { error: documents_operation.failure })
     end
   end
 
@@ -182,7 +181,7 @@ class TemplatesController < ::ApplicationController
 
   def entities_contracts_mapping
     {
-      "AcaEntities::Families::Family" => "AcaEntities::Contracts::Families::FamilyContract",
+      "AcaEntities::Families::Family" => "AcaEntities::Contracts::Families::FamilyContract"
     }
   end
 

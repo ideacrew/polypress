@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
+# Transform a Hash into YAML-formatted String
 class SerializeXlsx
-  # Transform a Hash into YAML-formatted String
   send(:include, Dry::Monads[:result, :do])
 
   # @param [Hash] Key/value pairs to transformed into YAML String

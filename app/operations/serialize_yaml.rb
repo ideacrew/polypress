@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 
 # require 'yaml'
-
+# Transform a Hash into YAML-formatted String
 class SerializeYaml
-  # Transform a Hash into YAML-formatted String
   send(:include, Dry::Monads[:result, :do])
 
   # @param [Hash] Key/value pairs to transformed into YAML String
