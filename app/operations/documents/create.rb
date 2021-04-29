@@ -29,24 +29,8 @@ module Documents
       end
     end
 
-    def resource(_params)
-      {
-        'site' => { 'home_url' => 'www.homeurl.com' },
-        'applicant_reference' => { 'email_address' => 'email@address.com' }
-      }
-    end
-
-    def stubbed_object
-      {
-        'site' => { 'home_url' => 'www.homeurl.com' },
-        'applicant_reference' => { 'email_address' => 'email@address.com' },
-        'user' => { 'kind' => 'USER KIND', 'relative_reference' => { 'email_address' => 'test@test.com' } }
-      }
-    end
-
     def render_liquid_template(template, params)
-      payload = params[:preview] ? stubbed_object : resource(params)
-      RenderLiquid.new.call({ body: template.body, entity: payload })
+      RenderLiquid.new.call({ body: template.body, entity: params[:entity], preview: params[:preview] })
     end
 
     def create_document(template, rendered_template, params)

@@ -53,6 +53,13 @@ class TemplatesController < ::ApplicationController
   end
 
   def instant_preview
+    template = RenderLiquid.new.call({ body: instant_preview_params[:body], instant_preview: 'true' })
+
+    if template.success?
+      @rendered_template = template.success
+    else
+      @errors = Array.wrap(template.failure).flatten
+    end
   end
 
   def preview
@@ -72,9 +79,6 @@ class TemplatesController < ::ApplicationController
   end
 
   def delete_notice
-    # NoticeKind.where(:id.in => params['ids']).each do |notice|
-    #   notice.delete
-    # end
     Template.where(:id => params['id']).first.delete
 
     flash[:notice] = 'Notices deleted successfully'
@@ -163,6 +167,10 @@ class TemplatesController < ::ApplicationController
   end
 
   private
+
+  def instant_preview_params
+    params.permit(:body)
+  end
 
   def file_content_type
     params[:file]&.content_type

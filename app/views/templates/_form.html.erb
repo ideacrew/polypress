@@ -51,8 +51,14 @@
   <div class="form-group col-xs-12">
     <div class="pull-right">
     <%= link_to 'Cancel', templates_path, class: "btn btn-primary" %>
-    <input type='button' id='instant_preview' class="btn btn-primary" value='Preview'>
+    <button type="button" id="instant_preview" data-target="#instantPreviewModal" data-toggle="modal" class="btn btn-primary">Preview</button>
     <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+  </div>
+
+  <div class="modal fade" id="instantPreviewModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content"></div>
     </div>
   </div>
 <% end %>
@@ -129,7 +135,7 @@
     $.ajax({
       type:"GET",
       url: "templates/instant_preview",
-      dataType: 'json',
+      // dataType: 'json',
       data: { body: CKEDITOR.instances.template_body.getData() },
       success: function(result){
       }

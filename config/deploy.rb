@@ -29,7 +29,10 @@ set :pty, true
 
 # Default value for :linked_files is []
 # append :linked_files, "config/database.yml"
-set :linked_files, (fetch(:linked_files, []) | ['config/mongoid.yml', 'config/initializers/devise.rb', "config/environments/production.rb", "config/unicorn.rb", "eyes/polypress.eye.rb"])
+set :linked_files, (
+  fetch(:linked_files, []) |
+    ['config/mongoid.yml', 'config/initializers/devise.rb', "config/environments/production.rb", "config/unicorn.rb", "eyes/polypress.eye.rb"]
+)
 
 # Default value for linked_dirs is []
 append :linked_dirs, "log", "tmp/pids", "tmp/sockets", "public/sbc", "eye"
@@ -54,7 +57,7 @@ namespace :assets do
         with rails_env: fetch(:rails_env) do
           execute("cd #{release_path} && rm -rf node_modules && rm -f package-lock.json")
           execute("cd #{release_path} && nvm use 10 && yarn install")
-          #execute :rake, "assets:clobber"
+          # execute :rake, "assets:clobber"
           execute("cd #{release_path} && nvm use 10 && RAILS_ENV=production NODE_ENV=production bundle exec rake assets:precompile")
         end
       end
@@ -73,6 +76,7 @@ namespace :deploy do
 
   after :restart, :clear_cache do
     on roles(:web), in: :groups, limit: 3, wait: 10 do
+      # do nothing
     end
   end
 end

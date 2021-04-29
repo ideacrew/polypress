@@ -24,13 +24,21 @@ class RenderLiquid
     Failure(e)
   end
 
-  def render(parsed_template, params)
-    rendered_template = parsed_template.render(params[:entity].to_h, { strict_variables: true })
+  # TODO: Stub entity payload based on the recipient
+  def stubbed_entity
+    {
+      'family' => {
+        'family_members' => [{ 'hbx_id' => 464_747 }],
+        'family_member' => { 'foreign_key' => { 'key' => 'KEY' }, 'hbx_id' => 464_747 },
+        'timestamp' => { 'submitted_at' => 'TimeStamp' }
+      }
+    }
+  end
 
-    if parsed_template.errors.present?
-      Failure(parsed_template.errors)
-    else
-      Success(rendered_template)
-    end
+  def render(parsed_template, params)
+    entity = params[:instant_preview] || params[:preview] ? stubbed_entity : params[:entity].to_h
+    rendered_template = parsed_template.render(entity, { strict_variables: true })
+
+    parsed_template.errors.present? ? Failure(parsed_template.errors) : Success(rendered_template)
   end
 end

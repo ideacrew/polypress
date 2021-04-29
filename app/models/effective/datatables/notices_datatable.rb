@@ -27,7 +27,7 @@ module Effective
           row.recipient_klass_name.to_s.titleize
         }, :filter => false, :sortable => false
         table_column :content_type, :proc => proc { |row|
-          row.content_type.split('/')[1]
+          row.content_type.split('/')[1].upcase if row.content_type
         }, :filter => false, :sortable => true
         table_column :last_updated_at, :proc => proc { |row|
           row.updated_at.in_time_zone('Eastern Time (US & Canada)').strftime('%m/%d/%Y %H:%M')
