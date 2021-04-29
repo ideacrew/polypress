@@ -5,9 +5,7 @@ module Services
   class ShopNoticeService
 
     def recipients
-      {
-        "QLE" => "AcaEntities::QualifyingLifeEventKind"
-      }
+      {}
     end
 
     def setting_placeholders

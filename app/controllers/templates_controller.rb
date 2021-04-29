@@ -190,8 +190,7 @@ class TemplatesController < ::ApplicationController
   def entities_contracts_mapping
     {
       "AcaEntities::People::ConsumerRole" => 'AcaEntities::Contracts::People::ConsumerRoleContract',
-      "AcaEntities::Families::Family" => "AcaEntities::Contracts::Families::FamilyContract",
-      "AcaEntities::BenefitMarkets::BenefitSponsorCatalog" => "AcaEntities::BenefitMarkets::BenefitSponsorCatalogs::BenefitSponsorCatalogContract",
+      "AcaEntities::Families::Family" => "AcaEntities::Contracts::Families::FamilyContract"
     }
   end
 
