@@ -5,7 +5,7 @@ class Template
   include Mongoid::Document
   include Mongoid::Timestamps
 
-  CATEGORIES = [:aca_shop, :aca_individual].freeze
+  CATEGORIES = [:aca_individual].freeze
 
   field :key, type: Symbol
   field :title, type: String
@@ -17,7 +17,7 @@ class Template
   field :contracts, type: Array
   field :body, type: String
   field :subject, type: String
-  field :category, type: String, default: :aca_shop
+  field :category, type: String, default: :aca_individual
   # field :tags, type: String
 
   # validates_presence_of :raw_body

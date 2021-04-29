@@ -51,7 +51,6 @@ module Services
     end
 
     def editor_tokens
-      model_builder = AcaEntities::Contracts::Families::FamilyContract
       prepend_namespace = [model_builder.class_name.gsub('Contract', '')]
       model_builder.schema.key_map.each_with_object([]) do |schema_key, attributes|
         tokens(prepend_namespace, schema_key, attributes)
@@ -66,7 +65,7 @@ module Services
           tokens(namespace, key, attributes)
         end
       when Dry::Schema::Key::Array
-        namespace = ['&nbsp;&nbsp;'] + prepend_namespace + [schema_key.name.singularize.camelcase]
+        namespace = ['&nbsp;&nbsp;'] + [schema_key.name.singularize.camelcase]
         schema_key.member.keys.each do |key|
           tokens(namespace, key, attributes)
         end

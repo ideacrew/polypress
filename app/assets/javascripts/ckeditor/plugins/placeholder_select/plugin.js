@@ -50,7 +50,7 @@ CKEDITOR.plugins.add("placeholder_select", {
 
         if (config.placeholders[i].type == "tablerow") {
           format =
-            "<table> {% tablerow item in collection.items %} <br /> {% endtablerow %} </table>";
+            "{% tablerow item in collection.items %} <br /> {% endtablerow %}";
         }
 
         if (config.placeholders[i].type == "comment") {

@@ -39,7 +39,7 @@
   <% recipients = Services::NoticeKindService.new(template.category).recipients %>
   <div class="form-group col-xs-8">
     <label for="noticeDescription">Recipient *</label>
-    <%= f.select(:recipient, options_for_select(recipients.inject([]) {|options, (k, v)| options << [k, v]}, selected: template.recipient), {}, { :class => 'form-control', required: true } ) %>
+    <%= f.select(:recipient, options_for_select(recipients.inject([]) {|options, (k, v)| options << [k, v]}, selected: template.recipient), { include_blank: false }, { :class => 'form-control'} ) %>
   </div>
  
   <div class="form-group col-xs-12">
