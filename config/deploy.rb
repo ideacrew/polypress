@@ -31,11 +31,11 @@ set :pty, true
 # append :linked_files, "config/database.yml"
 set :linked_files, (
   fetch(:linked_files, []) |
-    ['config/mongoid.yml', 'config/initializers/devise.rb', "config/environments/production.rb", "config/unicorn.rb", "eyes/polypress.eye.rb"]
+    ['config/mongoid.yml', 'config/initializers/devise.rb', 'config/environments/production.rb', 'config/unicorn.rb', 'eyes/polypress.eye.rb', 'config/master.key', 'config/credentials.yml.enc']
 )
 
 # Default value for linked_dirs is []
-append :linked_dirs, "log", "tmp/pids", "tmp/sockets", "public/sbc", "eye"
+append :linked_dirs, "log", "pids", "tmp/sockets", "public/sbc", "eye"
 
 # Default value for default_env is {}
 # set :default_env, { path: "/opt/ruby/bin:$PATH" }
