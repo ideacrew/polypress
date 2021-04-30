@@ -6,7 +6,6 @@
     "@rails/actioncable": "^6.0.0",
     "@rails/webpacker": "5.2.1",
     "bootstrap": "^4.6.0",
-    "ckeditor4": "^4.16.0",
     "jquery": "^3.6.0",
     "jquery-ui": "^1.12.1",
     "jquery-ui-dist": "^1.12.1",
