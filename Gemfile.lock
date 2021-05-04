@@ -39,6 +39,20 @@ GIT
       typhoeus (~> 1.4.0)
 
 GIT
+  remote: https://github.com/ideacrew/event_source.git
+  revision: fe24a20d546bcc834cd85cbde279e0b81efcd92c
+  branch: trunk
+  specs:
+    event_source (0.3.0)
+      dry-events (~> 0.3)
+      dry-initializer (~> 3.0)
+      dry-monads (~> 1.3)
+      dry-struct (~> 1.4)
+      dry-types (~> 1.5)
+      dry-validation (~> 1.6)
+      resque-bus (~> 0.7.0)
+
+GIT
   remote: https://github.com/prawnpdf/prawn.git
   revision: 8028ca0cd2aae8c72df9fc4bf16388948423bcb2
   ref: 8028ca0cd2

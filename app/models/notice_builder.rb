@@ -449,7 +449,6 @@ module NoticeBuilder
     }
   end
 
-  # rubocop:disable Naming/VariableNumber
   def address_hash
     [
       {
@@ -468,7 +467,6 @@ module NoticeBuilder
       }
     ]
   end
-  # rubocop:enable Naming/VariableNumber
 
   protected
 

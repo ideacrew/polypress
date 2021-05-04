@@ -36,7 +36,7 @@ class RenderLiquid
   end
 
   def render(parsed_template, params)
-    entity = params[:instant_preview] || params[:preview] ? stubbed_entity : params[:entity].to_h
+    entity = params[:instant_preview] || params[:preview] ? stubbed_entity : params[:entity].to_h&.deep_stringify_keys
     rendered_template = parsed_template.render(entity, { strict_variables: true })
 
     parsed_template.errors.present? ? Failure(parsed_template.errors) : Success(rendered_template)
