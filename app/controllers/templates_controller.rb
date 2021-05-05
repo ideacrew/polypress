@@ -22,7 +22,10 @@ class TemplatesController < ::ApplicationController
 
   def new
     @template = Template.new
-    # @notice_kind.template = Template.new
+    respond_to do |format|
+      format.html
+      format.js
+    end
   end
 
   def edit
