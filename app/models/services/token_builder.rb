@@ -54,7 +54,7 @@ module Services
       prepend_namespace = [model_builder.class_name.gsub('Contract', '')]
       model_builder.schema.key_map.each_with_object([]) do |schema_key, attributes|
         tokens(prepend_namespace, schema_key, attributes)
-      end
+      end.sort
     end
 
     def tokens(prepend_namespace, schema_key, attributes)
