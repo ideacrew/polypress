@@ -27,12 +27,16 @@ Rails.application.config.assets.precompile += %w[
   ckeditor/plugins/widget/plugin.js
   ckeditor/plugins/clipboard/plugin.js
   ckeditor/plugins/token/plugin.js
+  ckeditor/plugins/token/lang/en.js
   ckeditor/plugins/placeholder/plugin.js
+  ckeditor/plugins/placeholder/lang/en.js
   ckeditor/plugins/placeholder_select/plugin.js
   ckeditor/plugins/lineheight/plugin.js
+  ckeditor/plugins/lineheight/lang/en.js
   ckeditor/plugins/liquid/plugin.js
   ckeditor/plugins/strinsert/plugin.js
   ckeditor/plugins/pastefromword/plugin.js
   ckeditor/plugins/pastetools/plugin.js
   ckeditor/plugins/xml/plugin.js
+  ckeditor/plugins/fontawesome/font-awesome/css/font-awesome.min.css
 ]
