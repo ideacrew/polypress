@@ -4,6 +4,7 @@
 # FamilyHelper
 module FamilyHelper
 
+  # TODO: dynamically load data using contracts/entities
   def family_member_reference
     {
       family_member_hbx_id: '1001',
@@ -723,21 +724,23 @@ module FamilyHelper
 
   def family_hash
     {
-      hbx_id: '1000',
-      foreign_keys: foreign_keys,
-      renewal_consent_through_year: 2014,
-      min_verification_due_date: nil,
-      vlp_documents_status: nil,
-      family_members: family_member_params,
-      households: household_params,
-      documents: documents,
-      special_enrollment_periods: special_enrollment_periods,
-      broker_accounts: broker_accounts,
-      general_agency_accounts: [],
-      irs_groups: irs_groups,
-      payment_transactions: payment_transactions,
-      updated_by: person_reference,
-      timestamp: timestamp
+      family: {
+        hbx_id: '1000',
+        foreign_keys: foreign_keys,
+        renewal_consent_through_year: 2014,
+        min_verification_due_date: nil,
+        vlp_documents_status: nil,
+        family_members: family_member_params,
+        households: household_params,
+        documents: documents,
+        special_enrollment_periods: special_enrollment_periods,
+        broker_accounts: broker_accounts,
+        general_agency_accounts: [],
+        irs_groups: irs_groups,
+        payment_transactions: payment_transactions,
+        updated_by: person_reference,
+        timestamp: timestamp
+      }
     }
   end
 end

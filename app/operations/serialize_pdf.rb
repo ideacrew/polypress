@@ -29,7 +29,12 @@ class SerializePdf
     end
 
     if document
-      Success([document, params[:template]])
+      Success(
+        {
+          document: document,
+          template: params[:template].attributes
+        }
+      )
     else
       Failure("Unable to generate PDF document")
     end

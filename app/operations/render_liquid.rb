@@ -19,7 +19,7 @@ class RenderLiquid
   private
 
   def parse(params)
-    template = Liquid::Template.parse(params[:body])
+    template = Liquid::Template.parse(params[:body], line_numbers: true)
     Success(template)
   rescue StandardError => e
     Failure(e)

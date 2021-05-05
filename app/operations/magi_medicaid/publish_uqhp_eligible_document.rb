@@ -51,9 +51,7 @@ module MagiMedicaid
     end
 
     def build_event(values)
-      Try() do
-        event 'uqhp_eligible_document_published', attributes: values
-      end.to_result
+      event 'magi_medicaid.uqhp_eligible_document_published', attributes: values
     end
   end
 end

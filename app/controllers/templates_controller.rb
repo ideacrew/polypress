@@ -66,9 +66,8 @@ class TemplatesController < ::ApplicationController
     documents_operation = Documents::Create.new.call({ id: params[:id], preview: 'true' })
 
     if documents_operation.success?
-      file, template = documents_operation.success
-      send_file file.path,
-                :type => template.content_type,
+      send_file documents_operation.success[:document].path,
+                :type => documents_operation.success[:template][:content_type],
                 :disposition => 'inline'
     else
       flash[:error] = 'Failed to load preview.'
