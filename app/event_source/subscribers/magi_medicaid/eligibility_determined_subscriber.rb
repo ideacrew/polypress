@@ -6,7 +6,7 @@ module Subscribers
     class EligibilityDeterminationsSubscriber
       include EventSource::Subscriber
 
-      subscription 'publishers.magi_medicaid.eligibilities_publisher, magi_medicaid.eligibility_determinations'
+      subscription 'magi_medicaid.eligibilities_publisher', 'magi_medicaid.eligibility_determinations'
 
       def on_determined_uqhp_eligible(params)
         puts "EA------------->>>>>person subscriber reached with #{params.inspect}"
