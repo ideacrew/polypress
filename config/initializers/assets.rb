@@ -13,30 +13,4 @@ Rails.application.config.assets.paths << Rails.root.join('node_modules')
 # Precompile additional assets.
 # application.js, application.css, and all non-JS/CSS in the app/assets
 # folder are already added.
-Rails.application.config.assets.precompile += %w[
-  ckeditor/plugins/ajax/plugin.js
-  ckeditor/plugins/dialogui/plugin.js
-  ckeditor/plugins/dialog/plugin.js
-  ckeditor/plugins/preview/plugin.js
-  ckeditor/plugins/fontawesome/plugin.js
-  ckeditor/plugins/button/plugin.js
-  ckeditor/plugins/lineutils/plugin.js
-  ckeditor/plugins/widgetselection/plugin.js
-  ckeditor/plugins/notification/plugin.js
-  ckeditor/plugins/toolbar/plugin.js
-  ckeditor/plugins/widget/plugin.js
-  ckeditor/plugins/clipboard/plugin.js
-  ckeditor/plugins/token/plugin.js
-  ckeditor/plugins/token/lang/en.js
-  ckeditor/plugins/placeholder/plugin.js
-  ckeditor/plugins/placeholder/lang/en.js
-  ckeditor/plugins/placeholder_select/plugin.js
-  ckeditor/plugins/lineheight/plugin.js
-  ckeditor/plugins/lineheight/lang/en.js
-  ckeditor/plugins/liquid/plugin.js
-  ckeditor/plugins/strinsert/plugin.js
-  ckeditor/plugins/pastefromword/plugin.js
-  ckeditor/plugins/pastetools/plugin.js
-  ckeditor/plugins/xml/plugin.js
-  ckeditor/plugins/fontawesome/font-awesome/css/font-awesome.min.css
-]
+Rails.application.config.assets.precompile += Dir["#{Rails.root}/app/assets/javascripts/ckeditor/plugins/**/*"].reject {|fn| File.directory?(fn) }
