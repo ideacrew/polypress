@@ -51,7 +51,7 @@ module Services
     end
 
     def editor_tokens
-      prepend_namespace = [model_builder.class_name.gsub('Contract', '')]
+      prepend_namespace = [model_builder.to_s.split('::').last.gsub('Contract', '')]
       model_builder.schema.key_map.each_with_object([]) do |schema_key, attributes|
         tokens(prepend_namespace, schema_key, attributes)
       end.sort
