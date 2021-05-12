@@ -13,6 +13,3 @@
 //= require jquery_ujs
 //= require jquery-ui
 //= require effective_datatables
-//= require ckeditor/config.js
-//= require ckeditor/init
-//= require_tree .
