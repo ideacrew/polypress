@@ -1,4 +1,4 @@
-FROM ruby:2.6.6 AS polypress_base
+FROM ruby:2.7.2 AS polypress
 
 LABEL author="IdeaCrew"
 
