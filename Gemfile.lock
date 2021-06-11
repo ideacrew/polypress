@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/ideacrew/aca_entities.git
-  revision: 4c7e52bb755705130f471fcac385ed5375edc382
+  revision: 84b62da0a1f378d8d93abb1e33189ce0d9ced2a2
   branch: fdsh
   specs:
     aca_entities (0.2.2)
@@ -14,7 +14,7 @@ GIT
 
 GIT
   remote: https://github.com/ideacrew/event_source.git
-  revision: b69ca07bb255894fc7b492d1d37925ad2f032d50
+  revision: fa8b950c06a56a74202697034ce75600dfffd512
   branch: release_0.5.0
   specs:
     event_source (0.5.0)
@@ -297,7 +297,7 @@ GEM
     rb-fsevent (0.11.0)
     rb-inotify (0.10.1)
       ffi (~> 1.0)
-    redis (4.2.5)
+    redis (4.3.1)
     redis-namespace (1.8.1)
       redis (>= 3.0.4)
     regexp_parser (2.1.1)
@@ -425,6 +425,7 @@ DEPENDENCIES
   jbuilder (~> 2.7)
   listen (~> 3.3)
   mongoid (~> 7.2.1)
+  pry
   pry-byebug
   puma (~> 5.0)
   rack-mini-profiler (~> 2.0)

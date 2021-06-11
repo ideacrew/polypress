@@ -40,7 +40,7 @@ services:
       - QB_CLIENT_ID=${QB_CLIENT_ID:-1234567890}
       - QB_CLIENT_SECRET=${QB_CLIENT_SECRET:-1234567890}
       - QB_REALM_ID=${QB_REALM_ID:-1234567890}
-      - RABBITMQ_HOST=${RABBITMQ_HOST:-amqp://amqp}
+      - RABBITMQ_HOST=${RABBITMQ_HOST:-amqp://rabbitmq}
       - RABBITMQ_VHOST=${RABBITMQ_VHOST:-event_source}
       - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-guest}
       - RABBITMQ_PORT=${RABBITMQ_PORT:-5672}
@@ -64,6 +64,7 @@ services:
     command: bash -c "rm -f tmp/pids/server.pid && mkdir -p tmp/pids && yarn install --check-files && bundle install && bundle exec puma -C config/puma.rb"
     depends_on:
       - db
+      - rabbitmq
   db:
     image: mongo:4.2
     volumes:
@@ -71,7 +72,7 @@ services:
       - mongodb_config:/data/configdb
     ports:
       - 27017:27017
-  amqp:
+  rabbitmq:
     image: rabbitmq:3.8-management
     container_name: rabbitmq
     volumes:
