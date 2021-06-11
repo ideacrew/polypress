@@ -1,0 +1,177 @@
+<%= link_to "Back".html_safe, templates_path, class: 'btn btn-primary' %>
+
+<h2><%= template.persisted? ? 'Edit' : 'Create' %> Notice Template</h2>
+
+<div>
+  <%= form_for template do |f| %>
+
+    <div class="form-group col-xs-8">
+      <label for="noticeContentType">Select Format</label>
+      <%= f.select(:content_type, options_for_select(['application/pdf', 'text/plain', 'text/csv'].collect{ |type| [type.split('/')[1], type] }, selected: template.content_type), {include_blank: false}, {:class => 'form-control'} ) %>
+    </div>
+
+    <div class="form-group col-xs-8">
+      <label for="noticeDescription">Select Market</label>
+      <%= f.select(:category, options_for_select(::Template::CATEGORIES.collect{ |market| [market.to_s.titleize, market] }, selected: template.category), {include_blank: false}, {:class => 'form-control'} ) %>
+    </div>
+
+    <div class="form-group col-xs-8">
+      <label for="noticeDescription">MPI Indicator *</label>
+      <%= f.text_field :subject, class: 'form-control', required: true %>
+    </div>
+
+    <div class="form-group col-xs-8">
+      <label for="noticeTitle">Title *</label>
+      <%= f.text_field :title, class: 'form-control', required: true %>
+    </div>
+
+    <div class="form-group col-xs-8">
+      <label for="noticeDescription">Description</label>
+      <%= f.text_field :description, class: 'form-control' %>
+    </div>
+
+    <div class="form-group col-xs-8">
+      <label for="noticeEventName">Event Name</label>
+      <%= f.text_field :key, class: 'form-control' %>
+      <p class='memo'>Find the event name on the associated ticket</p>
+    </div>
+
+    <% recipients = Services::NoticeKindService.new(template.category).recipients %>
+    <div class="form-group col-xs-8">
+      <label for="noticeDescription">Recipient *</label>
+      <%= f.select(:recipient, options_for_select(recipients.inject([]) {|options, (k, v)| options << [k, v]}, selected: template.recipient), { include_blank: false }, { :class => 'form-control'} ) %>
+    </div>
+  
+    <div class="form-group col-xs-12">
+      <label for="noticeBody">NoticeBody *</label>
+      <%= f.cktext_area :body, value: template.body, class: 'notice_template form-control' %>
+    </div>
+
+    <%= hidden_field_tag 'notice_preview_url', preview_template_path(id: template.id) %>
+    <div class="form-group col-xs-12">
+      <div class="pull-right">
+      <%= link_to 'Cancel', templates_path, class: "btn btn-primary" %>
+      <button type="button" id="instant_preview" data-target="#instantPreviewModal" data-toggle="modal" class="btn btn-primary">Preview</button>
+      <button type="submit" class="btn btn-primary">Submit</button>
+      </div>
+    </div>
+
+    <div class="modal fade" id="instantPreviewModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content"></div>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<script>
+    var CKEDITOR_BASEPATH = '/assets/ckeditor/';
+</script>
+
+<%= javascript_include_tag 'ckeditor/ckeditor' %>
+
+<script>
+
+  function updateCkEditor() {
+    for (instance in CKEDITOR.instances){ 
+      CKEDITOR.instances[instance].destroy(true); 
+    }
+
+    CKEDITOR.replace('template_body', {
+      customConfig: '/assets/ckeditor/config.js'
+    });
+
+    CKEDITOR.editorConfig = function (config) {
+      config.placeholder_selects = [
+        {
+          key: "select_system_settings",
+          title: "Select Application Settings",
+          placeholders: update_placeholders.setting_placeholders,
+        },
+        {
+          key: "select_conditional_statement",
+          title: "Select Condition/Loop",
+          placeholders: update_placeholders.placeholders,
+        },
+      ];
+      config.availableTokens = update_tokens.tokens;
+    }
+  }
+
+  function update_placeholders(config) {  
+    $.ajax({
+      type:"GET",
+      url:"templates/fetch_placeholders",
+      dataType:"json",
+      async: false,
+      data: {builder: $('#template_recipient').val(), market_kind: $('#template_category').val()},
+      success:function(result){
+        config.placeholder_selects = [
+          {
+            key: 'select_system_settings',
+            title: 'Select Application Settings',
+            placeholders: result.setting_placeholders
+          },
+          {
+            key: 'select_conditional_statement',
+            title: 'Select Condition/Loop',
+            placeholders: result.placeholders
+          }
+        ];
+      }});
+
+    return config;
+  }
+
+  function update_tokens(config) {
+    $.ajax({
+      type:"GET",
+      url:"templates/fetch_tokens",
+      dataType:"json",
+      async: false,
+      data: {builder: $('#template_recipient').val(), market_kind: $('#template_category').val()},
+      success:function(result){
+        config.availableTokens = result.tokens;
+        update_placeholders(config);
+      }
+    });
+  }
+
+  $('#instant_preview').click(function(e) {
+    $.ajax({
+      type:"GET",
+      url: "templates/instant_preview",
+      // dataType: 'json',
+      data: { body: CKEDITOR.instances.template_body.getData() },
+      success: function(result){
+      }
+    })
+  })
+
+  $('#template_category').change(function() {
+    $.ajax({
+      type:"GET",
+      url:"templates/fetch_recipients",
+      dataType:"json",
+      data: {market_kind: $('#template_category').val()},
+      complete:function(result){
+        var select = $('#template_recipient');
+        select.empty();
+
+        $.each( result.responseJSON.recipients, function( key, value ) {
+          select.append("<option value='" +value+ "'>" +key+ "</option>");
+        });
+        updateCkEditor();
+      }
+    })
+  })
+
+  $('#template_recipient').change(function() {
+    updateCkEditor();
+  })
+
+  $(document).ready(function() {
+    updateCkEditor();
+  });
+
+</script>

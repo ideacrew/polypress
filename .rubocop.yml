@@ -6,6 +6,8 @@ AllCops:
   Exclude:
     - "bin/**/*"
     - "vendor/**/*"
+    - "project_gems/**/*"
+    - "node_modules/**/*"
 
 Layout/EmptyLineAfterGuardClause:
   Enabled: false
@@ -71,7 +73,7 @@ Metrics/PerceivedComplexity:
   Max: 15
 
 Naming/VariableNumber:
-  Enabled: true
+  Enabled: false
 
 Style/AndOr:
   Enabled: true
