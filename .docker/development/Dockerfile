@@ -26,8 +26,10 @@ RUN apt-get update && \
     apt-get -yq dist-upgrade && \
     apt-get install -y tzdata build-essential nodejs vim && \
     apt-get autoremove -y && \
-    gem install bundler:$BUNDLER_VERSION_OVERRIDE && \
     npm install --global yarn
+
+RUN gem install --source "https://rubygems.org" bundler:2.2.14
+
 
 COPY . $HOME
 
@@ -35,5 +37,5 @@ COPY . $HOME
 ENV RAILS_ENV='development'
 ENV NODE_ENV='development'
 
-RUN bundle config set deployment 'true' && \
-    bundle install
+# RUN bundle config set deployment 'true' && \
+RUN    bundle install

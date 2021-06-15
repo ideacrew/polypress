@@ -8,7 +8,8 @@ module MagiMedicaid
   class PublishUqhpEligibleDocument
     send(:include, Dry::Monads[:result, :do])
     send(:include, Dry::Monads[:try])
-    send(:include, ::EventSource::Command)
+
+    # send(:include, ::EventSource::Command)
 
     # @param [Hash] AcaEntities::Families::Family
     # @param [String] :event_key
@@ -19,7 +20,6 @@ module MagiMedicaid
       template = yield find_template(params)
       document = yield create_document({ id: template.id, entity: family_entity })
       # result = yield build_event(document)
-
       Success(document)
     end
 
@@ -27,9 +27,14 @@ module MagiMedicaid
 
     # validating incoming family hash
     def validate(params)
-      return Failure("Missing event key #{params[:family][:hbx_id]}") unless params[:event_key]
+      unless params[:event_key]
+        return Failure("Missing event key #{params[:family][:hbx_id]}")
+      end
 
-      result = AcaEntities::Contracts::Families::FamilyContract.new.call(params[:family])
+      result =
+        AcaEntities::Contracts::Families::FamilyContract.new.call(
+          params[:family]
+        )
       result.success? ? Success(result.to_h) : Failure(result)
     end
 
@@ -43,7 +48,11 @@ module MagiMedicaid
 
     def find_template(params)
       template = Template.where(key: params[:event_key]).first
-      template ? Success(template) : Failure("No template found for the given #{params[:event_key]}")
+      if template
+        Success(template)
+      else
+        Failure("No template found for the given #{params[:event_key]}")
+      end
     end
 
     def create_document(params)
