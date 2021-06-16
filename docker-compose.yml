@@ -37,6 +37,9 @@ services:
       - FIN_SVC_PRIVATE_KEY=""
       - FIN_SVC_API_SECRET=""
       - INTERFACE="0.0.0.0"
+      - MITC_HOST=${MITC_HOST:-http://mitc}
+      - MITC_PORT=${MITC_PORT:-3001}
+      - MITC_URL=${MITC_URL:-http://mitc:3001}
       - QB_CLIENT_ID=${QB_CLIENT_ID:-1234567890}
       - QB_CLIENT_SECRET=${QB_CLIENT_SECRET:-1234567890}
       - QB_REALM_ID=${QB_REALM_ID:-1234567890}
