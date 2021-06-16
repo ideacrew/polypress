@@ -846,8 +846,8 @@ RSpec.describe MagiMedicaid::PublishUqhpEligibleDocument do
       end
     end
 
-    context "publishes the event" do
-      it { expect(subject.success.event_key).to eq('magi_medicaid.uqhp_eligible_document_published') }
-    end
+    # context "publishes the event" do
+    #   it { expect(subject.success.event_key).to eq('magi_medicaid.uqhp_eligible_document_published') }
+    # end
   end
 end

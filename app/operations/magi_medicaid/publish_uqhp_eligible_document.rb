@@ -18,9 +18,9 @@ module MagiMedicaid
       family_entity = yield create_entity(values)
       template = yield find_template(params)
       document = yield create_document({ id: template.id, entity: family_entity })
-      result = yield build_event(document)
+      # result = yield build_event(document)
 
-      Success(result)
+      Success(document)
     end
 
     private
@@ -50,8 +50,8 @@ module MagiMedicaid
       Documents::Create.new.call(params)
     end
 
-    def build_event(values)
-      event 'magi_medicaid.uqhp_eligible_document_published', attributes: values
-    end
+    # def build_event(values)
+    #   event 'magi_medicaid.uqhp_eligible_document_published', attributes: values
+    # end
   end
 end
