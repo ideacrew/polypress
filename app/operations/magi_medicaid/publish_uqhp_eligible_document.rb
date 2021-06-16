@@ -27,9 +27,7 @@ module MagiMedicaid
 
     # validating incoming family hash
     def validate(params)
-      unless params[:event_key]
-        return Failure("Missing event key #{params[:family][:hbx_id]}")
-      end
+      return Failure("Missing event key #{params[:family][:hbx_id]}") unless params[:event_key]
 
       result =
         AcaEntities::Contracts::Families::FamilyContract.new.call(

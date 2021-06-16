@@ -15,4 +15,4 @@ Rails.application.config.assets.paths << Rails.root.join('node_modules')
 # folder are already added.
 Rails.application.config.assets.precompile += Dir["#{Rails.root}/app/assets/javascripts/ckeditor/**/*"].reject {|fn| File.directory?(fn) }
 Rails.application.config.assets.precompile +=
-  %w[ckeditor/config.js, ckeditor/lang/en.js]
+  %w[ckeditor/config.js ckeditor/lang/en.js]
