@@ -7,6 +7,12 @@ EventSource.configure do |config|
   config.app_name = :polypress
 
   config.servers do |server|
+    server.http do |http|
+      http.host = ENV['MITC_HOST'] || "http://localhost"
+      http.port = ENV['MITC_PORT'] || "3000"
+      http.url = ENV['MITC_URL'] || "http://localhost:3000"
+    end
+ 
     server.amqp do |rabbitmq|
       rabbitmq.host = ENV['RABBITMQ_HOST'] || "amqp://localhost"
       warn rabbitmq.host
@@ -40,7 +46,7 @@ EventSource.configure do |config|
         EventSource::AsyncApi::Operations::AsyncApiConf::LoadPath.new.call(path: file).success.to_h
       end
     else
-      ::AcaEntities.async_api_config_find_by_service_name('polypress').success
+      ::AcaEntities.async_api_config_find_by_service_name(nil).success
     end
 end
 
