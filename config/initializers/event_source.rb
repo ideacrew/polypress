@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 EventSource.configure do |config|
-  config.protocols = %w[amqp]
+  config.protocols = %w[amqp http]
   config.pub_sub_root = Pathname.pwd.join('app', 'event_source')
   config.server_key = ENV['RAILS_ENV'] || Rails.env.to_sym
   config.app_name = :polypress
@@ -12,7 +12,7 @@ EventSource.configure do |config|
       http.port = ENV['MITC_PORT'] || "3000"
       http.url = ENV['MITC_URL'] || "http://localhost:3000"
     end
- 
+
     server.amqp do |rabbitmq|
       rabbitmq.host = ENV['RABBITMQ_HOST'] || "amqp://localhost"
       warn rabbitmq.host
