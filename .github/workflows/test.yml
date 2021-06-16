@@ -20,14 +20,14 @@ jobs:
           bundle config path vendor/bundle
           bundle check || bundle install
       - name: Run rubocop
-        run: bundle exec rubocop
+        run: bundle exec rubocop-git origin/trunk
   rspec:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 2.6.5
+          ruby-version: 2.7.2
       - uses: wbari/start-mongoDB@v0.2
         with:
           mongoDBVersion: "3.6"
