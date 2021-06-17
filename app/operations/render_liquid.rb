@@ -19,7 +19,8 @@ class RenderLiquid
   private
 
   def parse(params)
-    template = Liquid::Template.parse(params[:body], line_numbers: true)
+    html_string = (ApplicationController.new.render_to_string(partial: 'templates/cover') + params[:body].html_safe).to_str
+    template = Liquid::Template.parse(html_string, line_numbers: true)
     Success(template)
   rescue StandardError => e
     Failure(e)
