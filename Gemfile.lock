@@ -306,6 +306,8 @@ GEM
       haml (>= 4.0, < 6)
       nokogiri (>= 1.6.0)
       ruby_parser (~> 3.5)
+    httparty (0.16.2)
+      multi_xml (>= 0.5.2)
     i18n (1.8.10)
       concurrent-ruby (~> 1.0)
     ice_nine (0.11.2)
@@ -360,6 +362,7 @@ GEM
     mono_logger (1.1.1)
     msgpack (1.4.2)
     multi_json (1.15.0)
+    multi_xml (0.6.0)
     multipart-post (2.1.1)
     mustermann (1.1.1)
       ruby2_keywords (~> 0.0.1)
@@ -617,6 +620,7 @@ DEPENDENCIES
   event_source!
   eye (= 0.10.0)
   factory_bot_rails
+  httparty
   jbuilder (~> 2.7)
   jquery-rails (~> 4.3)
   liquid

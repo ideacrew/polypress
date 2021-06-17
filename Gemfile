@@ -49,6 +49,7 @@ gem 'pundit',                   '~> 2.1.0'
 gem 'devise'
 gem 'jquery-rails',             '~> 4.3'
 gem 'liquid'
+gem 'httparty'
 
 group :development, :test do
   gem "capistrano", "~> 3.10", require: false

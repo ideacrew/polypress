@@ -8,38 +8,39 @@ module MagiMedicaid
   class PublishUqhpEligibleDocument
     send(:include, Dry::Monads[:result, :do])
     send(:include, Dry::Monads[:try])
+    send(:include, ::EventSource::Command)
+    send(:include, ::EventSource::Logging)
 
-    # send(:include, ::EventSource::Command)
-
-    # @param [Hash] AcaEntities::Families::Family
+    # @param [Hash] AcaEntities::MagiMedicaid::Application
     # @param [String] :event_key
     # @return [Dry::Monads::Result] Parsed template as string
     def call(params)
       values = yield validate(params)
-      family_entity = yield create_entity(values)
+      application_entity = yield create_entity(values)
       template = yield find_template(params)
-      document = yield create_document({ id: template.id, entity: family_entity })
-      # result = yield build_event(document)
-      Success(document)
+      document = yield create_document({ id: template.id, entity: application_entity })
+      uploaded_document = yield upload_document(document, application_entity)
+      event = yield build_event(uploaded_document)
+      result = yield publish_response(event)
+      Success(result)
     end
 
     private
 
-    # validating incoming family hash
+    # validating incoming application hash
     def validate(params)
-      return Failure("Missing event key #{params[:family][:hbx_id]}") unless params[:event_key]
+      return Failure("Missing event key for resource_id: #{params[:application][:family_reference][:hbx_id]}") unless params[:event_key]
 
       result =
-        AcaEntities::Contracts::Families::FamilyContract.new.call(
-          params[:family]
+        ::AcaEntities::MagiMedicaid::Contracts::ApplicationContract.new.call(
+          params[:application]
         )
       result.success? ? Success(result.to_h) : Failure(result)
     end
 
-    # create family entity
     def create_entity(params)
-      family_entity = AcaEntities::Families::Family.new(params)
-      Success(family_entity)
+      application_entity = ::AcaEntities::MagiMedicaid::Application.new(params)
+      Success(application_entity)
     rescue StandardError => e
       Failure(e)
     end
@@ -49,16 +50,41 @@ module MagiMedicaid
       if template
         Success(template)
       else
-        Failure("No template found for the given #{params[:event_key]}")
+        Failure("No template found for the given #{params[:event_key]} & for resource #{params[:application][:family_reference][:hbx_id]}")
       end
     end
 
     def create_document(params)
-      Documents::Create.new.call(params)
+      document = Documents::Create.new.call(params)
+      if document.success?
+        Success(document.success)
+      else
+        logger.error("Couldn't create document for the given payload: #{document.failure}")
+        Failure(document.failure)
+      end
     end
 
-    # def build_event(values)
-    #   event 'magi_medicaid.uqhp_eligible_document_published', attributes: values
-    # end
+    def upload_document(document_payload, entity)
+      upload = Documents::Upload.new.call(resource_id: entity.family_reference.hbx_id, file: document_payload[:document], user_id: nil, subjects: nil)
+
+      return Failure("Couldn't upload document for the given payload") unless upload.success?
+
+      Success(upload.success)
+    end
+
+    def build_event(payload)
+      result = event("events.documents.document_created", attributes: payload.to_h)
+      logger.info('-' * 100)
+      logger.info(
+        "Polypress Reponse Publisher to external systems(enroll),
+        event_key: events.documents.document_created, attributes: #{payload.to_h}, result: #{result}"
+      )
+      logger.info('-' * 100)
+      result
+    end
+
+    def publish_response(event)
+      Success(event.publish)
+    end
   end
 end
