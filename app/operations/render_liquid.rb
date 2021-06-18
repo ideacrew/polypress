@@ -26,13 +26,8 @@ class RenderLiquid
     Failure(e)
   end
 
-  # TODO: Stub entity payload based on the recipient
-  def stubbed_entity
-    family_hash
-  end
-
   def render(parsed_template, params)
-    entity = params[:instant_preview] || params[:preview] ? stubbed_entity : params[:entity].to_h
+    entity = params[:instant_preview] || params[:preview] ? application_hash : params[:entity].to_h
     rendered_template = parsed_template.render(entity&.deep_stringify_keys, { strict_variables: true })
 
     parsed_template.errors.present? ? Failure(parsed_template.errors) : Success(rendered_template)

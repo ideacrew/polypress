@@ -6,7 +6,7 @@ module Services
 
     def recipients
       {
-        'Family' => 'AcaEntities::Families::Family',
+        'Family' => '::AcaEntities::MagiMedicaid::Application',
         'ConsumerRole' => 'AcaEntities::People::ConsumerRole'
       }
     end

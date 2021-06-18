@@ -192,11 +192,11 @@ class TemplatesController < ::ApplicationController
   def entities_contracts_mapping
     {
       "AcaEntities::People::ConsumerRole" => 'AcaEntities::Contracts::People::ConsumerRoleContract',
-      "AcaEntities::Families::Family" => "AcaEntities::Contracts::Families::FamilyContract"
+      "::AcaEntities::MagiMedicaid::Application" => "::AcaEntities::MagiMedicaid::Contracts::ApplicationContract"
     }
   end
 
   def builder_param
-    entities_contracts_mapping[params['builder']] || 'AcaEntities::Contracts::Families::FamilyContract'
+    entities_contracts_mapping[params['builder']] || '::AcaEntities::MagiMedicaid::Contracts::ApplicationContract'
   end
 end

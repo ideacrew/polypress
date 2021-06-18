@@ -65,7 +65,7 @@ module Services
           tokens(namespace, key, attributes)
         end
       when Dry::Schema::Key::Array
-        namespace = ['&nbsp;&nbsp;'] + [schema_key.name.singularize.camelcase]
+        namespace = [schema_key.name.singularize.camelcase]
         schema_key.member.keys.each do |key|
           tokens(namespace, key, attributes)
         end

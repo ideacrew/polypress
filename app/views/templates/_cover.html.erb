@@ -1,21 +1,24 @@
 <div class="break">
 <%= render :partial => "templates/logo" %>
+{% assign recipient = applicants | where: "is_primary_applicant", true | first %}
+{% assign mailing_address = recipient.addresses | first %}
+{% assign notice_number = 'IVL_FRE' %}
 <table class="total_table address custom-address" border="0">
   <tbody>
   <tr><td><br><br><br></td></tr>
     <tr>
-      <td class="fssize health-connector-address" align="left">{{recipient.first_name}} {{recipient.last_name}}</td>
+      <td class="fssize health-connector-address" align="left">{{recipient.name.first_name}} {{recipient.name.last_name}}</td>
     </tr>
     <tr>
-       <td class="fssize1 health-connector-address" align="left">{{recipient.mailing_address.street_1}}</td>
+       <td class="fssize1 health-connector-address" align="left">{{mailing_address.address_1}}</td>
     </tr>
-    {% if recipient.mailing_address.street_2 %}
+    {% if mailing_address.address_3 %}
     <tr>
-      <td class="fssize1 health-connector-address" align="left">{{recipient.mailing_address.street_2}}</td>
+      <td class="fssize1 health-connector-address" align="left">{{mailing_address.address_3}}</td>
     </tr>
     {% endif %}
     <tr>
-    <td class="fssize1 health-connector-address" align="left">{{recipient.mailing_address.city}} {{recipient.mailing_address.state}} {{recipient.mailing_address.zip}}</td>
+    <td class="fssize1 health-connector-address" align="left">{{mailing_address.city}} {{mailing_address.state}} {{mailing_address.zip}}</td>
     </tr>
   </tbody>
 </table>
