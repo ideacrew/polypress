@@ -9,7 +9,7 @@ module Documents
       _validate = yield validate(resource_id, file)
       header = yield construct_headers(resource_id, user_id)
       body = yield construct_body(resource_id, file, subjects)
-      response = yield upload_to_doc_storage(resource_id, header, body)
+      response = yield upload_to_doc_storage(resource_id, header, body, file)
       validated_response = yield validate_response(response.transform_keys(&:to_sym))
       Success(validated_response)
     end
@@ -69,7 +69,7 @@ module Documents
         source: 'polypress',
         language: 'en',
         date_submitted: Time.now,
-        title: File.basename(file),
+        title: file_name(file),
         format: 'application/pdf'
       }
       document_body[:subjects] = subjects unless subjects.nil?
@@ -82,13 +82,19 @@ module Documents
       )
     end
 
-    def upload_to_doc_storage(resource_id, header, body)
-      if Rails.env.production?
-        response = HTTParty.post(fetch_url, :body => body, :headers => header)
+    def file_name(file)
+      File.basename(file)
+    end
 
-        (response["errors"] || response["error"]).present? ? Failure({ :message => ['Unable to upload document'] }) : Success(response)
+    def upload_to_doc_storage(resource_id, header, body, file)
+      return Success(test_env_response(resource_id)) unless Rails.env.production?
+
+      response = HTTParty.post(fetch_url, :body => body, :headers => header)
+      if (response["errors"] || response["error"]).present?
+        Failure({ :message => ['Unable to upload document'] })
       else
-        Success(test_env_response(resource_id))
+        payload = response.merge({ file_name: file_name(file), file_content_type: 'application/pdf' })
+        Success(payload)
       end
     end
 
@@ -107,7 +113,9 @@ module Documents
         :document_type => 'notice',
         :subjects => [{ :id => resource_id.to_s, :type => nil }],
         :id => BSON::ObjectId.new.to_s,
-        :extension => 'pdf'
+        :extension => 'pdf',
+        :file_name => 'Test.pdf',
+        :file_content_type => 'application/pdf'
       }
     end
   end
