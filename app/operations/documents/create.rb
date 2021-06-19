@@ -10,9 +10,7 @@ module Documents
     # @return [Dry:Monad] passed params into pdf
     def call(params)
       template           = yield fetch_template(params)
-      # prepend
       rendered_template  = yield render_liquid_template(template, params)
-      # append
       output             = yield create_document(template, rendered_template, params)
       Success(output)
     end
@@ -34,7 +32,7 @@ module Documents
     end
 
     def create_document(template, rendered_template, params)
-      doc_params = params.merge({ rendered_template: rendered_template, template: template })
+      doc_params = params.merge({ rendered_template: rendered_template[:rendered_template], template: template, entity: rendered_template[:entity] })
 
       case template.content_type
       when 'application/pdf'

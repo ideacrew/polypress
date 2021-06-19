@@ -1,4 +1,7 @@
-<%= render partial: 'layouts/cover_page', :locals => {notice: notice, recipient: recipient, notice_recipient: notice_recipient } %>
-<%= render partial: 'layouts/logo_and_address_shop', :locals => {notice: notice} %>
+{% assign recipient = applicants | where: "is_primary_applicant", true | first %}
+{% assign mailing_address = recipient.addresses | first %}
+{% assign notice_number = 'IVL_FRE' %}
+<%= render partial: 'layouts/cover_page' %>
+<%= render partial: 'layouts/logo_and_address_shop' %>
 <br>
-<%= render partial: "layouts/ivl_address", :locals => {notice: notice, recipient: recipient, notice_recipient: notice_recipient } %>
+<%= render partial: "layouts/ivl_address" %>
