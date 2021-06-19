@@ -1,13 +1,6 @@
 <div class="page-break">
-  <%= render partial: 'shared/logo_and_address_shop', :locals => {notice: notice} %>
-
-  <% if shop_market(recipient) %>
-    <%= render partial: 'layouts/shop_address', :locals => {notice: notice, show_mpi_indicator: false, recipient: recipient, notice_recipient: notice_recipient} %>
-  <% elsif individual_market(recipient) %>
-    <%= render partial: 'layouts/ivl_address', :locals => {notice: notice, show_mpi_indicator: false, recipient: recipient, notice_recipient: notice_recipient} %>
-  <% else %>
-    <%= render partial: 'shared/address', :locals => {notice: notice, show_mpi_indicator: false} %>
-  <% end %>
+  <%= render partial: 'shared/logo_and_address_shop' %>
+  <%= render partial: 'layouts/ivl_address', :locals => { show_mpi_indicator: false } %>
 
   <table class="total_table" border="0">
     <tbody>
@@ -30,10 +23,10 @@
     </tbody>
   </table>
 
-  <table class="total_table" border="0" <% if shop_market(recipient) %>style="margin-top: 220px;" <% else %> style="margin-top: 260px;" <% end%>>
+  <table class="total_table" border="0"  style="margin-top: 260px;">
     <tbody>
       <tr>
-        <td><%= notice.notice_number %></td>
+        <td>{{notice_number}}</td>
       </tr>
     </tbody>
   </table>

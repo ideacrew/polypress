@@ -59,7 +59,7 @@ class TemplatesController < ::ApplicationController
     template = RenderLiquid.new.call({ body: instant_preview_params[:body], instant_preview: 'true' })
 
     if template.success?
-      @rendered_template = template.success
+      @rendered_template = template.success[:rendered_template]
     else
       @errors = Array.wrap(template.failure).flatten
     end

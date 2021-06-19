@@ -4,29 +4,29 @@
       <td><br></br></td>
     </tr>
     <tr>
-      <td><%= recipient.first_name %></td>
+      <td>{{ recipient.name.first_name }}</td>
     </tr>
     <tr class="fssize1">
-       <td><%= recipient.addresses[0].address_1 %></td>
+       <td>{{ mailing_address.address_1 }}</td>
     </tr>
-    <% if recipient.addresses[0].address_2.present? %>
+    {% if mailing_address.address_3 %}
     <tr class="fssize1">
-      <td><%= recipient.addresses[0].address_2 %></td>
+      <td>{{ mailing_address.address_3 }}</td>
     </tr>
-    <% end %>
+    {% endif %}
     <tr>
-      <td><%= recipient.addresses[0].city %>, <%= recipient.addresses[0].state %> <%= recipient.addresses[0].zip %></td>
-        <% display_mpi_indicator =  show_mpi_indicator if defined? show_mpi_indicator%>
-        <% if display_mpi_indicator.nil? %>
-          <td style="text-align: right;"><%= notice.notice_number %></td>
-        <% end %>
+      <td>{{ mailing_address.city }}, {{ mailing_address.state }} {{ mailing_address.zip }}</td>
+      <% display_mpi_indicator =  show_mpi_indicator if defined? show_mpi_indicator %>
+      <% if display_mpi_indicator.nil? %>
+        <td style="text-align: right;">{{ notice_number }}</td>
+      <% end %>
     </tr>
 
-    <% if !recipient.addresses[0].address_2.present? %>
+    {% unless mailing_address.address_3 %}
     <tr class="fssize1">
       <td><br></td>
     </tr>
-    <% end %>
+    {% endunless %}
     <tr>
       <td>
         <br></br>

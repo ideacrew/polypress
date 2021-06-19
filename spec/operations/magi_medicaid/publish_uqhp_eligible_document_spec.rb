@@ -70,7 +70,7 @@ RSpec.describe MagiMedicaid::PublishUqhpEligibleDocument do
       let(:body) { '<p>Uqhp Eligible Document for {{ unknown_attribute }}</p><p> {{ unknown_attribute_new }} </p> ' }
 
       let(:error) do
-        ["Liquid error (line 60): undefined variable unknown_attribute", "Liquid error (line 60): undefined variable unknown_attribute_new"]
+        ["Liquid error (line 147): undefined variable unknown_attribute", "Liquid error (line 147): undefined variable unknown_attribute_new"]
       end
 
       it 'should return failure' do
@@ -85,7 +85,7 @@ RSpec.describe MagiMedicaid::PublishUqhpEligibleDocument do
     context "when template body has syntax errors" do
       let(:body) { '<p>Uqhp Eligible Document for {% if %}</p>' }
 
-      let(:error) { "Liquid syntax error (line 60): Syntax Error in tag 'if' - Valid syntax: if [expression]" }
+      let(:error) { "Liquid syntax error (line 147): Syntax Error in tag 'if' - Valid syntax: if [expression]" }
 
       it 'should return failure' do
         expect(subject.failure?).to be_truthy
