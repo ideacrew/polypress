@@ -44,7 +44,7 @@ RSpec.describe Documents::Create do
     context "when template body has unknown attributes" do
       let(:body) { '<p>Uqhp Eligible Document for {{ unknown_attribute }}</p>' }
 
-      let(:error) { ["Liquid error (line 147): undefined variable unknown_attribute"] }
+      let(:error) { ["Liquid error (line 1): undefined variable unknown_attribute"] }
 
       it 'should return failure' do
         expect(subject.failure?).to be_truthy
@@ -58,7 +58,7 @@ RSpec.describe Documents::Create do
     context "when template body has syntax errors" do
       let(:body) { '<p>Uqhp Eligible Document for {% if %}</p>' }
 
-      let(:error) { "Liquid syntax error (line 147): Syntax Error in tag 'if' - Valid syntax: if [expression]" }
+      let(:error) { "Liquid syntax error (line 1): Syntax Error in tag 'if' - Valid syntax: if [expression]" }
 
       it 'should return failure' do
         expect(subject.failure?).to be_truthy

@@ -48,7 +48,7 @@ class SerializePdf
   end
 
   def ivl_attach_envelope
-    join_pdfs [@document_path, Rails.root.join('lib/pdf_templates', 'ivl_envelope.pdf')]
+    join_pdfs [@document_path, Rails.root.join('lib/pdf_templates', 'taglines.pdf')]
   end
 
   def insert_attachments
