@@ -35,14 +35,14 @@ class RenderLiquid
   end
 
   def entity_hash(params)
-    oe_end_on_year = params[:oe_start_on].year + 1
+    entity = params[:instant_preview] || params[:preview] ? application_hash : params[:entity].to_h
+    oe_end_on_year = entity[:oe_start_on].year + 1
     settings_hash = {
       :short_name => Settings.site.short_name,
       :marketplace_phone => Settings.contact_center.short_number,
       :marketplace_url => Settings.site.website_url,
       :oe_end_on => Date.new(oe_end_on_year, 1, 31)
     }
-    entity = params[:instant_preview] || params[:preview] ? application_hash : params[:entity].to_h
     entity.merge(settings_hash)
   end
 
