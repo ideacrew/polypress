@@ -6,7 +6,7 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 ruby '2.7.2'
 
 gem 'aca_entities',  git:  'https://github.com/ideacrew/aca_entities.git', branch: 'fdsh'
-gem 'event_source',       git: "https://github.com/ideacrew/event_source.git", branch: "release_0.5.1"
+gem 'event_source',       git: "https://github.com/ideacrew/event_source.git", branch: "release_0.5.2"
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '~> 6.0'
 # Use Puma as the app server
