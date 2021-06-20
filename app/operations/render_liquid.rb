@@ -5,7 +5,8 @@ class RenderLiquid
   send(:include, FamilyHelper)
   send(:include, Dry::Monads[:result, :do])
 
-  # @param [Templates::Template] :template
+  # @param [String] :body
+  # @param [String] :subject MPI indicator for a given notice
   # @param [Array<Dry::Struct>] :entities
   # @param [Hash] :options
   # @return [Dry::Monads::Result] Parsed template as string
@@ -28,7 +29,8 @@ class RenderLiquid
   end
 
   def parse_body(params)
-    template = Liquid::Template.parse(params[:body], line_numbers: true)
+    body = params[:body] || params[:template].body
+    template = Liquid::Template.parse(body, line_numbers: true)
     Success(template)
   rescue StandardError => e
     Failure(e)
@@ -38,6 +40,7 @@ class RenderLiquid
     entity = params[:instant_preview] || params[:preview] ? application_hash : params[:entity].to_h
     oe_end_on_year = entity[:oe_start_on].year + 1
     settings_hash = {
+      :notice_number => params[:subject],
       :short_name => Settings.site.short_name,
       :marketplace_phone => Settings.contact_center.short_number,
       :marketplace_url => Settings.site.website_url,

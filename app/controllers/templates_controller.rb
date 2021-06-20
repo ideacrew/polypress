@@ -56,7 +56,13 @@ class TemplatesController < ::ApplicationController
   end
 
   def instant_preview
-    template = RenderLiquid.new.call({ body: instant_preview_params[:body], instant_preview: 'true' })
+    template = RenderLiquid.new.call(
+      {
+        body: instant_preview_params[:body],
+        subject: instant_preview_params[:subject],
+        instant_preview: 'true'
+      }
+    )
 
     if template.success?
       @rendered_template = template.success[:rendered_template]
@@ -171,7 +177,7 @@ class TemplatesController < ::ApplicationController
   private
 
   def instant_preview_params
-    params.permit(:body)
+    params.permit(:body, :subject)
   end
 
   def file_content_type

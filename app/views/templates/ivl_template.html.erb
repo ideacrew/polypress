@@ -1,6 +1,6 @@
 {% assign recipient = applicants | where: "is_primary_applicant", true | first %}
 {% assign mailing_address = recipient.addresses | first %}
-{% assign notice_number = 'IVL_FRE' %}
+
 <%= render partial: 'layouts/cover_page' %>
 <%= render partial: 'layouts/logo_and_address_shop' %>
 <br>

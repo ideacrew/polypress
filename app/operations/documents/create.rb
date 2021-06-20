@@ -28,7 +28,7 @@ module Documents
     end
 
     def render_liquid_template(template, params)
-      RenderLiquid.new.call({ body: template.body, entity: params[:entity], preview: params[:preview] })
+      RenderLiquid.new.call({ body: template.body, subject: template.subject, entity: params[:entity], preview: params[:preview] })
     end
 
     def create_document(template, rendered_template, params)

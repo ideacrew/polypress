@@ -4,7 +4,7 @@
       <td><br></br></td>
     </tr>
     <tr>
-      <td>{{ recipient.name.first_name }}</td>
+      <td>{{ recipient.name.first_name | capitalize }}</td>
     </tr>
     <tr class="fssize1">
        <td>{{ mailing_address.address_1 }}</td>
@@ -15,7 +15,7 @@
     </tr>
     {% endif %}
     <tr>
-      <td>{{ mailing_address.city }}, {{ mailing_address.state }} {{ mailing_address.zip }}</td>
+      <td>{{ mailing_address.city | capitalize }}, {{ mailing_address.state }} {{ mailing_address.zip }}</td>
       <% display_mpi_indicator =  show_mpi_indicator if defined? show_mpi_indicator %>
       <% if display_mpi_indicator.nil? %>
         <td style="text-align: right;">{{ notice_number }}</td>
