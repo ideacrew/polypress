@@ -54,8 +54,8 @@ class SerializePdf
   def insert_attachments
     attach_blank_page
     ivl_appeal_rights
-    ivl_non_discrimination
-    ivl_attach_envelope
+    # ivl_non_discrimination
+    # ivl_attach_envelope
   end
 
   def pdf_options(entity)

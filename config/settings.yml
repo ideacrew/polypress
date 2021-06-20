@@ -45,7 +45,7 @@ site:
   forms_name: "DCHealthLink.com/forms"
   short_url: "dchealthlink.com"
   forms: "https://dchealthlink.com/forms#en"
-  website_url: "www.healthcare.gov"
+  website_url: "www.coverme.gov"
   healthcare_name: "www.healthcare.gov"
   healthcare_url: "https://www.healthcare.gov/"
   irs_url: "https://www.irs.gov/"
@@ -348,7 +348,8 @@ notices:
   individual_market:
     mail_address:
       address_1: "PO Box 44018"
-      city: "Washington"
+      city: "Augusta"
+      state: "Maine"
       zip_code: "20026"
 
   shop_market:

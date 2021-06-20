@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "active_support/core_ext/integer/time"
 
 Rails.application.configure do
@@ -28,7 +30,7 @@ Rails.application.configure do
   config.serve_static_files = false
 
   # Compress JavaScripts and CSS.
-  #config.assets.js_compressor = Uglifier.new(harmony: true)
+  # config.assets.js_compressor = Uglifier.new(harmony: true)
   # config.assets.css_compressor = :sass
 
   # Do not fallback to assets pipeline if a precompiled asset is missed.
@@ -65,13 +67,14 @@ Rails.application.configure do
 
   # Use a different cache store in production.
   # config.cache_store = :mem_cache_store
-  # config.cache_store = :redis_store, { :host => "localhost",
-                                     #:port => 6379,
-                                     #:db => 0,
-                                     #:password => "mysecret",
-                                     #:namespace => "cache",
-                                     #:expires_in => 90.minutes }
-
+  # config.cache_store = :redis_store, {
+  #   :host => "localhost",
+  #   :port => 6379,
+  #   :db => 0,
+  #   :password => "mysecret",
+  #   :namespace => "cache",
+  #   :expires_in => 90.minutes
+  # }
 
   # Enable serving of images, stylesheets, and JavaScripts from an asset server.
   # config.action_controller.asset_host = 'http://assets.example.com'
@@ -90,9 +93,7 @@ Rails.application.configure do
   # Use default logging formatter so that PID and timestamp are not suppressed.
   config.log_formatter = ::Logger::Formatter.new
 
-# Mongoid logger levels
-Mongoid.logger.level = Logger::ERROR
-Mongo::Logger.logger.level = Logger::ERROR
-
-
+  # Mongoid logger levels
+  Mongoid.logger.level = Logger::ERROR
+  Mongo::Logger.logger.level = Logger::ERROR
 end

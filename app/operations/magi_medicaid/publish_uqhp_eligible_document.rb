@@ -59,7 +59,7 @@ module MagiMedicaid
       if document.success?
         Success(document.success)
       else
-        logger.error("Couldn't create document for the given payload: #{document.failure}")
+        logger.error("Couldn't create document for the given payload: #{document.failure}") unless Rails.env.test?
         Failure(document.failure)
       end
     end
@@ -74,12 +74,14 @@ module MagiMedicaid
 
     def build_event(payload)
       result = event("events.documents.document_created", attributes: payload.to_h)
-      logger.info('-' * 100)
-      logger.info(
-        "Polypress Reponse Publisher to external systems(enroll),
-        event_key: events.documents.document_created, attributes: #{payload.to_h}, result: #{result}"
-      )
-      logger.info('-' * 100)
+      unless Rails.env.test?
+        logger.info('-' * 100)
+        logger.info(
+          "Polypress Reponse Publisher to external systems(enroll),
+          event_key: events.documents.document_created, attributes: #{payload.to_h}, result: #{result}"
+        )
+        logger.info('-' * 100)
+      end
       result
     end
 
