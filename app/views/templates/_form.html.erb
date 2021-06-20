@@ -139,7 +139,7 @@
 
   $('#instant_preview').click(function(e) {
     $.ajax({
-      type:"GET",
+      type:"POST",
       url: "templates/instant_preview",
       // dataType: 'json',
       data: { body: CKEDITOR.instances.template_body.getData() },

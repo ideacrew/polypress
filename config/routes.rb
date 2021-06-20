@@ -13,7 +13,7 @@ Rails.application.routes.draw do
     end
 
     collection do
-      get :instant_preview
+      post :instant_preview
       get :download_notices
       get :fetch_tokens
       get :fetch_placeholders
