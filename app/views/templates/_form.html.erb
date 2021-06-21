@@ -49,10 +49,10 @@
 
     <%= hidden_field_tag 'notice_preview_url', preview_template_path(id: template.id) %>
     <div class="form-group col-xs-12">
-      <div class="pull-right">
-      <%= link_to 'Cancel', templates_path, class: "btn btn-primary" %>
-      <button type="button" id="instant_preview" data-target="#instantPreviewModal" data-toggle="modal" class="btn btn-primary">Preview</button>
-      <button type="submit" class="btn btn-primary">Submit</button>
+      <div>
+        <%= link_to 'Cancel', templates_path, class: "btn btn-primary" %>
+        <button type="button" id="instant_preview" data-target="#instantPreviewModal" data-toggle="modal" class="btn btn-primary">Preview</button>
+        <button type="submit" class="btn btn-primary">Submit</button>
       </div>
     </div>
 
