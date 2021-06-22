@@ -21,11 +21,7 @@ class TemplatesController < ::ApplicationController
   end
 
   def new
-    @template = Template.new
-    respond_to do |format|
-      format.html
-      format.js
-    end
+    @template = params[:template].nil? ? Template.new : Template.new(template_params)
   end
 
   def edit
@@ -34,17 +30,14 @@ class TemplatesController < ::ApplicationController
   end
 
   def create
-    template = Templates::Create.new.call(template_params.to_h)
+    template_values = template_params.to_h
+    template = Templates::Create.new.call(template_values)
     if template.success?
       flash[:notice] = 'Notice created successfully'
       redirect_to templates_path
     else
       @errors = Array.wrap(template.failure)
-
-      @templates = Template.all
-      @datatable = Effective::Datatables::NoticesDatatable.new
-
-      render :action => 'index'
+      redirect_to new_template_path(template: template_values), flash: { errors: @errors }
     end
   end
 
