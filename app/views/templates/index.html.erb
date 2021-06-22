@@ -9,12 +9,10 @@
   </div>
 <% end %>
 
-<div class="content landing">  
+<div class="content landing">
   <div class="home">
-
     <div class="tab-row">
       <div class="tab-content" id="myTabContent"></div>
-
       <div class="container top-pd">
         <div class="container">
           <div aria-labelledby="inbox-tab" id="inbox" class="tab-pane-hbx" role="tabpanel">
@@ -22,7 +20,7 @@
               <div class="notices_index_list">
                 <h1 class="heading-text"></h1>
                   <span class="pull-right">
-                    <%= link_to 'Add Notice', new_template_path, class: "btn btn-primary notice-preview", remote: true %>
+                    <%= link_to 'Add Notice', new_template_path, class: "btn btn-primary notice-preview", data: { turbolinks: false } %>
                     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
                       <i class='far fa-file-alt' aria-hidden='true'></i> Upload Notices
                     </button>
