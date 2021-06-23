@@ -6,36 +6,29 @@ module Subscribers
     include EventSource::Logging
     include ::EventSource::Subscriber[amqp: 'magi_medicaid.mitc.eligibilities']
 
-    subscribe(:on_determined_aptc_eligible) do |delivery_info, _metadata, _response|
-      logger.info "Polypress: invoked on_determined_aptc_eligible with #{delivery_info}"
-    end
-    subscribe(:on_determined_medicaid_chip_eligible) do |delivery_info, _metadata, _response|
-      logger.info "Polypress: invoked on_determined_medicaid_chip_eligible with #{delivery_info}"
-    end
-    subscribe(:on_determined_totally_ineligible) do |delivery_info, _metadata, _response|
-      logger.info "Polypress: invoked on_determined_totally_ineligible with #{delivery_info}"
-    end
-    subscribe(:on_determined_magi_medicaid_eligible) do |delivery_info, _metadata, response|
-      logger.info "Polypress: invoked on_determined_magi_medicaid_eligible with #{delivery_info}"
+    subscribe(:on_magi_medicaid_mitc_eligibilities) do |delivery_info, _metadata, response|
+      routing_key = delivery_info[:routing_key]
+      logger.info "Polypress: invoked on_magi_medicaid_mitc_eligibilities with delivery_info: #{delivery_info} routing_key: #{routing_key}"
       payload = JSON.parse(response, :symbolize_names => true)
-      result = MagiMedicaid::PublishUqhpEligibleDocument.new.call({ application: payload, event_key: 'determined_medicaid_eligible' })
+      event_key = routing_key.split('.').last
+      result = MagiMedicaid::PublishUqhpEligibleDocument.new.call({ application: payload, event_key: event_key })
       if result.success?
         ack(delivery_info.delivery_tag)
-        logger.info "polypress_eligibility_determination_subscriber_message; acked"
+        logger.info "Polypress: polypress_eligibility_determination_subscriber_message; acked for #{routing_key}"
       else
         errors = result.failure.errors.to_h
         nack(delivery_info.delivery_tag)
-        logger.debug "polypress_eligibility_determination_subscriber_message; nacked due to:#{errors}; payload: #{payload}"
+        logger.error(
+          "Polypress: polypress_eligibility_determination_subscriber_error;
+          nacked due to:#{errors}; for routing_key: #{routing_key}, payload: #{payload}"
+        )
       end
     rescue StandardError => e
       nack(delivery_info.delivery_tag)
-      logger.debug "polypress_eligibility_determination_subscriber_error: baacktrace: #{e.backtrace}; nacked; payload: #{payload}"
-    end
-    subscribe(:on_determined_uqhp_eligible) do |delivery_info, _metadata, _response|
-      logger.info "Polypress: invoked on_determined_uqhp_eligible with #{delivery_info}"
-    end
-    subscribe(:on_determined_mixed_determination) do |delivery_info, _metadata, _response|
-      logger.info "Polypress: invoked on_determined_mixed_determination with #{delivery_info}"
+      logger.error(
+        "Polypress: polypress_eligibility_determination_subscriber_error: nacked due to backtrace:
+        #{e.backtrace}; for routing_key: #{routing_key}, response: #{response}"
+      )
     end
   end
 end

@@ -216,9 +216,11 @@ module FamilyHelper
           :is_magi_medicaid => false,
           :is_uqhp_eligible => nil,
           :is_csr_eligible => true,
+          :is_eligible_for_non_magi_reasons => true,
           :csr => "94",
           :is_non_magi_medicaid_eligible => false,
-          :is_without_assistance => false
+          :is_without_assistance => false,
+          :category_determinations => category_determinations
         },
         :applicant_reference => {
           :first_name => "Gerald",
@@ -227,6 +229,13 @@ module FamilyHelper
           :person_hbx_id => "95"
         }
       }
+    ]
+  end
+
+  def category_determinations
+    [
+      { :category => "Medicaid Citizen Or Immigrant", :indicator_code => true, :ineligibility_code => nil, :ineligibility_reason => nil },
+      { :category => "CHIP Citizen Or Immigrant", :indicator_code => true, :ineligibility_code => nil, :ineligibility_reason => nil }
     ]
   end
 end

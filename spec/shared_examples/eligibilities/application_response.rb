@@ -4,6 +4,12 @@ RSpec.shared_context 'application response from medicaid gateway', :shared_conte
   let(:current_date) { Date.today }
   let(:member_dob) { Date.new(current_date.year - 22, current_date.month, current_date.day) }
   let(:aptc_effective_date) { Date.today.next_month.beginning_of_month }
+  let(:category_determinations) do
+    [
+      { :category => "Medicaid Citizen Or Immigrant", :indicator_code => true, :ineligibility_code => nil, :ineligibility_reason => nil },
+      { :category => "CHIP Citizen Or Immigrant", :indicator_code => true, :ineligibility_code => nil, :ineligibility_reason => nil }
+    ]
+  end
   let(:application_hash) do
     {
       :family_reference => { :hbx_id => "10011" },
@@ -113,10 +119,12 @@ RSpec.shared_context 'application response from medicaid gateway', :shared_conte
                                                                       :is_totally_ineligible => nil,
                                                                       :is_magi_medicaid => false,
                                                                       :is_uqhp_eligible => nil,
+                                                                      :is_eligible_for_non_magi_reasons => true,
                                                                       :is_csr_eligible => true,
                                                                       :csr => "94",
                                                                       :is_non_magi_medicaid_eligible => false,
-                                                                      :is_without_assistance => false },
+                                                                      :is_without_assistance => false,
+                                                                      :category_determinations => category_determinations },
                               :applicant_reference => { :first_name => "Gerald",
                                                         :last_name => "Rivers",
                                                         :dob => member_dob,
