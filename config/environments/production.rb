@@ -109,4 +109,5 @@ Rails.application.configure do
   # config.active_record.database_resolver_context = ActiveRecord::Middleware::DatabaseSelector::Resolver::Session
 
   # config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
+  config.cartafact_document_base_url = "http://#{ENV['CARTAFACT_HOST']}:3000/api/v1/documents"
 end
