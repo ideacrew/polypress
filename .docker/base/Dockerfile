@@ -46,7 +46,7 @@ COPY . $HOME
 
 # Add/configure fonts
 RUN cp .docker/config/91-bad-kerning.conf /etc/fonts/conf.d/ && \
-    chmod 755 /etc/fonts/conf.d/91-bad-kerning.conf \
+    chmod 755 /etc/fonts/conf.d/91-bad-kerning.conf && \
     unzip .docker/config/open_sans.zip -d google-open-sans && \
     unzip .docker/config/roboto_slab.zip -d roboto-slab && \
     mv google-open-sans /usr/share/fonts/ && \
