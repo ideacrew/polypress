@@ -60,6 +60,7 @@ module Documents
     end
 
     def construct_body(resource_id, file, subjects)
+      Rails.logger.info{ "construct body: #{file}" }
       document_body = {
         subjects: [{ id: resource_id.to_s, type: 'Person' }],
         document_type: 'notice',
@@ -73,7 +74,7 @@ module Documents
         format: 'application/pdf'
       }
       document_body[:subjects] = subjects unless subjects.nil?
-
+      Rails.logger.info { "document_body: #{document_body} " }
       Success(
         {
           document: document_body.to_json,
@@ -88,7 +89,7 @@ module Documents
 
     def upload_to_doc_storage(resource_id, header, body, file)
       return Success(test_env_response(resource_id)) unless Rails.env.production?
-
+      Rails.logger.info { "fetch_url: #{fetch_url}, body: #{body}, header: #{header}" }
       response = HTTParty.post(fetch_url, :body => body, :headers => header)
       if (response["errors"] || response["error"]).present?
         Failure({ :message => ['Unable to upload document'] })
