@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/ideacrew/aca_entities.git
-  revision: ceaa99eb663669e127705aa42107a6998d347070
+  revision: eb0fcc0f81dfedd50522abf263e05c74c3b39756
   branch: fdsh
   specs:
     aca_entities (0.2.2)
@@ -14,7 +14,7 @@ GIT
 
 GIT
   remote: https://github.com/ideacrew/event_source.git
-  revision: 2b3c788b09c5d4ca3fd741d0ad5339314aac925f
+  revision: 4a4baa01544467fb97c732659c6e1ec82fa8be01
   branch: release_0.5.2
   specs:
     event_source (0.5.2)
@@ -270,7 +270,7 @@ GEM
     factory_bot_rails (6.2.0)
       factory_bot (~> 6.2.0)
       railties (>= 5.0.0)
-    faraday (1.4.2)
+    faraday (1.4.3)
       faraday-em_http (~> 1.0)
       faraday-em_synchrony (~> 1.0)
       faraday-excon (~> 1.1)
@@ -377,7 +377,7 @@ GEM
       racc (~> 1.4)
     nokogiri (1.11.7-x86_64-linux)
       racc (~> 1.4)
-    oj (3.11.6)
+    oj (3.11.7)
     orm_adapter (0.5.0)
     ox (2.14.5)
     parallel (1.20.1)

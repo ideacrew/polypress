@@ -61,7 +61,7 @@ module Documents
 
     def construct_body(resource_id, file, subjects)
       document_body = {
-        subjects: [{ id: resource_id.to_s, type: nil }],
+        subjects: [{ id: resource_id.to_s, type: 'Person' }],
         document_type: 'notice',
         creator: Settings.site.publisher,
         publisher: Settings.site.publisher,
@@ -77,7 +77,7 @@ module Documents
       Success(
         {
           document: document_body.to_json,
-          content: file
+          content: File.open(file.path)
         }
       )
     end
