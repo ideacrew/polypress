@@ -13,18 +13,18 @@ module Subscribers
       event_key = routing_key.split('.').last
       result = MagiMedicaid::PublishUqhpEligibleDocument.new.call({ application: payload, event_key: event_key })
       if result.success?
-        ack(delivery_info.delivery_tag)
+        # ack(delivery_info.delivery_tag)
         logger.info "Polypress: polypress_eligibility_determination_subscriber_message; acked for #{routing_key}"
       else
         errors = result.failure.errors.to_h
-        nack(delivery_info.delivery_tag)
+        # nack(delivery_info.delivery_tag)
         logger.error(
           "Polypress: polypress_eligibility_determination_subscriber_error;
           nacked due to:#{errors}; for routing_key: #{routing_key}, payload: #{payload}"
         )
       end
     rescue StandardError => e
-      nack(delivery_info.delivery_tag)
+      # nack(delivery_info.delivery_tag)
       logger.error(
         "Polypress: polypress_eligibility_determination_subscriber_error: nacked due to backtrace:
         #{e.backtrace}; for routing_key: #{routing_key}, response: #{response}"
