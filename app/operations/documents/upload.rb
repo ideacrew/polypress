@@ -99,9 +99,10 @@ module Documents
     end
 
     def validate_response(params)
+      # Validating to make sure required attributes are present
       result = ::Contracts::Documents::UploadContract.new.call(params)
 
-      result.success? ? Success(result.to_h) : Failure(result.errors.to_h)
+      result.success? ? Success(params) : Failure(result.errors.to_h)
     end
 
     def test_env_response(resource_id)
