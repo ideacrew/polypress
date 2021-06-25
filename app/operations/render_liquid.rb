@@ -29,18 +29,7 @@ class RenderLiquid
   end
 
   def parse_body(params)
-    # I used a regular expression to gsub both; double and single quotes
-    # instead of having to gsub twice.
-    body = (params[:body] || params[:template].body).gsub(
-      /&quot;|&#39;/,
-      # Below is just the mapping for the regular expression.
-      # It simply tells the gsub method what to replace for each
-      # matched value.
-      {
-        '&quot;' => "\"",
-        "&#39;" => "\'"
-      }
-    )
+    body = params[:body] || params[:template].body
     template = Liquid::Template.parse(body, line_numbers: true)
     Success(template)
   rescue StandardError => e
