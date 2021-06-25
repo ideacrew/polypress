@@ -167,19 +167,29 @@
     updateCkEditor();
   });
 
+  const disableSubmit = () => {
+    $('.submit-notice').attr('disabled','disabled');
+  }
+
+  const enableSubmit = () => {
+    $('.submit-notice').removeAttr('disabled');
+  }
+
+  // Load CK Editor once the page is fully loaded with all of it's scripts.
   $(document).ready(function() {
     updateCkEditor();
-    
-    $('.submit-notice').on('click', function(e) {
-      e.preventDefault();
-      var form = $(e.target).closest('form');
-      var editorText = $('#cke_template_body iframe').contents().find("body").text();
+    var ckInstance = CKEDITOR.instances.template_body;
 
-      if (editorText === "") {
-        alert('Notice Body Can Not Be Empty!');
+    if (ckInstance.getData() === "") {
+      disableSubmit();
+    }
+
+    ckInstance.on('change', function(e) {
+      if (this.getData() === "") {
+        disableSubmit();
       } else {
-        form.submit();
-      };
+        enableSubmit();
+      }
     });
   });
 </script>
