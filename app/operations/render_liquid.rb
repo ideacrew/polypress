@@ -37,16 +37,24 @@ class RenderLiquid
   end
 
   def entity_hash(params)
-    entity = params[:instant_preview] || params[:preview] ? application_hash : params[:entity].to_h
-    oe_end_on_year = entity[:oe_start_on].year + 1
+    entity_hash = params[:instant_preview] || params[:preview] ? application_hash : params[:entity].to_h
+    oe_end_on_year = entity_hash[:oe_start_on].year
     settings_hash = {
       :notice_number => params[:subject],
       :short_name => Settings.site.short_name,
+      :day_45_from_now => Date.today + 45.days,
+      :day_95_from_now => Date.today + 95.days,
+      :medicaid_agency_name => Settings.notices.individual_market.medicaid.agency_name,
+      :medicaid_agency_phone => Settings.notices.individual_market.medicaid.agency_phone,
+      :medicaid_chip_long_name => Settings.notices.individual_market.medicaid.chip_long_name,
+      :medicaid_chip_short_name => Settings.notices.individual_market.medicaid.chip_short_name,
+      :medicaid_program_name => Settings.notices.individual_market.medicaid.program_name,
       :marketplace_phone => Settings.contact_center.short_number,
       :marketplace_url => Settings.site.website_url,
-      :oe_end_on => Date.new(oe_end_on_year, 1, 31)
+      :marketplace_shopping_name => Settings.notices.individual_market.shopping_name,
+      :oe_end_on => Date.new(oe_end_on_year, 12, 15)
     }
-    entity.merge(settings_hash)
+    entity_hash.merge(settings_hash)
   end
 
   def render(body, cover_page, params)
