@@ -58,7 +58,7 @@ module MagiMedicaid
     end
 
     def publish_documents(application_entity, event_keys)
-      results = event_keys.collect do |event_key|
+      event_keys.collect do |event_key|
         result = MagiMedicaid::PublishUqhpEligibleDocument.new.call(application_entity: application_entity, event_key: event_key)
         if result.success?
           Success(result.success)
