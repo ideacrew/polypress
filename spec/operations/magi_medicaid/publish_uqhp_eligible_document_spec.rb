@@ -25,28 +25,15 @@ RSpec.describe MagiMedicaid::PublishUqhpEligibleDocument do
         description: 'Uqhp Descriptoin'
       )
     end
+    let(:application_entity) { ::AcaEntities::MagiMedicaid::Application.new(application_hash) }
 
     subject do
-      described_class.new.call(application: application_hash, event_key: event_key)
+      described_class.new.call(application_entity: application_entity, event_key: event_key)
     end
 
     context "when payload has all the required params" do
       it 'should return success' do
         expect(subject.success?).to be_truthy
-      end
-    end
-
-    context "when event key is missing" do
-      let(:event_key) { nil }
-
-      let(:error) { "Missing event key for resource_id: #{application_hash[:family_reference][:hbx_id]}" }
-
-      it 'should return failure' do
-        expect(subject.failure?).to be_truthy
-      end
-
-      it 'should return errors' do
-        expect(subject.failure).to eq error
       end
     end
 
@@ -93,20 +80,6 @@ RSpec.describe MagiMedicaid::PublishUqhpEligibleDocument do
 
       it 'should return errors' do
         expect(subject.failure.to_s).to eq error
-      end
-    end
-
-    context "when input application hash is invalid" do
-      let(:error) { '[#<Dry::Schema::Message text="is missing" path=[:family_reference, :hbx_id] predicate=:key? input={}>]' }
-
-      before { application_hash[:family_reference].delete(:hbx_id) }
-
-      it 'should return failure' do
-        expect(subject.failure?).to be_truthy
-      end
-
-      it 'should return errors' do
-        expect(subject.failure.errors.messages.to_s).to eq error
       end
     end
   end

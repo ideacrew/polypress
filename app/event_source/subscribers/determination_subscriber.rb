@@ -11,17 +11,19 @@ module Subscribers
       logger.info "Polypress: invoked on_magi_medicaid_mitc_eligibilities with delivery_info: #{delivery_info} routing_key: #{routing_key}"
       payload = JSON.parse(response, :symbolize_names => true)
       event_key = routing_key.split('.').last
-      result = MagiMedicaid::PublishUqhpEligibleDocument.new.call({ application: payload, event_key: event_key })
-      if result.success?
+      results = MagiMedicaid::GenerateAndPublishDocuments.new.call({ application: payload, event_key: event_key })
+      if results.all?(&:success)
         ack(delivery_info.delivery_tag)
         logger.info "Polypress: polypress_eligibility_determination_subscriber_message; acked for #{routing_key}"
       else
-        errors = result.failure.errors.to_h
         nack(delivery_info.delivery_tag)
-        logger.error(
-          "Polypress: polypress_eligibility_determination_subscriber_error;
-          nacked due to:#{errors}; for routing_key: #{routing_key}, payload: #{payload}"
-        )
+        results.map(&:failure).compact.each do |result|
+          errors = result.failure.errors.to_h
+          logger.error(
+            "Polypress: polypress_eligibility_determination_subscriber_error;
+            nacked due to:#{errors}; for routing_key: #{routing_key}, payload: #{payload}"
+          )
+        end
       end
     rescue StandardError => e
       nack(delivery_info.delivery_tag)

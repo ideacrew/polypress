@@ -15,35 +15,15 @@ module MagiMedicaid
     # @param [String] :event_key
     # @return [Dry::Monads::Result] Parsed template as string
     def call(params)
-      values = yield validate(params)
-      application_entity = yield create_entity(values)
       template = yield find_template(params)
-      document = yield create_document({ id: template.id, entity: application_entity })
-      uploaded_document = yield upload_document(document, application_entity)
+      document = yield create_document({ id: template.id, entity: params[:application_entity] })
+      uploaded_document = yield upload_document(document, params[:application_entity])
       event = yield build_event(uploaded_document)
       result = yield publish_response(event)
       Success(result)
     end
 
     private
-
-    # validating incoming application hash
-    def validate(params)
-      return Failure("Missing event key for resource_id: #{params[:application][:family_reference][:hbx_id]}") unless params[:event_key]
-
-      result =
-        ::AcaEntities::MagiMedicaid::Contracts::ApplicationContract.new.call(
-          params[:application]
-        )
-      result.success? ? Success(result.to_h) : Failure(result)
-    end
-
-    def create_entity(params)
-      application_entity = ::AcaEntities::MagiMedicaid::Application.new(params)
-      Success(application_entity)
-    rescue StandardError => e
-      Failure(e)
-    end
 
     def find_template(params)
       template = Template.where(key: params[:event_key]).first
