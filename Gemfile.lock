@@ -60,6 +60,11 @@ PATH
       sass-rails
       simple_form
 
+PATH
+  remote: project_gems/liquid-5.0.1
+  specs:
+    liquid (5.0.2.alpha)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -331,7 +336,6 @@ GEM
     kaminari-core (1.2.1)
     kgio (2.11.4)
     kostya-sigar (2.0.8)
-    liquid (5.0.1)
     listen (3.5.1)
       rb-fsevent (~> 0.10, >= 0.10.3)
       rb-inotify (~> 0.9, >= 0.9.10)
@@ -623,7 +627,7 @@ DEPENDENCIES
   httparty
   jbuilder (~> 2.7)
   jquery-rails (~> 4.3)
-  liquid
+  liquid!
   listen (~> 3.3)
   mongoid (~> 7.2.1)
   mongoid-locker

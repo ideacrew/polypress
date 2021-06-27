@@ -48,7 +48,8 @@ gem 'config',                   '~> 2.0'
 gem 'pundit',                   '~> 2.1.0'
 gem 'devise'
 gem 'jquery-rails',             '~> 4.3'
-gem 'liquid'
+# Had to clone to make nested search work in where filter
+gem 'liquid', path: './project_gems/liquid-5.0.1'
 gem 'httparty'
 
 group :development, :test do
