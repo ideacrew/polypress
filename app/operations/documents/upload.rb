@@ -5,11 +5,11 @@ module Documents
   class Upload
     send(:include, Dry::Monads[:result, :do, :try])
 
-    def call(resource_id:, file:, user_id:, subjects: nil)
+    def call(resource_id:, title:, file:, user_id:, subjects: nil)
       _validate = yield validate(resource_id, file)
       header = yield construct_headers(resource_id, user_id)
       body = yield construct_body(resource_id, file, subjects)
-      response = yield upload_to_doc_storage(resource_id, header, body, file)
+      response = yield upload_to_doc_storage(resource_id, header, body, title)
       validated_response = yield validate_response(response.transform_keys(&:to_sym))
       Success(validated_response)
     end
@@ -86,14 +86,14 @@ module Documents
       File.basename(file)
     end
 
-    def upload_to_doc_storage(resource_id, header, body, file)
+    def upload_to_doc_storage(resource_id, header, body, title)
       return Success(test_env_response(resource_id)) unless Rails.env.production?
 
       response = HTTParty.post(fetch_url, :body => body, :headers => header)
       if (response["errors"] || response["error"]).present?
         Failure({ :message => ['Unable to upload document'] })
       else
-        payload = response.merge({ file_name: file_name(file), file_content_type: 'application/pdf' })
+        payload = response.merge({ file_name: title, file_content_type: 'application/pdf' })
         Success(payload)
       end
     end

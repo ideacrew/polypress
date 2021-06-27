@@ -40,7 +40,7 @@ class SerializePdf
   end
 
   def ivl_appeal_rights
-    join_pdfs [@document_path, Rails.root.join('lib/pdf_templates', 'ivl_appeal_rights.pdf')]
+    join_pdfs [@document_path, Rails.root.join('lib/pdf_templates', 'appeals_maine.pdf')]
   end
 
   def ivl_non_discrimination
