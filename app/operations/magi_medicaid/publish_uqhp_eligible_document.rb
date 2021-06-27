@@ -17,7 +17,7 @@ module MagiMedicaid
     def call(params)
       template = yield find_template(params)
       document = yield create_document({ id: template.id, entity: params[:application_entity] })
-      uploaded_document = yield upload_document(document, params[:application_entity])
+      uploaded_document = yield upload_document(document, params[:application_entity], template)
       event = yield build_event(uploaded_document)
       result = yield publish_response(event)
       Success(result)
@@ -44,8 +44,14 @@ module MagiMedicaid
       end
     end
 
-    def upload_document(document_payload, entity)
-      upload = Documents::Upload.new.call(resource_id: entity.family_reference.hbx_id, file: document_payload[:document], user_id: nil, subjects: nil)
+    def upload_document(document_payload, entity, template)
+      upload = Documents::Upload.new.call(
+        resource_id: entity.family_reference.hbx_id,
+        title: template.title,
+        file: document_payload[:document],
+        user_id: nil,
+        subjects: nil
+      )
 
       return Failure("Couldn't upload document for the given payload") unless upload.success?
 

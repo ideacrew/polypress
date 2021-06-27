@@ -28,7 +28,7 @@ RSpec.describe Documents::Upload do
   end
   let(:resource_id) { '10011' }
   let(:params) do
-    { resource_id: resource_id, file: tempfile, user_id: nil }
+    { resource_id: resource_id, title: 'some title', file: tempfile, user_id: nil }
   end
 
   describe 'given empty resource' do
