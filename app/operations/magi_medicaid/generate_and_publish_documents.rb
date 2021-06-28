@@ -42,12 +42,10 @@ module MagiMedicaid
           e_name =
             if ped.is_ia_eligible
               'determined_aptc_eligible'
-            elsif ped.is_medicaid_chip_eligible
-              'determined_medicaid_chip_eligible'
+            elsif ped.is_medicaid_chip_eligible || ped.is_magi_medicaid
+              'determined_magi_medicaid_eligible'
             elsif ped.is_totally_ineligible
               'determined_totally_ineligible'
-            elsif ped.is_magi_medicaid
-              'determined_magi_medicaid_eligible'
             elsif ped.is_uqhp_eligible
               'determined_uqhp_eligible'
             end
