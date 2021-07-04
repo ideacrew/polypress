@@ -60,6 +60,7 @@ class TemplatesController < ::ApplicationController
       {
         body: instant_preview_params[:body],
         subject: instant_preview_params[:subject],
+        cover_page: true,
         instant_preview: 'true'
       }
     )
@@ -72,7 +73,8 @@ class TemplatesController < ::ApplicationController
   end
 
   def preview
-    documents_operation = Documents::Create.new.call({ id: params[:id], preview: 'true' })
+    template = Template.find(params['id'])
+    documents_operation = Documents::Create.new.call({ key: template.key, preview: 'true', cover_page: true })
 
     if documents_operation.success?
       send_file documents_operation.success[:document].path,

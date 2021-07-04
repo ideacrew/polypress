@@ -19,43 +19,10 @@ class SerializePdf
 
   private
 
-  def attach_blank_page(template_path = nil)
-    path = template_path.nil? ? @document_path : template_path
-    blank_page = Rails.root.join('lib/pdf_templates', 'blank.pdf')
-    page_count = Prawn::Document.new(:template => path).page_count
-    join_pdfs([path, blank_page], path) if page_count.odd?
-  end
-
-  def join_pdfs(pdfs, path = nil)
-    pdf = File.exist?(pdfs[0]) ? CombinePDF.load(pdfs[0]) : CombinePDF.new
-    pdf << CombinePDF.load(pdfs[1])
-    path_to_save = path.nil? ? @document_path : path
-    pdf.save path_to_save
-  end
-
   def document_path(template)
     document_title = template.title.titleize.gsub(/\s+/, '_')
     @document_path = Rails.root.join("tmp", "#{document_title}.pdf")
     Success(@document_path)
-  end
-
-  def ivl_appeal_rights
-    join_pdfs [@document_path, Rails.root.join('lib/pdf_templates', 'appeals_maine.pdf')]
-  end
-
-  def ivl_non_discrimination
-    join_pdfs [@document_path, Rails.root.join('lib/pdf_templates', 'ivl_non_discrimination.pdf')]
-  end
-
-  def ivl_attach_envelope
-    join_pdfs [@document_path, Rails.root.join('lib/pdf_templates', 'taglines.pdf')]
-  end
-
-  def insert_attachments
-    attach_blank_page
-    ivl_appeal_rights
-    # ivl_non_discrimination
-    # ivl_attach_envelope
   end
 
   def pdf_options(entity)
@@ -110,7 +77,6 @@ class SerializePdf
     document = File.open(@document_path, 'wb') do |file|
       file << WickedPdf.new.pdf_from_string(params[:rendered_template], pdf_options)
     end
-    insert_attachments
 
     if document
       Success(

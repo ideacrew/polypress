@@ -11,7 +11,7 @@ class RenderLiquid
   # @param [Hash] :options
   # @return [Dry::Monads::Result] Parsed template as string
   def call(params)
-    parsed_cover_page = yield parse_cover_page
+    parsed_cover_page = yield parse_cover_page if params[:cover_page]
     parsed_body = yield parse_body(params)
     template = yield render(parsed_body, parsed_cover_page, params)
 
@@ -59,11 +59,17 @@ class RenderLiquid
 
   def render(body, cover_page, params)
     entity = entity_hash(params)
-    rendered_cover_page = cover_page.render(entity&.deep_stringify_keys, { strict_variables: true })
     rendered_body = body.render(entity&.deep_stringify_keys, { strict_variables: true })
-    template = ApplicationController.new.render_to_string(inline: rendered_cover_page + rendered_body, layout: 'layouts/ivl_pdf_layout')
+    document_body =
+      if cover_page
+        rendered_cover_page = cover_page.render(entity&.deep_stringify_keys, { strict_variables: true })
+        rendered_cover_page + rendered_body
+      else
+        rendered_body
+      end
+    template = ApplicationController.new.render_to_string(inline: document_body, layout: 'layouts/ivl_pdf_layout')
 
-    return Failure(body.errors + cover_page.errors) if body.errors.present? || cover_page.errors.present?
+    return Failure(body.errors) if body.errors.present?
 
     Success({ rendered_template: template, entity: entity })
   end

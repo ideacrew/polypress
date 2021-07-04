@@ -38,11 +38,11 @@ RSpec.describe MagiMedicaid::PublishUqhpEligibleDocument do
     end
 
     context "when event key is invalid" do
-      let(:invalid_subject) { described_class.new.call(application: application_hash, event_key: invalid_event_key) }
+      let(:invalid_subject) { described_class.new.call(application_entity: application_entity, event_key: invalid_event_key) }
 
       let(:invalid_event_key) { 'invalid_event_key' }
 
-      let(:error) { "No template found for the given #{invalid_event_key} & for resource #{application_hash[:family_reference][:hbx_id]}" }
+      let(:error) { "Unable to find template with #{invalid_event_key} for family_hbx_id: #{application_entity.family_reference.hbx_id}" }
 
       it 'should return failure' do
         expect(invalid_subject.failure?).to be_truthy
