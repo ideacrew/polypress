@@ -5,7 +5,7 @@ require 'dry/monads/do'
 
 module MagiMedicaid
   # Operation to create template
-  class PublishUqhpEligibleDocument
+  class PublishDocument
     send(:include, Dry::Monads[:result, :do])
     send(:include, Dry::Monads[:try])
     send(:include, ::EventSource::Command)

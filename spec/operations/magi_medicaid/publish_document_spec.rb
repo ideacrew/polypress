@@ -3,7 +3,7 @@
 require 'rails_helper'
 require "#{Rails.root}/spec/shared_examples/eligibilities/application_response"
 
-RSpec.describe MagiMedicaid::PublishUqhpEligibleDocument do
+RSpec.describe MagiMedicaid::PublishDocument do
   describe 'with valid arguments' do
     include_context 'application response from medicaid gateway'
 
