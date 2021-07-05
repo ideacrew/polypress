@@ -23,7 +23,7 @@ module Documents
       if template
         Success(template)
       else
-        Failure("Unable to find template with #{params[:key]} for family_hbx_id: #{params[:entity].family_reference.hbx_id}")
+        Failure("Unable to find template with #{params[:key]} for family_hbx_id: #{params[:entity]&.family_reference&.hbx_id}")
       end
     end
 

@@ -74,7 +74,7 @@ class TemplatesController < ::ApplicationController
 
   def preview
     template = Template.find(params['id'])
-    documents_operation = Documents::Create.new.call({ key: template.key, preview: 'true', cover_page: true })
+    documents_operation = Documents::CreateWithInsert.new.call({ event_key: template.key, preview: 'true', cover_page: true })
 
     if documents_operation.success?
       send_file documents_operation.success[:document].path,
