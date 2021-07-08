@@ -60,6 +60,7 @@ class TemplatesController < ::ApplicationController
       {
         body: instant_preview_params[:body],
         subject: instant_preview_params[:subject],
+        key: instant_preview_params[:key],
         cover_page: true,
         instant_preview: 'true'
       }
@@ -179,7 +180,7 @@ class TemplatesController < ::ApplicationController
   private
 
   def instant_preview_params
-    params.permit(:body, :subject)
+    params.permit(:body, :subject, :key)
   end
 
   def file_content_type
@@ -200,7 +201,9 @@ class TemplatesController < ::ApplicationController
   def entities_contracts_mapping
     {
       "AcaEntities::People::ConsumerRole" => 'AcaEntities::Contracts::People::ConsumerRoleContract',
+      "::AcaEntities::Families::Family" => "::AcaEntities::Contracts::Families::FamilyContract",
       "::AcaEntities::MagiMedicaid::Application" => "::AcaEntities::MagiMedicaid::Contracts::ApplicationContract"
+
     }
   end
 

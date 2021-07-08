@@ -4,13 +4,13 @@ module Subscribers
   # Subscriber will receive response payload from enroll and creates ENR document
   class EnrollmentSubmittedSubscriber
     include EventSource::Logging
-    include ::EventSource::Subscriber[amqp: 'enroll.individual.enrollment']
+    include ::EventSource::Subscriber[amqp: 'enroll.individual.enrollments']
 
     subscribe(:on_enroll_individual_enrollment) do |delivery_info, _metadata, response|
       logger.info "Polypress invoked on_enroll_individual_enrollment with delivery_info: #{delivery_info}, response: #{response}"
 
       payload = JSON.parse(response, :symbolize_names => true)
-      result = MagiMedicaid::PublishDocument.new.call({ application: payload, event_key: 'enrollment_submitted' })
+      result = MagiMedicaid::PublishDocument.new.call({ family_hash: payload, event_key: 'enrollment_submitted' })
 
       if result.success?
         ack(delivery_info.delivery_tag)

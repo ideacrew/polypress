@@ -31,6 +31,7 @@ module Documents
       RenderLiquid.new.call(
         body: template.body,
         subject: template.subject,
+        key: params[:key],
         cover_page: params[:cover_page],
         entity: params[:entity],
         preview: params[:preview]

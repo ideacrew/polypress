@@ -2,7 +2,7 @@
 
 module MagiMedicaid
   # This operation determines eligibilities and publishes documents accordingly
-  class GenerateAndPublishDocuments
+  class GenerateAndPublishEligibilityDocuments
     send(:include, Dry::Monads[:result, :do])
     send(:include, Dry::Monads[:try])
 

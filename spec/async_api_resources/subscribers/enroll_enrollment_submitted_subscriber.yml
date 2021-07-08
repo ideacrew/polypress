@@ -28,12 +28,12 @@ servers:
     protocolVersion: "0.9.2"
     description: RabbitMQ Test Server
 channels:
-  on_polypress.enroll.individual.enrollment:
+  on_polypress.enroll.individual.enrollments:
     bindings:
       amqp:
         is: queue
         queue:
-          name: on_polypress.enroll.individual.enrollment
+          name: on_polypress.enroll.individual.enrollments
           durable: true
           exclusive: false
           auto_delete: false
@@ -43,7 +43,7 @@ channels:
         amqp:
           ack: true
           exclusive: false
-          routing_key: enroll.individual.enrollment
+          routing_key: enroll.individual.enrollments
           bindingVersion: "0.2.0"
-      operationId: on_polypress.enroll.individual.enrollment
+      operationId: on_polypress.enroll.individual.enrollments
       description: Events - Individual Market Enrollment related events

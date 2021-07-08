@@ -2,6 +2,7 @@
 
 # RenderLiquid
 class RenderLiquid
+  send(:include, FinancialApplicationHelper)
   send(:include, FamilyHelper)
   send(:include, Dry::Monads[:result, :do])
 
@@ -36,10 +37,20 @@ class RenderLiquid
     Failure(e)
   end
 
-  def entity_hash(params)
-    entity_hash = params[:instant_preview] || params[:preview] ? application_hash : params[:entity].to_h
-    oe_end_on_year = entity_hash[:oe_start_on].year
+  def fetch_entity_hash(params)
+    if params[:instant_preview] || params[:preview]
+      return family_hash if params[:key].to_s == 'enrollment_submitted'
+      application_hash
+    else
+      params[:entity].to_h
+    end
+  end
+
+  def construct_settings(params)
+    entity_hash = fetch_entity_hash(params)
+    # oe_end_on_year = entity_hash[:oe_start_on].year
     settings_hash = {
+      :key => params[:key],
       :notice_number => params[:subject],
       :short_name => Settings.site.short_name,
       :day_45_from_now => Date.today + 45.days,
@@ -52,13 +63,13 @@ class RenderLiquid
       :marketplace_phone => Settings.contact_center.short_number,
       :marketplace_url => Settings.site.website_url,
       :marketplace_shopping_name => Settings.notices.individual_market.shopping_name,
-      :oe_end_on => Date.new(oe_end_on_year, 12, 15)
+      :oe_end_on => Date.new(2021, 12, 15)
     }
     entity_hash.merge(settings_hash)
   end
 
   def render(body, cover_page, params)
-    entity = entity_hash(params)
+    entity = construct_settings(params)
     rendered_body = body.render(entity&.deep_stringify_keys, { strict_variables: true })
     document_body =
       if cover_page

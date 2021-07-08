@@ -50,7 +50,8 @@ class SerializePdf
   end
 
   def header(entity)
-    hbx_id = entity[:applicants].detect { |a| a[:is_primary_applicant] == true }[:person_hbx_id]
+    members = entity[:applicants] || entity[:family_members]
+    hbx_id = members.detect { |a| a[:is_primary_applicant] == true }[:person_hbx_id]
     {
       content: ApplicationController.new.render_to_string(
         {
