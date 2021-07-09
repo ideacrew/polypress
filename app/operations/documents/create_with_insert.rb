@@ -25,7 +25,7 @@ module Documents
 
     # Creates main body of the document
     def create_main_document(params)
-      result = document({ key: params[:event_key], entity: params[:application_entity], cover_page: true, preview: params[:preview] })
+      result = document({ key: params[:event_key], entity: params[:entity], cover_page: true, preview: params[:preview] })
       if result.is_a?(Hash)
         @main_document_path = result[:document].path
         Success(result)
@@ -72,15 +72,15 @@ module Documents
     end
 
     def append_verifications_insert(params)
-      return Success(true) unless params[:event_key].to_s == 'enrollment_submitted'
+      return Success(true) unless params[:event_key].to_s == 'enrollment_submitted' && (params[:entity]&.documents_needed || params[:preview])
 
       attach_blank_page
-      result = document({ key: :outstanding_verifications_insert, entity: params[:application_entity], cover_page: false, preview: params[:preview] })
+      result = document({ key: :outstanding_verifications_insert, entity: params[:entity], cover_page: false, preview: params[:preview] })
       if result.is_a?(Hash)
         insert_path = result[:document].path
         Success(join_pdfs([@main_document_path, insert_path]))
       else
-        Failure("Unable to append verifications insert for family_hbx_id: #{params[:application_entity].family_reference.hbx_id}")
+        Failure("Unable to append verifications insert for event: #{params[:event_key]}")
       end
     end
 

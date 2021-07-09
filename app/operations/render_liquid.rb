@@ -39,7 +39,7 @@ class RenderLiquid
 
   def fetch_entity_hash(params)
     if params[:instant_preview] || params[:preview]
-      return family_hash if params[:key].to_s == 'enrollment_submitted'
+      return family_hash if ['enrollment_submitted', 'outstanding_verifications_insert'].include?(params[:key].to_s)
       application_hash
     else
       params[:entity].to_h
@@ -61,7 +61,11 @@ class RenderLiquid
       :medicaid_chip_short_name => Settings.notices.individual_market.medicaid.chip_short_name,
       :medicaid_program_name => Settings.notices.individual_market.medicaid.program_name,
       :marketplace_phone => Settings.contact_center.short_number,
+      :contact_center_state_and_city => Settings.contact_center.state_and_city,
+      :contact_center_zip_code => Settings.contact_center.zip_code,
+      :contact_center_po_box => Settings.contact_center.po_box,
       :marketplace_url => Settings.site.website_url,
+      :home_url => Settings.site.home_url,
       :marketplace_shopping_name => Settings.notices.individual_market.shopping_name,
       :oe_end_on => Date.new(2021, 12, 15)
     }

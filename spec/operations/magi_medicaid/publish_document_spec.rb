@@ -28,7 +28,7 @@ RSpec.describe MagiMedicaid::PublishDocument do
     let(:application_entity) { ::AcaEntities::MagiMedicaid::Application.new(application_hash) }
 
     subject do
-      described_class.new.call(application_entity: application_entity, event_key: event_key)
+      described_class.new.call(entity: application_entity, event_key: event_key)
     end
 
     context "when payload has all the required params" do
@@ -38,11 +38,11 @@ RSpec.describe MagiMedicaid::PublishDocument do
     end
 
     context "when event key is invalid" do
-      let(:invalid_subject) { described_class.new.call(application_entity: application_entity, event_key: invalid_event_key) }
+      let(:invalid_subject) { described_class.new.call(entity: application_entity, event_key: invalid_event_key) }
 
       let(:invalid_event_key) { 'invalid_event_key' }
 
-      let(:error) { "Unable to find template with #{invalid_event_key} for family_hbx_id: #{application_entity.family_reference.hbx_id}" }
+      let(:error) { "Unable to find template with #{invalid_event_key}" }
 
       it 'should return failure' do
         expect(invalid_subject.failure?).to be_truthy

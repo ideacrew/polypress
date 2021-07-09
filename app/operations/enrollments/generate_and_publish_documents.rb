@@ -12,11 +12,11 @@ module Enrollments
     def call(params)
       values = yield validate(params)
       family_entity = yield init_family_entity(values)
-      publish_documents(family_entity)
+      publish_documents(family_entity, params[:event_key])
     end
 
     def validate(params)
-      return Failure("Missing event key for given payload: #{params}") unless params[:event_key]
+      return Failure("Missing event key for given payload: #{params[:family_hash][:hbx_id]}") unless params[:event_key]
 
       result = AcaEntities::Contracts::Families::FamilyContract.new.call(params[:family_hash])
       result.success? ? Success(result.to_h) : Failure(result)
@@ -29,8 +29,8 @@ module Enrollments
       Failure(e)
     end
 
-    def publish_documents(family_entity)
-      result = MagiMedicaid::PublishDocument.new.call(family_entity: family_entity, event_key: event_key)
+    def publish_documents(family_entity, event_key)
+      result = MagiMedicaid::PublishDocument.new.call(entity: family_entity, event_key: event_key)
       if result.success?
         Success(result.success)
       else
