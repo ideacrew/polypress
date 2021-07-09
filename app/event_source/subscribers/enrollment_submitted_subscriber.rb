@@ -6,8 +6,8 @@ module Subscribers
     include EventSource::Logging
     include ::EventSource::Subscriber[amqp: 'enroll.individual.enrollments']
 
-    subscribe(:on_enroll_individual_enrollment) do |delivery_info, _metadata, response|
-      logger.info "Polypress invoked on_enroll_individual_enrollment with delivery_info: #{delivery_info}, response: #{response}"
+    subscribe(:on_enroll_individual_enrollments) do |delivery_info, _metadata, response|
+      logger.info "Polypress invoked on_enroll_individual_enrollments with delivery_info: #{delivery_info}, response: #{response}"
 
       payload = JSON.parse(response, :symbolize_names => true)
       result = Enrollments::GenerateAndPublishDocuments.new.call({ family_hash: payload, event_key: 'enrollment_submitted' })
