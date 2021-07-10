@@ -13,11 +13,11 @@ module Subscribers
       result = Enrollments::GenerateAndPublishDocuments.new.call({ family_hash: payload, event_key: 'enrollment_submitted' })
 
       if result.success?
-        ack(delivery_info.delivery_tag)
         logger.info "Polypress polypress_individual_enrollment_info Result: #{result.success} for payload: #{payload}"
+        ack(delivery_info.delivery_tag)
       else
-        nack(delivery_info.delivery_tag)
         logger.error "Polypress polypress_individual_enrollment_error: #{result.failure} for payload: #{payload}"
+        nack(delivery_info.delivery_tag)
       end
     rescue StandardError => e
       nack(delivery_info.delivery_tag)
