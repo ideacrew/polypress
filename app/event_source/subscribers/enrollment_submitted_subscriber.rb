@@ -17,7 +17,7 @@ module Subscribers
         logger.info "Polypress polypress_individual_enrollment_info Result: #{result.success} for payload: #{payload}"
       else
         nack(delivery_info.delivery_tag)
-        logger.error "Polypress polypress_individual_enrollment_error: #{result.failure.message} for payload: #{payload}"
+        logger.error "Polypress polypress_individual_enrollment_error: #{result.failure} for payload: #{payload}"
       end
     rescue StandardError => e
       nack(delivery_info.delivery_tag)
