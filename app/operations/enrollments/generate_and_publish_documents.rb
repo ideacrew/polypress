@@ -19,7 +19,7 @@ module Enrollments
       return Failure("Missing event key for given payload: #{params[:family_hash][:hbx_id]}") unless params[:event_key]
 
       result = AcaEntities::Contracts::Families::FamilyContract.new.call(params[:family_hash])
-      result.success? ? Success(result.to_h) : Failure(result)
+      result.success? ? Success(result.to_h) : Failure(result.errors.to_h)
     end
 
     def init_family_entity(params)
