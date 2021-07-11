@@ -46,10 +46,28 @@ class RenderLiquid
     end
   end
 
+  def recipient_name_and_address(params)
+    mailing_address = nil
+    recipient_name =
+      if params[:applicants]
+        applicant = params[:applicants].detect { |app| app[:is_primary_applicant] } || params[:applicants][0]
+        mailing_address = applicant[:addresses][0]
+        applicant[:name]
+      else
+        applicant = params[:family_members].detect { |app| app[:is_primary_applicant] } || params[:family_members][0]
+        mailing_address = applicant[:person][:addresses][0]
+        applicant[:person][:person_name]
+      end
+    ["#{recipient_name[:first_name].titleize} #{recipient_name[:last_name].titleize}", mailing_address]
+  end
+
+  # rubocop:disable Metrics/AbcSize
   def construct_settings(params)
     entity_hash = fetch_entity_hash(params)
     # oe_end_on_year = entity_hash[:oe_start_on].year
     settings_hash = {
+      :mailing_address => recipient_name_and_address(entity_hash)[1],
+      :recipient_full_name => recipient_name_and_address(entity_hash)[0],
       :key => params[:key],
       :notice_number => params[:subject],
       :short_name => Settings.site.short_name,
@@ -71,6 +89,7 @@ class RenderLiquid
     }
     entity_hash.merge(settings_hash)
   end
+  # rubocop:enable Metrics/AbcSize
 
   def render(body, cover_page, params)
     entity = construct_settings(params)

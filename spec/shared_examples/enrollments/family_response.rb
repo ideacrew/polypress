@@ -35,6 +35,7 @@ RSpec.shared_context 'family response from enroll', :shared_context => :metadata
         :person_health => { :is_tobacco_user => "unknown" },
         :is_active => true,
         :is_disabled => false,
+        :addresses => [{ :kind => 'mailing', :address_1 => 'H st', :state => "ME", :city => 'Augusta', :zip => '67662' }],
         :verification_types => verification_types
       }
     }
@@ -55,6 +56,7 @@ RSpec.shared_context 'family response from enroll', :shared_context => :metadata
         :person_health => { :is_tobacco_user => "unknown" },
         :is_active => true,
         :is_disabled => false,
+        :addresses => [{ :kind => 'mailing', :address_1 => 'H st', :state => "ME", :city => 'Augusta', :zip => '67662' }],
         :verification_types => verification_types
       }
     }
