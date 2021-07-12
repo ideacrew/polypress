@@ -11,7 +11,7 @@ module Subscribers
       logger.info "Polypress: invoked on_magi_medicaid_mitc_eligibilities with delivery_info: #{delivery_info} routing_key: #{routing_key}"
       payload = JSON.parse(response, :symbolize_names => true)
       event_key = routing_key.split('.').last
-      results = MagiMedicaid::GenerateAndPublishDocuments.new.call({ application: payload, event_key: event_key })
+      results = MagiMedicaid::GenerateAndPublishEligibilityDocuments.new.call({ application: payload, event_key: event_key })
       if results.all?(&:success)
         ack(delivery_info.delivery_tag)
         logger.info "Polypress: polypress_eligibility_determination_subscriber_message; acked for #{routing_key}"

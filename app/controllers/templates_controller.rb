@@ -60,6 +60,8 @@ class TemplatesController < ::ApplicationController
       {
         body: instant_preview_params[:body],
         subject: instant_preview_params[:subject],
+        key: instant_preview_params[:key],
+        cover_page: true,
         instant_preview: 'true'
       }
     )
@@ -72,7 +74,8 @@ class TemplatesController < ::ApplicationController
   end
 
   def preview
-    documents_operation = Documents::Create.new.call({ id: params[:id], preview: 'true' })
+    template = Template.find(params['id'])
+    documents_operation = Documents::CreateWithInsert.new.call({ event_key: template.key, preview: 'true', cover_page: true })
 
     if documents_operation.success?
       send_file documents_operation.success[:document].path,
@@ -177,7 +180,7 @@ class TemplatesController < ::ApplicationController
   private
 
   def instant_preview_params
-    params.permit(:body, :subject)
+    params.permit(:body, :subject, :key)
   end
 
   def file_content_type
@@ -198,7 +201,9 @@ class TemplatesController < ::ApplicationController
   def entities_contracts_mapping
     {
       "AcaEntities::People::ConsumerRole" => 'AcaEntities::Contracts::People::ConsumerRoleContract',
+      "::AcaEntities::Families::Family" => "::AcaEntities::Contracts::Families::FamilyContract",
       "::AcaEntities::MagiMedicaid::Application" => "::AcaEntities::MagiMedicaid::Contracts::ApplicationContract"
+
     }
   end
 

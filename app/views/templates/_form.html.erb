@@ -142,7 +142,7 @@
       type:"POST",
       url: "templates/instant_preview",
       // dataType: 'json',
-      data: { body: CKEDITOR.instances.template_body.getData(), subject: $('#template_subject').val() },
+      data: { body: CKEDITOR.instances.template_body.getData(), subject: $('#template_subject').val(), key: $('#template_key').val()},
       success: function(result){
       }
     })

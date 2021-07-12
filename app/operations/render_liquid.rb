@@ -2,6 +2,7 @@
 
 # RenderLiquid
 class RenderLiquid
+  send(:include, FinancialApplicationHelper)
   send(:include, FamilyHelper)
   send(:include, Dry::Monads[:result, :do])
 
@@ -11,7 +12,7 @@ class RenderLiquid
   # @param [Hash] :options
   # @return [Dry::Monads::Result] Parsed template as string
   def call(params)
-    parsed_cover_page = yield parse_cover_page
+    parsed_cover_page = yield parse_cover_page if params[:cover_page]
     parsed_body = yield parse_body(params)
     template = yield render(parsed_body, parsed_cover_page, params)
 
@@ -36,10 +37,38 @@ class RenderLiquid
     Failure(e)
   end
 
-  def entity_hash(params)
-    entity_hash = params[:instant_preview] || params[:preview] ? application_hash : params[:entity].to_h
-    oe_end_on_year = entity_hash[:oe_start_on].year
+  def fetch_entity_hash(params)
+    if params[:instant_preview] || params[:preview]
+      return family_hash if ['enrollment_submitted', 'outstanding_verifications_insert'].include?(params[:key].to_s)
+      application_hash
+    else
+      params[:entity].to_h
+    end
+  end
+
+  def recipient_name_and_address(params)
+    mailing_address = nil
+    recipient_name =
+      if params[:applicants]
+        applicant = params[:applicants].detect { |app| app[:is_primary_applicant] } || params[:applicants][0]
+        mailing_address = applicant[:addresses][0]
+        applicant[:name]
+      else
+        applicant = params[:family_members].detect { |app| app[:is_primary_applicant] } || params[:family_members][0]
+        mailing_address = applicant[:person][:addresses][0]
+        applicant[:person][:person_name]
+      end
+    ["#{recipient_name[:first_name].titleize} #{recipient_name[:last_name].titleize}", mailing_address]
+  end
+
+  # rubocop:disable Metrics/AbcSize
+  def construct_settings(params)
+    entity_hash = fetch_entity_hash(params)
+    # oe_end_on_year = entity_hash[:oe_start_on].year
     settings_hash = {
+      :mailing_address => recipient_name_and_address(entity_hash)[1],
+      :recipient_full_name => recipient_name_and_address(entity_hash)[0],
+      :key => params[:key],
       :notice_number => params[:subject],
       :short_name => Settings.site.short_name,
       :day_45_from_now => Date.today + 45.days,
@@ -50,20 +79,31 @@ class RenderLiquid
       :medicaid_chip_short_name => Settings.notices.individual_market.medicaid.chip_short_name,
       :medicaid_program_name => Settings.notices.individual_market.medicaid.program_name,
       :marketplace_phone => Settings.contact_center.short_number,
+      :contact_center_state_and_city => Settings.contact_center.state_and_city,
+      :contact_center_zip_code => Settings.contact_center.zip_code,
+      :contact_center_po_box => Settings.contact_center.po_box,
       :marketplace_url => Settings.site.website_url,
+      :home_url => Settings.site.home_url,
       :marketplace_shopping_name => Settings.notices.individual_market.shopping_name,
-      :oe_end_on => Date.new(oe_end_on_year, 12, 15)
+      :oe_end_on => Date.new(2021, 12, 15)
     }
     entity_hash.merge(settings_hash)
   end
+  # rubocop:enable Metrics/AbcSize
 
   def render(body, cover_page, params)
-    entity = entity_hash(params)
-    rendered_cover_page = cover_page.render(entity&.deep_stringify_keys, { strict_variables: true })
+    entity = construct_settings(params)
     rendered_body = body.render(entity&.deep_stringify_keys, { strict_variables: true })
-    template = ApplicationController.new.render_to_string(inline: rendered_cover_page + rendered_body, layout: 'layouts/ivl_pdf_layout')
+    document_body =
+      if cover_page
+        rendered_cover_page = cover_page.render(entity&.deep_stringify_keys, { strict_variables: true })
+        rendered_cover_page + rendered_body
+      else
+        rendered_body
+      end
+    template = ApplicationController.new.render_to_string(inline: document_body, layout: 'layouts/ivl_pdf_layout')
 
-    return Failure(body.errors + cover_page.errors) if body.errors.present? || cover_page.errors.present?
+    return Failure(body.errors) if body.errors.present?
 
     Success({ rendered_template: template, entity: entity })
   end

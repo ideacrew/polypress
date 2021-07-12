@@ -2,7 +2,7 @@
 
 module MagiMedicaid
   # This operation determines eligibilities and publishes documents accordingly
-  class GenerateAndPublishDocuments
+  class GenerateAndPublishEligibilityDocuments
     send(:include, Dry::Monads[:result, :do])
     send(:include, Dry::Monads[:try])
 
@@ -57,7 +57,7 @@ module MagiMedicaid
 
     def publish_documents(application_entity, event_keys)
       event_keys.collect do |event_key|
-        result = MagiMedicaid::PublishUqhpEligibleDocument.new.call(application_entity: application_entity, event_key: event_key)
+        result = MagiMedicaid::PublishDocument.new.call(entity: application_entity, event_key: event_key)
         if result.success?
           Success(result.success)
         else
