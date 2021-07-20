@@ -6,9 +6,9 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 ruby '2.7.2'
 
 gem 'aca_entities',  git: 'https://github.com/ideacrew/aca_entities.git', branch: 'release_0.3.0'
-gem 'event_source',  git: 'https://github.com/ideacrew/event_source.git', branch: 'trunk'
+gem 'event_source',  git: 'https://github.com/ideacrew/event_source.git', branch: 'release_0.5.3'
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '~> 6.0'
+gem 'rails', '~> 6.1.3'
 # Use Puma as the app server
 gem 'puma', '~> 5.0'
 # Use SCSS for stylesheets
@@ -24,16 +24,14 @@ gem 'jbuilder', '~> 2.7'
 # Use Active Model has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 
-gem 'database_cleaner',       '~> 1.7'
-
 # Reduces boot times through caching; required in config/boot.rb
 gem 'bootsnap', '>= 1.4.4', require: false
 
 gem 'dry-matcher',          '~> 0.8'
 gem 'dry-monads',           '~> 1.3'
-gem 'dry-struct',           '~> 1.3'
-gem 'dry-transaction'
-gem 'dry-types',            '~> 1.4'
+gem 'dry-struct',           '~> 1.4'
+gem 'dry-transaction',      '~> 0.13'
+gem 'dry-types',            '~> 1.5'
 gem 'dry-validation',       '~> 1.6'
 gem 'mongoid',             '~> 7.2.1'
 gem 'mongoid-locker'
@@ -50,20 +48,21 @@ gem 'devise'
 gem 'jquery-rails',             '~> 4.3'
 # Had to clone to make nested search work in where filter
 gem 'liquid', path: './project_gems/liquid-5.0.1'
-gem 'httparty'
+gem 'httparty',  '~> 0.16'
 
 group :development, :test do
-  gem "capistrano", "~> 3.10", require: false
-  gem "capistrano-rails", "~> 1.6", require: false
-  gem "capistrano-bundler", "~> 2.0", require: false
+  # gem "capistrano", "~> 3.10", require: false
+  # gem "capistrano-rails", "~> 1.6", require: false
+  # gem "capistrano-bundler", "~> 2.0", require: false
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
   gem 'factory_bot_rails'
-  gem 'rspec-rails',            '~> 4.0'
+  gem 'rspec-rails',            '~> 5.0'
   gem 'shoulda-matchers',       '~> 3'
   gem 'yard'
+  gem 'pry-byebug'
 end
-gem 'pry-byebug'
+
 
 group :development do
   # Access an interactive console on exception pages or by calling 'console' anywhere in the code.
@@ -74,8 +73,12 @@ group :development do
   gem 'listen', '~> 3.3'
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem 'spring'
-  gem 'rubocop', '1.10.0'
+  gem 'rubocop', '1.13.0'
   gem 'rubocop-git'
+end
+
+group :test do
+  gem 'database_cleaner',       '~> 1.7'
 end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
