@@ -89,6 +89,7 @@ RSpec.shared_context 'family response from enroll', :shared_context => :metadata
         :is_receiving_assistance => true,
         :effective_on => Date.today,
         :aasm_state => "coverage_selected",
+        :applied_aptc_amount => { cents: BigDecimal(44500), currency_iso: 'USD' },
         :market_place_kind => "individual",
         :total_premium => 445.09,
         :enrollment_period_kind => "open_enrollment",

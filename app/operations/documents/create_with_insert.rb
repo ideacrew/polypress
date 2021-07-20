@@ -72,7 +72,8 @@ module Documents
     end
 
     def append_verifications_insert(params)
-      return Success(true) unless params[:event_key].to_s == 'enrollment_submitted' && (params[:entity]&.documents_needed || params[:preview])
+      return Success(true) unless Template.where(key: 'outstanding_verifications_insert').first.present?
+      return Success(true) unless params[:event_key].to_s == 'enrollment_submitted' && (params[:entity]&.documents_needed || params[:preview].present?)
 
       attach_blank_page
       result = document({ key: :outstanding_verifications_insert, entity: params[:entity], cover_page: false, preview: params[:preview] })
