@@ -28,9 +28,9 @@ EventSource.configure do |config|
   end
 
   async_api_resources =
-      ::AcaEntities.async_api_config_find_by_service_name(
-        { protocol: :amqp, service_name: nil }
-      ).success
+    ::AcaEntities.async_api_config_find_by_service_name(
+      { protocol: :amqp, service_name: nil }
+    ).success
 
   config.async_api_schemas =
     async_api_resources.collect do |resource|
