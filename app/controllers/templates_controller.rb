@@ -22,6 +22,7 @@ class TemplatesController < ::ApplicationController
 
   def new
     @template = Template.new
+    @inserts = Template.where(doc_type: :insert)
     respond_to do |format|
       format.html
       format.js
@@ -30,6 +31,7 @@ class TemplatesController < ::ApplicationController
 
   def edit
     @template = Template.find(params[:id])
+    @inserts = Template.where(doc_type: :insert)
     render :layout => 'application'
   end
 
@@ -50,7 +52,7 @@ class TemplatesController < ::ApplicationController
 
   def update
     template = Template.find(params['id'])
-    template.update_attributes(template_params)
+    template.update_attributes(template_params.merge({ inserts: template_params[:inserts] || [] }))
     flash[:notice] = 'Notice content updated successfully'
     redirect_to templates_path
   end
@@ -195,7 +197,7 @@ class TemplatesController < ::ApplicationController
   end
 
   def template_params
-    params.require(:template).permit(:content_type, :category, :subject, :title, :description, :key, :recipient, :body)
+    params.require(:template).permit(:content_type, :category, :doc_type, :subject, :title, :description, :key, :recipient, :body, :inserts => [])
   end
 
   def entities_contracts_mapping

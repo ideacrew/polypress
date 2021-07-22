@@ -20,6 +20,16 @@ module Entities
       # @return [String]
       attribute :description,       Polypress::Types::String.meta(omittable: false)
 
+      # @!attribute [r] inserts
+      # Determines Inserts for the document. Ex: Appeals, Discrimination Page
+      # @return [String]
+      attribute :inserts,       Polypress::Types::Array.optional.meta(omittable: true)
+
+      # @!attribute [r] doc_type
+      # Determines the type of documents. Ex: Notice, Insert
+      # @return [String]
+      attribute :doc_type,       Polypress::Types::Symbol.meta(omittable: false)
+
       # @!attribute [r] content_type
       # The content type to use when encoding/decoding a template's payload. The value must be a
       # specific media type confirms to (e.g. application/json).

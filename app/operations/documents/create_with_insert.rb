@@ -15,20 +15,36 @@ module Documents
     # @param [String] :event_key
     # @return [Dry::Monads::Result] Parsed template as string
     def call(params)
-      documents_hash = yield create_main_document(params)
-      _verifications_insert = yield append_verifications_insert(params)
-      _other_inserts = yield append_other_inserts
+      template = yield fetch_template(params)
+      documents_hash = yield create_main_document(params, params[:event_key])
+      _inserts = yield append_inserts(params, template)
+      _other_pdfs = yield append_pdfs
       Success(documents_hash)
     end
 
     private
 
+    def fetch_template(params)
+      template = Template.where(key: params[:event_key]).first
+
+      if template
+        Success(template)
+      else
+        Failure("Unable to find template with #{params[:event_key]}")
+      end
+    end
+
     # Creates main body of the document
-    def create_main_document(params)
-      result = document({ key: params[:event_key], entity: params[:entity], cover_page: true, preview: params[:preview] })
+    def create_main_document(params, key, cover_page = true, insert = false)
+      result = document({ key: key, entity: params[:entity], cover_page: cover_page, preview: params[:preview] })
       if result.is_a?(Hash)
-        @main_document_path = result[:document].path
-        Success(result)
+        if insert
+          insert_path = result[:document].path
+          Success(join_pdfs([@main_document_path, insert_path]))
+        else
+          @main_document_path = result[:document].path
+          Success(result)
+        end
       else
         Failure(result)
       end
@@ -71,24 +87,30 @@ module Documents
       join_pdfs [@main_document_path, Rails.root.join('lib/pdf_templates', 'taglines.pdf')]
     end
 
-    def append_verifications_insert(params)
-      return Success(true) unless Template.where(key: 'outstanding_verifications_insert').first.present?
-      unless params[:event_key].to_s == 'enrollment_submitted' && (params[:entity]&.documents_needed || params[:preview].present?)
-        return Success(true)
-      end
-
-      attach_blank_page
-      result = document({ key: :outstanding_verifications_insert, entity: params[:entity], cover_page: false, preview: params[:preview] })
-      if result.is_a?(Hash)
-        insert_path = result[:document].path
-        Success(join_pdfs([@main_document_path, insert_path]))
-      else
-        Failure("Unable to append verifications insert for event: #{params[:event_key]}")
-      end
+    def verifications_insert_needed?(params, insert)
+      (params[:entity]&.documents_needed || params[:preview].present?) && insert_present?(insert)
     end
 
-    def append_other_inserts
-      attach_blank_page
+    def insert_present?(insert)
+      Template.where(key: insert).present?
+    end
+
+    def append_inserts(params, template)
+      output = template.inserts.sort.collect do |insert|
+        unless verifications_insert_needed?(params, insert) || insert_present?(insert)
+          Success(true)
+          next
+        end
+        attach_blank_page
+        create_main_document(params, insert, false, true)
+      end
+      failures = output.select { |o| o.failure? }
+      return Failure(failures) if failures.present?
+
+      Success(true)
+    end
+
+    def append_pdfs
       attach_blank_page
       ivl_appeal_rights
       # ivl_non_discrimination

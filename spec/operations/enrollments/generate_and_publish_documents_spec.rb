@@ -29,7 +29,7 @@ RSpec.describe Enrollments::GenerateAndPublishDocuments do
     let!(:docs_insert) do
       FactoryBot.create(
         :template,
-        key: 'outstanding_verifications_insert',
+        key: '1_outstanding_verifications_insert',
         body: body,
         title: title,
         subject: template_subject,

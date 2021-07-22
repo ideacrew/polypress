@@ -39,7 +39,7 @@ class RenderLiquid
 
   def fetch_entity_hash(params)
     if params[:instant_preview] || params[:preview]
-      return family_hash if ['enrollment_submitted', 'outstanding_verifications_insert'].include?(params[:key].to_s)
+      return family_hash if ['enrollment_submitted', '1_outstanding_verifications_insert'].include?(params[:key].to_s)
       application_hash
     else
       params[:entity].to_h
