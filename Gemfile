@@ -7,6 +7,8 @@ ruby '2.7.2'
 
 gem 'aca_entities',  git: 'https://github.com/ideacrew/aca_entities.git', branch: 'release_0.3.0'
 gem 'event_source',  git: 'https://github.com/ideacrew/event_source.git', branch: 'release_0.5.3'
+gem 'resource_registry',  git:  'https://github.com/ideacrew/resource_registry.git', branch: 'trunk'
+# gem 'resource_registry',  path: '../resource_registry'
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '~> 6.1.3'
 # Use Puma as the app server

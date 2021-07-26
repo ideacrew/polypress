@@ -2,6 +2,7 @@
 
 # RenderLiquid
 class RenderLiquid
+  send(:include, Config::SiteHelper)
   send(:include, FinancialApplicationHelper)
   send(:include, FamilyHelper)
   send(:include, Dry::Monads[:result, :do])
@@ -70,21 +71,21 @@ class RenderLiquid
       :recipient_full_name => recipient_name_and_address(entity_hash)[0],
       :key => params[:key],
       :notice_number => params[:subject],
-      :short_name => Settings.site.short_name,
+      :short_name => site_short_name,
       :day_45_from_now => Date.today + 45.days,
       :day_95_from_now => Date.today + 95.days,
-      :medicaid_agency_name => Settings.notices.individual_market.medicaid.agency_name,
-      :medicaid_agency_phone => Settings.notices.individual_market.medicaid.agency_phone,
-      :medicaid_chip_long_name => Settings.notices.individual_market.medicaid.chip_long_name,
-      :medicaid_chip_short_name => Settings.notices.individual_market.medicaid.chip_short_name,
-      :medicaid_program_name => Settings.notices.individual_market.medicaid.program_name,
-      :marketplace_phone => Settings.contact_center.short_number,
-      :contact_center_state_and_city => Settings.contact_center.state_and_city,
-      :contact_center_zip_code => Settings.contact_center.zip_code,
-      :contact_center_po_box => Settings.contact_center.po_box,
-      :marketplace_url => Settings.site.website_url,
-      :home_url => Settings.site.home_url,
-      :marketplace_shopping_name => Settings.notices.individual_market.shopping_name,
+      :medicaid_agency_name => medicaid_agency_name,
+      :medicaid_agency_phone => medicaid_agency_phone,
+      :medicaid_chip_long_name => medicaid_agency_chip_long_name,
+      :medicaid_chip_short_name => medicaid_agency_chip_short_name,
+      :medicaid_program_name => medicaid_agency_program_name,
+      :marketplace_phone => contact_center_short_phone_number,
+      :contact_center_state_and_city => contact_center_state_and_city,
+      :contact_center_zip_code => contact_center_zip_code,
+      :contact_center_po_box => site_po_box,
+      :marketplace_url => site_website_url,
+      :home_url => site_home_url,
+      :marketplace_shopping_name => marketplace_shopping_name,
       :oe_end_on => Date.new(2021, 12, 15)
     }
     entity_hash.merge(settings_hash)
