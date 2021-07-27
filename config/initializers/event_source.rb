@@ -3,13 +3,12 @@
 EventSource.configure do |config|
   config.protocols = %w[amqp http]
   config.app_name = :polypress
-  config.pub_sub_root =
-    Pathname.pwd.join('spec', 'rails_app', 'app', 'event_source')
-
+  config.pub_sub_root = Pathname.pwd.join('app', 'event_source')
   config.server_key = ENV['RAILS_ENV'] || Rails.env.to_sym
 
   config.servers do |server|
     server.amqp do |rabbitmq|
+      rabbitmq.ref = 'amqp://rabbitmq:5672/event_source'
       rabbitmq.host = ENV['RABBITMQ_HOST'] || 'amqp://localhost'
       warn rabbitmq.host
       rabbitmq.vhost = ENV['RABBITMQ_VHOST'] || '/'
