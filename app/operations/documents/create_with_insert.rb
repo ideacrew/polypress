@@ -35,7 +35,7 @@ module Documents
     end
 
     # Creates main body of the document
-    def create_main_document(params, key, cover_page = true, insert = false)
+    def create_main_document(params, key, cover_page: true, insert: false)
       result = document({ key: key, entity: params[:entity], cover_page: cover_page, preview: params[:preview] })
       if result.is_a?(Hash)
         if insert
@@ -104,7 +104,7 @@ module Documents
         attach_blank_page
         create_main_document(params, insert, false, true)
       end
-      failures = output.select { |o| o.failure? }
+      failures = output.select(&:failure?)
       return Failure(failures) if failures.present?
 
       Success(true)

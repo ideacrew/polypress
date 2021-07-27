@@ -13,7 +13,7 @@ module Services
     end
 
     def setting_placeholders
-      Config::SiteHelper.instance_methods.sort.each_with_object([]) do |method, placeholders|
+      Config::SiteHelper.instance_methods(false).sort.each_with_object([]) do |method, placeholders|
         placeholders << {
           title: method.to_s.humanize,
           target: method

@@ -3,8 +3,8 @@
 # rubocop:disable Metrics/ModuleLength
 module Config
   # Site wide helpers
-  # TODO: Everything in this with Settings.site should be configured into ResourceRegistry files eventually
   module SiteHelper
+
     def statewide_area
       PolypressRegistry[:enroll_app].setting(:statewide_area).item
     end
@@ -25,7 +25,7 @@ module Config
       PolypressRegistry[:enroll_app].setting(:privacy_act_statement).item
     end
 
-    def site_po_box
+    def contact_center_po_box
       PolypressRegistry[:enroll_app].setting(:contact_center_po_box).item
     end
 
@@ -41,7 +41,7 @@ module Config
       PolypressRegistry[:enroll_app].setting(:contact_center_zip_code).item
     end
 
-    def contact_center_short_phone_number
+    def marketplace_phone
       PolypressRegistry[:enroll_app].setting(:contact_center_short_number).item
     end
 
@@ -59,10 +59,6 @@ module Config
 
     def contact_center_email_address
       PolypressRegistry[:enroll_app].setting(:contact_center_email_address).item
-    end
-
-    def site_redirect_on_timeout_route
-      Settings.site.curam_enabled? ? SamlInformation.iam_login_url : new_user_session_path
     end
 
     def site_byline
@@ -85,39 +81,12 @@ module Config
       PolypressRegistry[:enroll_app].setting(:privacy_policy).item
     end
 
-    def site_website_link
-      link_to site_website_name, site_website_name
-    end
-
-    def site_find_expert_link
-      link_to site_find_expert_url, site_find_expert_url
-    end
-
-    def site_find_expert_url
-      "#{site_home_url}/find-expert"
-    end
-
     def site_home_business_url
       PolypressRegistry[:enroll_app].setting(:home_business_url).item
     end
 
-    def site_home_url
+    def home_url
       PolypressRegistry[:enroll_app].setting(:home_url).item
-    end
-
-    def site_curam_enabled?
-      PolypressRegistry[:enroll_app].setting(:curam_enabled).item
-    end
-
-    def site_brokers_agreement_path
-      link_to(
-        "#{Settings.aca.state_name} #{PolypressRegistry[:enroll_app].setting(:short_name).item} Broker Agreement",
-        PolypressRegistry[:enroll_app].setting(:terms_and_conditions_url).item
-      )
-    end
-
-    def site_home_link
-      link_to site_home_url, site_home_url
     end
 
     def site_copyright_period_start
@@ -138,10 +107,6 @@ module Config
 
     def marketplace_shopping_name
       PolypressRegistry[:enroll_app].setting(:marketplace_shopping_name).item
-    end
-
-    def link_to_site_business_resource_center
-      link_to "Business Resource Center", site_business_resource_center_url
     end
 
     def site_nondiscrimination_notice_url
@@ -172,14 +137,6 @@ module Config
       PolypressRegistry[:enroll_app].setting(:broker_registration_guide).item
     end
 
-    def site_registration_path(resource_name, params)
-      if PolypressRegistry[:enroll_app].setting(:registration_path).item.present? && ENV['AWS_ENV'] == 'prod'
-        PolypressRegistry[:enroll_app].setting(:registration_path).item
-      else
-        new_registration_path(resource_name, :invitation_id => params[:invitation_id])
-      end
-    end
-
     def site_long_name
       PolypressRegistry[:enroll_app].setting(:long_name).item
     end
@@ -200,32 +157,12 @@ module Config
       PolypressRegistry[:enroll_app].setting(:main_web_address_url).item
     end
 
-    def site_main_web_link
-      link_to site_website_name, site_main_web_address_url
-    end
-
     def site_make_their_premium_payments_online
       PolypressRegistry[:enroll_app].setting(:make_their_premium_payments_online).item
     end
 
-    def link_to_make_their_premium_payments_online
-      link_to "make your premium payments online", site_make_their_premium_payments_online
-    end
-
-    def health_care_website
-      PolypressRegistry[:enroll_app].setting(:health_care_website).item
-    end
-
     def site_website_url
       PolypressRegistry[:enroll_app].setting(:website_url).item
-    end
-
-    def health_care_website_url
-      PolypressRegistry[:enroll_app].setting(:health_care_website_url).item
-    end
-
-    def ivl_login_url
-      Settings.site.ivl_login_url
     end
 
     def site_uses_default_devise_path?
@@ -238,18 +175,6 @@ module Config
 
     def site_main_web_address_text
       Settings.site.main_web_address_text
-    end
-
-    def site_website_address
-      link_to site_website_name, site_main_web_address_url
-    end
-
-    def non_discrimination_notice_url
-      link_to site_nondiscrimination_notice_url, site_nondiscrimination_notice_url
-    end
-
-    def mail_non_discrimination_email
-      mail_to non_discrimination_email, non_discrimination_email
     end
 
     def site_noreply_email_address
@@ -276,10 +201,6 @@ module Config
       PolypressRegistry[:enroll_app].setting(:guidance_for_business_owners_url).item
     end
 
-    def site_non_discrimination_complaint_url
-      link_to non_discrimination_complaint_url, non_discrimination_complaint_url
-    end
-
     def site_document_verification_checklist_url
       PolypressRegistry[:enroll_app].setting(:document_verification_checklist_url).item
     end
@@ -296,18 +217,17 @@ module Config
       PolypressRegistry[:enroll_app].setting(:medicaid_agency_phone).item
     end
 
-    def medicaid_agency_chip_long_name
+    def medicaid_chip_long_name
       PolypressRegistry[:enroll_app].setting(:medicaid_agency_chip_long_name).item
     end
 
-    def medicaid_agency_chip_short_name
+    def medicaid_chip_short_name
       PolypressRegistry[:enroll_app].setting(:medicaid_agency_chip_short_name).item
     end
 
     def medicaid_agency_program_name
       PolypressRegistry[:enroll_app].setting(:medicaid_agency_program_name).item
     end
-
 
     def site_user_sign_in_url
       PolypressRegistry[:enroll_app].setting(:user_sign_in_url).item
@@ -327,14 +247,6 @@ module Config
 
     def fte_max_count
       Settings.aca.shop_market.small_market_employee_count_maximum
-    end
-
-    def site_tufts_url
-      Settings.site.tufts_premier_url
-    end
-
-    def site_tufts_premier_link
-      link_to site_tufts_url, site_tufts_url
     end
 
     def broker_course_administering_organization_number

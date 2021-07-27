@@ -62,8 +62,19 @@ class RenderLiquid
     ["#{recipient_name[:first_name].titleize} #{recipient_name[:last_name].titleize}", mailing_address]
   end
 
+  def site_settings
+    Config::SiteHelper.instance_methods(false).sort.each_with_object({}) do |method, settings_hash|
+      begin
+        settings_hash[method] = self.send(method)
+      rescue StandardError => e
+        Rails.logger.error { "Undefined setting #{method} due to #{e.inspect}" }
+      end
+      settings_hash
+    end
+  end
+
   # rubocop:disable Metrics/AbcSize
-  def construct_settings(params)
+  def construct_defaults(params)
     entity_hash = fetch_entity_hash(params)
     # oe_end_on_year = entity_hash[:oe_start_on].year
     settings_hash = {
@@ -71,29 +82,16 @@ class RenderLiquid
       :recipient_full_name => recipient_name_and_address(entity_hash)[0],
       :key => params[:key],
       :notice_number => params[:subject],
-      :short_name => site_short_name,
       :day_45_from_now => Date.today + 45.days,
       :day_95_from_now => Date.today + 95.days,
-      :medicaid_agency_name => medicaid_agency_name,
-      :medicaid_agency_phone => medicaid_agency_phone,
-      :medicaid_chip_long_name => medicaid_agency_chip_long_name,
-      :medicaid_chip_short_name => medicaid_agency_chip_short_name,
-      :medicaid_program_name => medicaid_agency_program_name,
-      :marketplace_phone => contact_center_short_phone_number,
-      :contact_center_state_and_city => contact_center_state_and_city,
-      :contact_center_zip_code => contact_center_zip_code,
-      :contact_center_po_box => site_po_box,
-      :marketplace_url => site_website_url,
-      :home_url => site_home_url,
-      :marketplace_shopping_name => marketplace_shopping_name,
       :oe_end_on => Date.new(2021, 12, 15)
-    }
+    }.merge(site_settings)
     entity_hash.merge(settings_hash)
   end
   # rubocop:enable Metrics/AbcSize
 
   def render(body, cover_page, params)
-    entity = construct_settings(params)
+    entity = construct_defaults(params)
     rendered_body = body.render(entity&.deep_stringify_keys, { strict_variables: true })
     document_body =
       if cover_page
