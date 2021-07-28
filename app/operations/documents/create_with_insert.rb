@@ -16,7 +16,7 @@ module Documents
     # @return [Dry::Monads::Result] Parsed template as string
     def call(params)
       template = yield fetch_template(params)
-      documents_hash = yield create_main_document(params, params[:event_key])
+      documents_hash = yield create_main_document(params: params, key: params[:event_key])
       _inserts = yield append_inserts(params, template)
       _other_pdfs = yield append_pdfs
       Success(documents_hash)
@@ -35,7 +35,7 @@ module Documents
     end
 
     # Creates main body of the document
-    def create_main_document(params, key, cover_page: true, insert: false)
+    def create_main_document(params:, key:, cover_page: true, insert: false)
       result = document({ key: key, entity: params[:entity], cover_page: cover_page, preview: params[:preview] })
       if result.is_a?(Hash)
         if insert
@@ -102,7 +102,7 @@ module Documents
           next
         end
         attach_blank_page
-        create_main_document(params, insert, false, true)
+        create_main_document(params: params, key: insert, cover_page: false, insert: true)
       end
       failures = output.select(&:failure?)
       return Failure(failures) if failures.present?
