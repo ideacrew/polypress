@@ -1,20 +1,17 @@
 # frozen_string_literal: true
 
-# rubocop:disable Metrics/ModuleLength
-# FamilyHelper
-module FamilyHelper
-  # TODO: dynamically load data using contracts/entities
-  def verification_types(type, date)
+RSpec.shared_context 'family response from enroll', :shared_context => :metadata do
+  let(:verification_types) do
     [
       {
-        :type_name => type,
+        :type_name => "American Indian Status",
         :validation_status => "outstanding",
-        :due_date => date
+        :due_date => Date.today + 45.days
       }
     ]
   end
 
-  def family_hash
+  let(:family_hash) do
     {
       :documents_needed => true,
       :hbx_id => '43456',
@@ -23,7 +20,7 @@ module FamilyHelper
     }
   end
 
-  def family_member_1
+  let(:family_member_1) do
     {
       :is_primary_applicant => true,
       :person => {
@@ -39,12 +36,12 @@ module FamilyHelper
         :is_active => true,
         :is_disabled => false,
         :addresses => [{ :kind => 'mailing', :address_1 => 'H st', :state => "ME", :city => 'Augusta', :zip => '67662' }],
-        :verification_types => verification_types('Social Security Number', Date.today + 40.days)
+        :verification_types => verification_types
       }
     }
   end
 
-  def family_member_2
+  let(:family_member_2) do
     {
       :is_primary_applicant => false,
       :person => {
@@ -60,12 +57,12 @@ module FamilyHelper
         :is_active => true,
         :is_disabled => false,
         :addresses => [{ :kind => 'mailing', :address_1 => 'H st', :state => "ME", :city => 'Augusta', :zip => '67662' }],
-        :verification_types => verification_types('American Indian Status', Date.today)
+        :verification_types => verification_types
       }
     }
   end
 
-  def households
+  let(:households) do
     [
       {
         :start_date => Date.today,
@@ -86,7 +83,7 @@ module FamilyHelper
     ]
   end
 
-  def hbx_enrollments
+  let(:hbx_enrollments) do
     [
       {
         :is_receiving_assistance => true,
@@ -97,10 +94,7 @@ module FamilyHelper
         :total_premium => 445.09,
         :enrollment_period_kind => "open_enrollment",
         :product_kind => "health",
-        :hbx_enrollment_members => [
-          hbx_enrollment_member('1', 'Smith1', "475", 45, true),
-          hbx_enrollment_member('2', 'Smith2', "476", 46, false)
-        ],
+        :hbx_enrollment_members => hbx_enrollment_members,
         :product_reference => product_reference,
         :issuer_profile_reference => issuer_profile_reference,
         :consumer_role_reference => consumer_role_preference
@@ -108,22 +102,36 @@ module FamilyHelper
     ]
   end
 
-  def hbx_enrollment_member(id, l_name, hbx_id, age, subs)
-    {
-      :family_member_reference => {
-        :family_member_hbx_id => id,
-        :first_name => "John",
-        :last_name => l_name,
-        :person_hbx_id => hbx_id,
-        :age => age
+  let(:hbx_enrollment_members) do
+    [
+      {
+        :family_member_reference => {
+          :family_member_hbx_id => '1',
+          :first_name => "John",
+          :last_name => "Smith1",
+          :person_hbx_id => "475",
+          :dob => Date.new(1972, 4, 4)
+        },
+        :is_subscriber => true,
+        :eligibility_date => Date.today,
+        :coverage_start_on => Date.today
       },
-      :is_subscriber => subs,
-      :eligibility_date => Date.today,
-      :coverage_start_on => Date.today
-    }
+      {
+        :family_member_reference => {
+          :family_member_hbx_id => '2',
+          :first_name => "John",
+          :last_name => "Smith2",
+          :person_hbx_id => "476",
+          :dob => Date.new(1978, 4, 4)
+        },
+        :is_subscriber => false,
+        :eligibility_date => Date.today,
+        :coverage_start_on => Date.today
+      }
+    ]
   end
 
-  def product_reference
+  let(:product_reference) do
     {
       :is_csr => true,
       :individual_deductible => "700",
@@ -139,16 +147,16 @@ module FamilyHelper
     }
   end
 
-  def issuer_profile_reference
+  let(:issuer_profile_reference) do
     {
-      :phone => "7869087789",
+      :phone => "786-908-7789",
       :hbx_id => "bb35d006bd844d4c91b68983569dc676",
       :name => "Blue Cross Blue Shield",
       :abbrev => "ANTHM"
     }
   end
 
-  def  consumer_role_preference
+  let(:consumer_role_preference) do
     {
       :is_active => true,
       :is_applying_coverage => true,
@@ -159,4 +167,3 @@ module FamilyHelper
     }
   end
 end
-# rubocop:enable Metrics/ModuleLength

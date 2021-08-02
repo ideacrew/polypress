@@ -22,6 +22,7 @@ class TemplatesController < ::ApplicationController
 
   def new
     @template = Template.new
+    @inserts = Template.where(doc_type: :insert)
     respond_to do |format|
       format.html
       format.js
@@ -30,6 +31,7 @@ class TemplatesController < ::ApplicationController
 
   def edit
     @template = Template.find(params[:id])
+    @inserts = Template.where(doc_type: :insert)
     render :layout => 'application'
   end
 
@@ -50,7 +52,7 @@ class TemplatesController < ::ApplicationController
 
   def update
     template = Template.find(params['id'])
-    template.update_attributes(template_params)
+    template.update_attributes(template_params.merge({ inserts: template_params[:inserts] || [] }))
     flash[:notice] = 'Notice content updated successfully'
     redirect_to templates_path
   end
@@ -60,6 +62,8 @@ class TemplatesController < ::ApplicationController
       {
         body: instant_preview_params[:body],
         subject: instant_preview_params[:subject],
+        key: instant_preview_params[:key],
+        cover_page: true,
         instant_preview: 'true'
       }
     )
@@ -72,7 +76,8 @@ class TemplatesController < ::ApplicationController
   end
 
   def preview
-    documents_operation = Documents::Create.new.call({ id: params[:id], preview: 'true' })
+    template = Template.find(params['id'])
+    documents_operation = Documents::CreateWithInsert.new.call({ event_key: template.key, preview: 'true', cover_page: true })
 
     if documents_operation.success?
       send_file documents_operation.success[:document].path,
@@ -177,7 +182,7 @@ class TemplatesController < ::ApplicationController
   private
 
   def instant_preview_params
-    params.permit(:body, :subject)
+    params.permit(:body, :subject, :key)
   end
 
   def file_content_type
@@ -192,13 +197,15 @@ class TemplatesController < ::ApplicationController
   end
 
   def template_params
-    params.require(:template).permit(:content_type, :category, :subject, :title, :description, :key, :recipient, :body)
+    params.require(:template).permit(:content_type, :category, :doc_type, :subject, :title, :description, :key, :recipient, :body, :inserts => [])
   end
 
   def entities_contracts_mapping
     {
       "AcaEntities::People::ConsumerRole" => 'AcaEntities::Contracts::People::ConsumerRoleContract',
+      "::AcaEntities::Families::Family" => "::AcaEntities::Contracts::Families::FamilyContract",
       "::AcaEntities::MagiMedicaid::Application" => "::AcaEntities::MagiMedicaid::Contracts::ApplicationContract"
+
     }
   end
 

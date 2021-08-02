@@ -6,6 +6,7 @@ class Template
   include Mongoid::Timestamps
 
   CATEGORIES = [:aca_individual].freeze
+  DOC_TYPES = [:notice, :insert].freeze
 
   field :key, type: Symbol
   field :title, type: String
@@ -17,6 +18,8 @@ class Template
   field :contracts, type: Array
   field :body, type: String
   field :subject, type: String
+  field :doc_type, type: String
+  field :inserts, type: Array, default: []
   field :category, type: String, default: :aca_individual
   # field :tags, type: String
 

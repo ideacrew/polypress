@@ -3,7 +3,7 @@
 require 'rails_helper'
 require "#{Rails.root}/spec/shared_examples/eligibilities/application_response"
 
-RSpec.describe MagiMedicaid::GenerateAndPublishDocuments do
+RSpec.describe MagiMedicaid::GenerateAndPublishEligibilityDocuments do
   describe 'with valid arguments' do
     include_context 'application response from medicaid gateway'
 
@@ -53,7 +53,7 @@ RSpec.describe MagiMedicaid::GenerateAndPublishDocuments do
 
     context "#determine_eligibilities" do
       let(:event_key) { 'determined_mixed_determination' }
-      let(:eligibilities) { MagiMedicaid::GenerateAndPublishDocuments.new.determine_eligibilities(application_entity, event_key) }
+      let(:eligibilities) { MagiMedicaid::GenerateAndPublishEligibilityDocuments.new.determine_eligibilities(application_entity, event_key) }
 
       it 'should eligibilities' do
         expect(eligibilities.success).to eq ["determined_aptc_eligible"]

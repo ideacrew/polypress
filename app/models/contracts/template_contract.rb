@@ -10,6 +10,8 @@ module Contracts
     # @return [Dry::Monads::Result] :result
     params do
       required(:key).filled(:symbol)
+      required(:doc_type).filled(:symbol)
+      optional(:inserts).maybe(:array)
       optional(:title).maybe(:string)
       optional(:description).maybe(:string)
       optional(:content_type).maybe(:string)

@@ -3,7 +3,7 @@
 require 'rails_helper'
 require "#{Rails.root}/spec/shared_examples/eligibilities/application_response"
 
-RSpec.describe MagiMedicaid::PublishUqhpEligibleDocument do
+RSpec.describe MagiMedicaid::PublishDocument do
   describe 'with valid arguments' do
     include_context 'application response from medicaid gateway'
 
@@ -28,7 +28,7 @@ RSpec.describe MagiMedicaid::PublishUqhpEligibleDocument do
     let(:application_entity) { ::AcaEntities::MagiMedicaid::Application.new(application_hash) }
 
     subject do
-      described_class.new.call(application_entity: application_entity, event_key: event_key)
+      described_class.new.call(entity: application_entity, event_key: event_key)
     end
 
     context "when payload has all the required params" do
@@ -38,11 +38,11 @@ RSpec.describe MagiMedicaid::PublishUqhpEligibleDocument do
     end
 
     context "when event key is invalid" do
-      let(:invalid_subject) { described_class.new.call(application: application_hash, event_key: invalid_event_key) }
+      let(:invalid_subject) { described_class.new.call(entity: application_entity, event_key: invalid_event_key) }
 
       let(:invalid_event_key) { 'invalid_event_key' }
 
-      let(:error) { "No template found for the given #{invalid_event_key} & for resource #{application_hash[:family_reference][:hbx_id]}" }
+      let(:error) { "Unable to find template with #{invalid_event_key}" }
 
       it 'should return failure' do
         expect(invalid_subject.failure?).to be_truthy

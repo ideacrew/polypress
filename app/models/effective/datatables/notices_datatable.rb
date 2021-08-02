@@ -20,14 +20,17 @@ module Effective
         table_column :title, :proc => proc { |row|
           link_to row.title, preview_template_path(row), target: '_blank'
         }, :filter => false, :sortable => false
+        table_column :doc_type, :proc => proc { |row|
+          row.doc_type
+        }, :filter => false, :sortable => false
         table_column :description, :proc => proc { |row|
           row.description
         }, :filter => false, :sortable => false
         table_column :recipient, :proc => proc { |row|
           row.recipient_klass_name.to_s.titleize
         }, :filter => false, :sortable => false
-        table_column :content_type, :proc => proc { |row|
-          row.content_type.split('/')[1].upcase if row.content_type
+        table_column :key, :proc => proc { |row|
+          row.key
         }, :filter => false, :sortable => true
         table_column :last_updated_at, :proc => proc { |row|
           row.updated_at.in_time_zone('Eastern Time (US & Canada)').strftime('%m/%d/%Y %H:%M')

@@ -45,7 +45,7 @@ RSpec.describe Documents::Upload do
   end
 
   describe ".validate_response" do
-    let(:result) { ::Documents::Upload.new.validate_response(doc_storage.transform_keys(&:to_sym)) }
+    let(:result) { ::Documents::Upload.new.send(:validate_response, doc_storage.transform_keys(&:to_sym)) }
 
     context "when response has empty subjects" do
       before do

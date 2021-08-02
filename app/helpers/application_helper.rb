@@ -19,6 +19,12 @@ module ApplicationHelper
     true
   end
 
+  def check_for_insert(insert, template)
+    return false unless template.persisted? || template.inserts.present?
+
+    template.inserts.include? insert.key.to_s
+  end
+
   def asset_data_base64(path)
     asset = ::Sprockets::Railtie.build_environment(Rails.application).find_asset(path)
     throw "Could not find asset '#{path}'" if asset.nil?

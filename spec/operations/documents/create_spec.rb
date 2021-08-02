@@ -28,7 +28,7 @@ RSpec.describe Documents::Create do
     end
 
     subject do
-      described_class.new.call(id: template.id, entity: entity)
+      described_class.new.call(key: template.key, entity: entity)
     end
 
     context "when payload has all the required params" do

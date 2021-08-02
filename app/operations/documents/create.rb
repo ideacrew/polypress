@@ -18,17 +18,24 @@ module Documents
     private
 
     def fetch_template(params)
-      template = Template.where(id: params[:id]).first
+      template = Template.where(key: params[:key]).first
 
       if template
         Success(template)
       else
-        Failure("Unable to find template with #{params[:id]}")
+        Failure("Unable to find template with #{params[:key]}")
       end
     end
 
     def render_liquid_template(template, params)
-      RenderLiquid.new.call({ body: template.body, subject: template.subject, entity: params[:entity], preview: params[:preview] })
+      RenderLiquid.new.call(
+        body: template.body,
+        subject: template.subject,
+        key: params[:key],
+        cover_page: params[:cover_page],
+        entity: params[:entity],
+        preview: params[:preview]
+      )
     end
 
     def create_document(template, rendered_template, params)
