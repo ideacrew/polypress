@@ -16,7 +16,6 @@ module Subscribers
         ack(delivery_info.delivery_tag)
         logger.info "Polypress: polypress_eligibility_determination_subscriber_message; acked for #{routing_key}"
       else
-        nack(delivery_info.delivery_tag)
         results.map(&:failure).compact.each do |result|
           errors = result.failure.errors.to_h
           logger.error(
@@ -24,6 +23,7 @@ module Subscribers
             nacked due to:#{errors}; for routing_key: #{routing_key}, payload: #{payload}"
           )
         end
+        nack(delivery_info.delivery_tag)
       end
     rescue StandardError => e
       nack(delivery_info.delivery_tag)
