@@ -12,6 +12,7 @@ RSpec.shared_context 'application response from medicaid gateway', :shared_conte
   end
   let(:application_hash) do
     {
+      :notice_options => { send_eligibility_notices: true, send_open_enrollment_notices: false },
       :family_reference => { :hbx_id => "10011" },
       :assistance_year => current_date.year,
       :aptc_effective_date => aptc_effective_date,
