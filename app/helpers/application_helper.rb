@@ -92,6 +92,10 @@ module ApplicationHelper
     Settings.notices.individual.attachments.non_discrimination_attachment
   end
 
+  def mailer_logo_file_name
+    PolypressRegistry[:enroll_app].setting(:mailer_logo_file_name).item
+  end
+
   def ivl_envelope_without_address
     Settings.notices.individual.attachments.envelope_without_address
   end

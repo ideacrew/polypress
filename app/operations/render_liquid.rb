@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'ostruct'
 # RenderLiquid
 class RenderLiquid
   send(:include, Config::SiteHelper)
@@ -47,19 +48,18 @@ class RenderLiquid
     end
   end
 
-  def recipient_name_and_address(params)
-    mailing_address = nil
-    recipient_name =
+  def recipient(params)
+    recipient_name, mailing_address, hbx_id =
       if params[:applicants]
         applicant = params[:applicants].detect { |app| app[:is_primary_applicant] } || params[:applicants][0]
-        mailing_address = applicant[:addresses][0]
-        applicant[:name]
+        [applicant[:name], applicant[:addresses][0], applicant[:person_hbx_id]]
       else
         applicant = params[:family_members].detect { |app| app[:is_primary_applicant] } || params[:family_members][0]
-        mailing_address = applicant[:person][:addresses][0]
-        applicant[:person][:person_name]
+        [applicant[:person][:person_name], applicant[:person][:addresses][0], applicant[:person][:hbx_id]]
       end
-    ["#{recipient_name[:first_name].titleize} #{recipient_name[:last_name].titleize}", mailing_address]
+    recipient_full_name = "#{recipient_name[:first_name].titleize} #{recipient_name[:last_name].titleize}"
+
+    OpenStruct.new(full_name: recipient_full_name, mailing_address: mailing_address, hbx_id: hbx_id)
   end
 
   def site_settings
@@ -78,8 +78,9 @@ class RenderLiquid
     entity_hash = fetch_entity_hash(params)
     # oe_end_on_year = entity_hash[:oe_start_on].year
     settings_hash = {
-      :mailing_address => recipient_name_and_address(entity_hash)[1],
-      :recipient_full_name => recipient_name_and_address(entity_hash)[0],
+      :mailing_address => recipient(entity_hash).mailing_address,
+      :recipient_full_name => recipient(entity_hash).full_name,
+      :primary_hbx_id => recipient(entity_hash).hbx_id,
       :key => params[:key],
       :notice_number => params[:subject],
       :day_45_from_now => Date.today + 45.days,
