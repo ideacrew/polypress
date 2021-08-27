@@ -21,7 +21,12 @@
         <td style="text-align: right;">{{ notice_number }}</td>
       <% end %>
     </tr>
-
+    <% if display_hbx_id_on_notices %>
+      <tr>
+        <td></td>
+        <td style="text-align: right;">{{ primary_hbx_id }}</td>
+      </tr>
+    <% end %>
     {% unless mailing_address.address_3 %}
     <tr class="fssize1">
       <td><br></td>

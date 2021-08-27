@@ -29,6 +29,10 @@ module Config
       PolypressRegistry[:enroll_app].setting(:contact_center_po_box).item
     end
 
+    def display_hbx_id_on_notices
+      PolypressRegistry.feature_enabled?(:display_hbx_id_on_notices)
+    end
+
     def site_state_long_title
       PolypressRegistry[:enroll_app].setting(:state_long_title).item
     end
