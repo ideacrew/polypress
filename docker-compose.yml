@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   polypress:
-    image: polypress_dev:0.7.0
+    image: polypress:release_0.7.0
     build:
       context: .
       dockerfile: ./.docker/development/Dockerfile

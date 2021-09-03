@@ -65,5 +65,5 @@ Rails.application.configure do
 
   config.cartafact_document_base_url = 'http://localhost:3004/api/v1/documents'
 
-  config.web_console.whitelisted_ips = '172.24.0.1'
+  config.web_console.allowed_ips = '172.24.0.1'
 end

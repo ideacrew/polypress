@@ -1,4 +1,5 @@
 const { environment } = require("@rails/webpacker");
+const erb = require('./loaders/erb')
 const webpack = require("webpack");
 // const CopyPlugin = require("copy-webpack-plugin");
 // var path = require("path");
@@ -56,4 +57,5 @@ environment.config.merge({
 
 // process.env.WEBPACK_PUBLIC_PATH = environment.config.output.publicPath;
 
+environment.loaders.prepend('erb', erb)
 module.exports = environment;
