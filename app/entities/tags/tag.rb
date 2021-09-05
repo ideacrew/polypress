@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module Tags
   # A key-value pair for assigning values to variables
   class Tag < Dry::Struct
