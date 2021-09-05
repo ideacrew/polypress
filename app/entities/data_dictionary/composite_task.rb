@@ -1,0 +1,2 @@
+class CompositeTask < Task
+end

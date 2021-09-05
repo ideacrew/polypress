@@ -6,6 +6,12 @@ services:
     build:
       context: .
       dockerfile: ./.docker/development/Dockerfile
+<<<<<<< Updated upstream
+=======
+      args:
+        RUBY_VERSION: "2.7.2"
+        BUNDLER_VERSION_OVERRIDE: "2.2.14"
+>>>>>>> Stashed changes
     ports:
       - "3000:3000"
     volumes:
