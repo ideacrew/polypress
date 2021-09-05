@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe Tags::Tag do
+RSpec.describe Tags::TagContract do
   subject { described_class.new }
 
   let(:namespace) { 'families.fammily_id_1' }
@@ -17,7 +17,9 @@ RSpec.describe Tags::Tag do
   context 'Given gapped or invalid parameters' do
     context 'and parameters are empty' do
       it { expect(subject.call({}).success?).to be_falsey }
-      it { expect(subject.call({}).error?(:name)).to be_truthy }
+      it do
+        expect(subject.call({}).error?(required_params.keys.first)).to be_truthy
+      end
     end
   end
 

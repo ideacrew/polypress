@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-module Contracts
+module Tags
   # Schema and validation rules for {Tags::Tag} domain object
-  class TagContract < Contracts::Contract
+  class TagContract < Contract
     # @!method call(opts)
     # @param [Hash] opts the parameters to validate using this contract
     # @option opts [String] :namespace optional
@@ -11,9 +11,9 @@ module Contracts
     # @option opts [String] :description optional
     # @return [Dry::Monads::Result] :result
     params do
-      optional(:namespace).filled(:string)
+      optional(:namespace).maybe(:string)
       required(:key).filled(:symbol)
-      required(:value).maybe(:any)
+      required(:value).filled(:any)
       optional(:description).maybe(:string)
     end
   end
