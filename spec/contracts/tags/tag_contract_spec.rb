@@ -27,13 +27,35 @@ RSpec.describe Tags::TagContract do
 
   context 'Given valid parameters' do
     context 'and required parameters only' do
+      let(:full_key) { key.to_s }
+
       it { expect(subject.call(required_params).success?).to be_truthy }
-      it { expect(subject.call(required_params).to_h).to eq required_params }
+
+      it 'the :full_key parameter should be stringified key' do
+        expect(subject.call(required_params).to_h[:full_key]).to eq full_key
+      end
+
+      it 'output values should match input parameters' do
+        expect(subject.call(required_params).to_h).to eq required_params.merge!(
+             full_key: full_key
+           )
+      end
     end
 
     context 'and required and optional parameters' do
+      let(:full_key) { [namespace, key.to_s].join('.') }
+
       it { expect(subject.call(all_params).success?).to be_truthy }
-      it { expect(subject.call(all_params).to_h).to eq all_params }
+
+      it 'the :full_key parameter should concat namespace + key' do
+        expect(subject.call(all_params).to_h[:full_key]).to eq full_key
+      end
+
+      it 'output values should match input parameters' do
+        expect(subject.call(all_params).to_h).to eq all_params.merge!(
+             full_key: full_key
+           )
+      end
     end
   end
 end
