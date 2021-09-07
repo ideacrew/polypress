@@ -36,6 +36,7 @@ RSpec.describe Tags::TagContract do
       end
 
       it 'output values should match input parameters' do
+        # rubocop:disable Layout/FirstArgumentIndentation
         expect(subject.call(required_params).to_h).to eq required_params.merge!(
              full_key: full_key
            )
@@ -55,6 +56,7 @@ RSpec.describe Tags::TagContract do
         expect(subject.call(all_params).to_h).to eq all_params.merge!(
              full_key: full_key
            )
+        # rubocop:enable Layout/FirstArgumentIndentation
       end
     end
   end

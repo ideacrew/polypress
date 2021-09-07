@@ -2,7 +2,7 @@
 
 class Template
   # @!attribute [r] key
-  # Unique identifier that links document to a particular event
+  # Unique identifier for this entity
   # @return [Symbol]
   attribute :key, Types::Symbol.meta(omittable: false) # unique identifier
 
@@ -16,9 +16,11 @@ class Template
   # @return [String]
   attribute :description, Types::String
 
-  attribute :sections do |section|
-    Types::Array.of(Section)
-  end
+  # @!attribute [r] sections
+  # A collection of standalone content components to parse and render for
+  # this template
+  # @return [String]
+  attribute :sections, Sections::Section
 
   # @!attribute [r] locale
   # Template's written Language
@@ -36,6 +38,9 @@ class Template
   # @return [String]
   attribute :category, Polypress::Types::CategoryKind.meta(omittable: false)
 
+  # @!attribute [r] order
+  # The order in which the sections render in the document
+  # @return [Array<String>]
   attribute :order, Types::Array.of(Types::Symbol)
 
   # @!attribute [r] tags
