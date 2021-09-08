@@ -5,28 +5,21 @@ require 'rails_helper'
 RSpec.describe Sections::SectionContract do
   subject { described_class.new }
 
-  let(:title) { 'UQHP deeterminatino main body' }
+  let(:title) { 'UQHP determination main body' }
   let(:kind) { 'body' }
-
   let(:section_key) { 'main' }
-  let(:section_item) { { title: title, kind: kind } }
+  let(:section_item) { { section_key.to_s => { title: title, kind: kind } } }
 
-  let(:required_params) { { sections: { section_key: section_item } } }
-  let(:all_params) { required_params }
+  let(:required_params) { { sections: section_item } }
 
-  context 'with a Section only' do
-    it 'should pass validation' do
-      expect(subject.call(required_params).success?).to be_truthy
-      expect(subject.call(required_params).to_h).to eq required_params
-    end
-  end
+  context 'Given valid parameters' do
+    context 'and required parameters only' do
+      it 'should pass validation' do
+        result = subject.call(required_params)
 
-  context 'with Section and SectionItem' do
-    it 'should pass validation' do
-      expect(subject.call(all_params).success?).to be_truthy
-    end
-    it 'should return validated params' do
-      expect(subject.call(all_params).to_h).to eq all_params
+        expect(result.success?).to be_truthy
+        expect(result.to_h).to eq required_params
+      end
     end
   end
 end

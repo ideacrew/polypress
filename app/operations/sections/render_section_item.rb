@@ -9,7 +9,7 @@ module Sections
   class RenderSectionItem
     include Dry::Monads[:result, :do, :try]
 
-    # @param opts [Hash] the parameters to render the SectionItem
+    # @param [Hash] opts the parameters to render a SectionItem
     # @option opts [Hash] :section_item required
     # @option opts [Hash] :attributes optional
     # @return [Dry::Monad] result
