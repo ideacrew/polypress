@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Sections
-  # Schema and validation rules for {Sections::Section} domain object
+  # Schema and validation rules for {Sections::SectionItem} domain object
   class SectionItemContract < Contract
     # @!method call(opts)
     # @param [Hash] opts the parameters to validate using this contract
@@ -18,7 +18,7 @@ module Sections
       required(:title).value(:string)
       required(:kind).value(Polypress::Types::SectionKind)
       optional(:description).maybe(:string)
-      optional(:section_body).value(SectionBodyContract.params)
+      optional(:section_item_body).value(SectionItemBodyContract.params)
       optional(:created_at).maybe(:time)
       optional(:updated_at).maybe(:time)
       optional(:updated_by).maybe(:string)

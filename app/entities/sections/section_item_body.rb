@@ -2,7 +2,7 @@
 
 module Sections
   # Markup content associated with a {Sections::Section}
-  class SectionBody < Dry::Struct
+  class SectionItemBody < Dry::Struct
     # References to key/value pairs in the {% schema %} tag
     # Can use these to correlate with HML elements, e.g. , id, type, label, etc.
     # @example

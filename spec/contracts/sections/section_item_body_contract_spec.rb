@@ -3,7 +3,7 @@
 require 'rails_helper'
 require 'shared_examples/enrollments/family_response'
 
-RSpec.describe Sections::SectionBodyContract do
+RSpec.describe Sections::SectionItemBodyContract do
   subject { described_class.new }
 
   let(:content_type) { 'text/html' }

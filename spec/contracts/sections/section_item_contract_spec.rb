@@ -8,7 +8,7 @@ RSpec.describe Sections::SectionItemContract do
   let(:title) { 'UQHP deeterminatino main body' }
   let(:kind) { 'body' }
   let(:description) { 'UQHP determination notice content' }
-  let(:section_body) { { markup: '', content_type: 'text/xml' } }
+  let(:section_item_body) { { markup: '', content_type: 'text/xml' } }
 
   let(:created_at) { Time.now }
   let(:updated_at) { created_at }
@@ -20,7 +20,7 @@ RSpec.describe Sections::SectionItemContract do
   let(:optional_params) do
     {
       description: description,
-      section_body: section_body,
+      section_item_body: section_item_body,
       created_at: created_at,
       updated_at: updated_at,
       updated_by: updated_by,

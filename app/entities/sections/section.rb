@@ -3,7 +3,7 @@
 module Sections
   # Standalone containers that groups logically connected content
   # in a {Templates::Template}>
-  class Sections < Dry::Struct
+  class Section < Dry::Struct
     # @!attribute [r] key
     # Unique identifier for this entity
     # @return [Symbol]

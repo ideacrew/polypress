@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Sections::SectionsContract do
+RSpec.describe Sections::SectionContract do
   subject { described_class.new }
 
   let(:title) { 'UQHP deeterminatino main body' }

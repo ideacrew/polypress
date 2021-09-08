@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 module Sections
-  # Schema and validation rules for {Sections::SectionBody} domain object
-  class SectionBodyContract < Contract
+  # Schema and validation rules for {Sections::SectionItemBody} domain object
+  class SectionItemBodyContract < Contract
     # @!method call(opts)
     # @param [Hash] opts the parameters to validate using this contract
     # @option opts [String] :markup optional

@@ -2,7 +2,7 @@
 
 module Sections
   # Schema and validation rules for {Sections::Sections} domain object
-  class SectionsContract < Contract
+  class SectionContract < Contract
     # @!method call(opts)
     # @param [Hash] opts the parameters to validate using this contract
     # @option opts [Hash] :sections required
