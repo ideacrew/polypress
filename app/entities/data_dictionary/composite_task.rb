@@ -1,2 +1,0 @@
-class CompositeTask < Task
-end
