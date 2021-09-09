@@ -22,10 +22,6 @@ module Documents
     attribute :key, Types::String
     attribute :title, Types::String
     attribute :description, Types::String
-
-    attribute :sections do |section|
-      Types::Array.of(Section)
-    end
     attribute :order, Types::Array.of(Types::Symbol)
 
     attribute :category, Types::String

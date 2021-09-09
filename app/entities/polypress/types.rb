@@ -16,6 +16,8 @@ module Polypress
         Mime::Type.lookup(value)
       end
 
+    MongoidPrivateKeys = %i[_id created_at updated_at]
+
     SectionKind = Types::Coercible::String.enum('body', 'component')
   end
 end

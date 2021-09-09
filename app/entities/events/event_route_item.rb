@@ -3,7 +3,7 @@
 module Events
   # Assign a {Templates::Template} to generate a document based on an event name
   # and optionally its attribute content
-  class EventRouteItem
+  class EventRouteItem < Dry::Struct
     attribute :attributes, Types::String.meta(ommitable: true)
     attribute :criteria, Types::String.meta(ommitable: true)
     attribute :template_key, Types::String.meta(ommitable: true)

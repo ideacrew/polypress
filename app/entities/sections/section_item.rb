@@ -22,17 +22,17 @@ module Sections
     # @!attribute [r] section_body
     # The content and composition to parse and render
     # @return [String]
-    attribute :section_body, SectionBody
+    attribute :section_item_body, SectionItemBody
 
     # @!attribute [r] created_at
     # Timestamp when this this section was created
     # @return [Time]
-    attribute :created_at, Types::TimestampTime
+    attribute :created_at, Types::Time
 
     # @!attribute [r] created_at
     # Date when this this section was last updated
     # @return [Time]
-    attribute :updated_at, Types::DateTime
+    attribute :updated_at, Types::Time
 
     # @!attribute [r] updated_by
     # The Account ID of the last person who updated this entity

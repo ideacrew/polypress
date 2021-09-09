@@ -1,14 +1,22 @@
 # frozen_string_literal: true
 
+# Find and cache the markdown of a section_item component
 class PartialCache
   def self.load(template_name, context:, parse_context:)
     cached_partials = (context.registers[:cached_partials] ||= {})
     cached = cached_partials[template_name]
     return cached if cached
 
-    file_system =
-      (context.registers[:file_system] ||= Liquid::Template.file_system)
-    source = file_system.read_template_file(template_name)
+    result = Sections::FindSectionItem.call(section_item_key: template_name)
+    if result.success?
+      source = result.value!
+    else
+      "Error #{result.failure} finding section: #{template_name}"
+    end
+
+    # file_system =
+    #   (context.registers[:file_system] ||= Liquid::Template.file_system)
+    # source = file_system.read_template_file(template_name)
 
     parse_context.partial = true
 

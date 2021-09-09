@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Blocks
-  class Block
+  class Block < Dry::Struct
     attribute :key, Types::String
     attribute :type, Types::String
     attribute :attributes, Types::String

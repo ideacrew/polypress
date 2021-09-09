@@ -19,10 +19,10 @@ module Sections
       required(:kind).value(Polypress::Types::SectionKind)
       optional(:description).maybe(:string)
       optional(:section_item_body).value(SectionItemBodyContract.params)
-      optional(:created_at).maybe(:time)
-      optional(:updated_at).maybe(:time)
       optional(:updated_by).maybe(:string)
       optional(:author).maybe(:string)
+      optional(:created_at).maybe(:time)
+      optional(:updated_at).maybe(:time)
     end
   end
 end
