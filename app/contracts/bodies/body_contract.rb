@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-module Sections
-  # Schema and validation rules for {Sections::SectionItemBody} domain object
-  class SectionItemBodyContract < Contract
+module Bodies
+  # Schema and validation rules for {Bodies::Body} domain object
+  class BodyContract < Contract
     # @!method call(opts)
     # @param [Hash] opts the parameters to validate using this contract
     # @option opts [String] :markup optional
@@ -12,10 +12,9 @@ module Sections
     # @return [Dry::Monads::Result] :result
     params do
       # required(:content_type).maybe(Polypress::Types::MimeType)
+      optional(:encoding_type).maybe(:string)
       optional(:content_type).maybe(:string)
-      optional(:markup).value(:string)
-      # optional(:schema).value(:hash)
-      # optional(:settings).value(:hash)
+      optional(:markup).maybe(:string)
     end
   end
 end

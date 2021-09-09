@@ -5,12 +5,70 @@ require 'rails_helper'
 RSpec.describe Sections::SectionContract do
   subject { described_class.new }
 
-  let(:title) { 'UQHP determination main body' }
-  let(:kind) { 'body' }
-  let(:section_key) { 'main' }
-  let(:section_item) { { section_key.to_s => { title: title, kind: kind } } }
+  let(:_id) { 'xyz321' }
+  let(:key) { 'address_block' }
 
-  let(:required_params) { { sections: section_item } }
+  let(:title) { 'Address Block' }
+  let(:kind) { 'component' }
+  let(:description) { 'UQHP determination notice content' }
+
+  let(:body) do
+    {
+      markup: '<h1>Hollo World!</h1>',
+      content_type: 'text/xml',
+      encoding_type: 'base64'
+    }
+  end
+
+  let(:author) { 'ad34df232456f' }
+  let(:updated_by) { author }
+  let(:created_at) { Time.now }
+  let(:updated_at) { created_at }
+
+  let(:required_params) do
+    { key: key, section_item: { title: title, kind: kind } }
+  end
+
+  let(:optional_params) do
+    {
+      _id: _id,
+      section_item: {
+        description: description,
+        body: body,
+        kind: kind,
+        author: author,
+        updated_by: updated_by,
+        created_at: created_at,
+        updated_at: updated_at
+      }
+    }
+  end
+
+  let(:all_params) { required_params.deep_merge(optional_params) }
+
+  context 'Given gapped or invalid parameters' do
+    context 'and parameters are empty' do
+      it { expect(subject.call({}).success?).to be_falsey }
+      it 'should fail validation' do
+        expect(subject.call({}).error?(required_params.keys.first)).to be_truthy
+      end
+    end
+
+    context 'and template kind is invalid' do
+      let(:invalid_kind) { 'invalid_kind_value' }
+
+      it 'should fail validation' do
+        result =
+          subject.call({ key: key, section_item: { kind: invalid_kind } })
+        invalid_kind_error = ['must be one of: body, component']
+
+        expect(result.success?).to be_falsey
+        expect(
+          result.errors.to_h[:section_item][:kind]
+        ).to eq invalid_kind_error
+      end
+    end
+  end
 
   context 'Given valid parameters' do
     context 'and required parameters only' do
@@ -19,6 +77,15 @@ RSpec.describe Sections::SectionContract do
 
         expect(result.success?).to be_truthy
         expect(result.to_h).to eq required_params
+      end
+    end
+
+    context 'and required and optional parameters' do
+      it 'should pass validation' do
+        result = subject.call(all_params)
+
+        expect(result.success?).to be_truthy
+        expect(result.to_h).to eq all_params
       end
     end
   end
