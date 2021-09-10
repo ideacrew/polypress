@@ -1,7 +1,7 @@
 <tr>
 	<td></td>
     <td><%= section.key %></td>
-	<td><%= link_to section.title, preview_new_section_path(section), target: '_blank' %></td>
+	<td><%= link_to section.title, edit_new_section_path(section), target: '_blank' %></td>
 	<td><%= section.description %></td>
 	<td><%= section.marketplace %></td>
 	<td><%= section.updated_at.in_time_zone('Eastern Time (US & Canada)').strftime('%m/%d/%Y %H:%M') %></td>

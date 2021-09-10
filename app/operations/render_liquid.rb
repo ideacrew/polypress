@@ -44,7 +44,6 @@ class RenderLiquid
 
   def render_body(params)
     entity = construct_defaults(params)
-    binding.pry
     Templates::Render.new.call(template: params[:template], attributes: entity&.deep_stringify_keys)
   end
 
