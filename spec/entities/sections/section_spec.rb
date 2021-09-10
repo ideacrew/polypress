@@ -1,11 +1,13 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
-require 'shared_examples/template_params'
+require 'shared_examples/section_params'
 
-RSpec.describe Templates::Template do
+RSpec.describe Sections::Section do
   subject { described_class.new }
-  include_context 'template_params'
+  include_context 'section_params'
+
+  before { Sections::SectionModel.create_indexes }
 
   context '.new' do
     context 'given missing or invalid parameters' do
@@ -19,7 +21,7 @@ RSpec.describe Templates::Template do
 
     context 'given valid parameters' do
       it 'all params should pass validation' do
-        values = Templates::TemplateContract.new.call(all_params)
+        values = Sections::SectionContract.new.call(all_params)
 
         expect(values.success?).to be_truthy
       end
@@ -39,18 +41,18 @@ RSpec.describe Templates::Template do
   context '#create_model' do
     context 'and a new record is added to the database' do
       before do
-        template_entity = described_class.call(all_params)
-        result = template_entity.create_model
+        section_entity = described_class.call(all_params)
+        result = section_entity.create_model
       end
 
-      it 'database should have one Template record present' do
-        result = Templates::TemplateModel.all.to_a
+      it 'database should have one Section record present' do
+        result = Sections::SectionModel.all.to_a
 
         expect(result.size).to eq 1
         expect(result.first[:key]).to eq all_params[:key]
       end
 
-      it 'a second attempt to add record with same key should fail' do
+      it ' second attempt to add record with same key should fail' do
         expect {
           described_class.call(all_params).create_model
         }.to raise_error Mongo::Error::OperationFailure

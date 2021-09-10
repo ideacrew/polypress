@@ -10,21 +10,32 @@ module Templates
     field :title, type: String
     field :description, type: String
     field :locale, type: String
-    field :content_type, type: String
-    field :print_code, type: String
     field :marketplace, type: String, default: 'aca_individual'
+
+    field :print_code, type: String
+    field :content_type, type: String
+    field :published_at, type: DateTime
     field :recipient, type: String
-    field :markup_section, type: String
+
+    embeds_one :body, class_name: 'Bodies::BodyModel'
+    accepts_nested_attributes_for :body
+
     field :author, type: String
     field :updated_by, type: String
 
-    # embeds_one :body, as: :template_body
-
     index({ key: 1 }, { unique: true, name: 'key_index' })
+
+    scope :all, -> { exists(_id: true) }
+    scope :aca_individual_market, -> { where(marketplace: 'aca_individual') }
+    scope :aca_shop_market, -> { where(marketplace: 'aca_shop') }
+    scope :published, -> { exists(published_at: true) }
+    scope :draft, -> { exists(published_at: false) }
+    scope :by_key, ->(value) { where(key: value[:value]) }
+    scope :by_id, ->(value) { value[:_id] }
 
     def to_entity
       # self.serializable_hash(except: %w[_id])
-      self.serializable_hash
+      serializable_hash
     end
 
     def to_s

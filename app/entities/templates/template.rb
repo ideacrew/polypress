@@ -16,10 +16,6 @@ module Templates
     # @return [String]
     attribute :title, Types::String.meta(omittable: false)
 
-    # @!attribute [r] subject
-    # Reference to the person/topic that output document discusses/deals with
-    # For example, notice_number: IVL_FEL
-    # @return [String]
     # attribute :subject, Types::String.meta(omittable: true)
 
     # @!attribute [r] description
@@ -32,28 +28,43 @@ module Templates
     # @return [String]
     attribute :locale, Types::String.optional.meta(omittable: true)
 
+    # @!attribute [r] body
+    # The content and composition to parse and render
+    # @return [Bodies::Body]
+    attribute :body, Bodies::Body.meta(omittable: true)
+
     # @!attribute [r] locale
     # Template's written Language
     # @return [String]
     attribute :content_type, Types::String.optional.meta(omittable: true)
 
+    # @!attribute [r] print_code
+    # Reference to the person/topic that output document discusses/deals with
+    # For example, notice_number: IVL_FEL
+    # @return [String]
     attribute :print_code, Types::String.optional.meta(omittable: true)
 
-    # @!attribute [r] category
-    # Defines the top level group for this template
+    # @!attribute [r] marketplace
     # @return [String]
     attribute :marketplace,
               AcaEntities::Types::MarketPlaceKinds.meta(omittable: false)
 
-    attribute :markup_section, Types::String.optional.meta(omittable: true)
+    attribute :author, Types::String.meta(omittable: true)
 
-    attribute :author, Types::String.optional.meta(omittable: true)
+    # @!attribute [r] updated_by
+    # The Account ID of the last person who updated this entity
+    # @return [String]
+    attribute :updated_by, Types::String.meta(omittable: true)
 
-    attribute :updated_by, Types::String.optional.meta(omittable: true)
+    # @!attribute [r] created_at
+    # Timestamp when this this entity was created
+    # @return [Time]
+    attribute :created_at, Types::Time.meta(omittable: true)
 
-    attribute :created_at, Types::Time.optional.meta(omittable: true)
-
-    attribute :updated_at, Types::Time.optional.meta(omittable: true)
+    # @!attribute [r] updated_at
+    # Date when this this entity was last updated
+    # @return [Time]
+    attribute :updated_at, Types::Time.meta(omittable: true)
 
     def create_model
       values = sanitize_attributes

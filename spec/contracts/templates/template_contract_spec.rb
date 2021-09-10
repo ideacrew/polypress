@@ -20,8 +20,12 @@ RSpec.describe Templates::TemplateContract do
   let(:updated_by) { '1abc123' }
   let(:created_at) { Time.now }
   let(:updated_at) { created_at }
-  let(:markup_section) do
-    '<p>Now ruthless Ruth is a maid uncouth With scarlet cheeks and lips</p>'
+  let(:body) do
+    {
+      markup: '<h1>Goodbye Bruel World!</h1>',
+      content_type: 'text/xml',
+      encoding_type: 'base64'
+    }
   end
 
   let(:required_params) { { key: key, title: title, marketplace: marketplace } }
@@ -30,23 +34,28 @@ RSpec.describe Templates::TemplateContract do
       _id: _id,
       description: description,
       locale: locale,
+      body: body,
       content_type: content_type,
       print_code: print_code,
       author: author,
       updated_by: updated_by,
       created_at: created_at,
-      updated_at: updated_at,
-      markup_section: markup_section
+      updated_at: updated_at
     }
   end
-  let(:all_params) { required_params.merge(optional_params) }
+  let(:all_params) { required_params.deep_merge(optional_params) }
 
   context 'Given gapped or invalid parameters' do
     context 'and parameters are empty' do
       it { expect(subject.call({}).success?).to be_falsey }
-      it do
+      it 'should fail validation' do
         expect(subject.call({}).error?(required_params.keys.first)).to be_truthy
       end
+    end
+
+    context 'and the marketplace param is invalid' do
+      let(:invalid_marketplace) { 'bogus_marketplace' }
+      it 'should return an error message'
     end
   end
 
