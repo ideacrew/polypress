@@ -13,6 +13,7 @@ module Templates
     # @option opts [Hash] :template required
     # @option opts [Hash] :attributes optional
     # @return [Dry::Monad] result
+    # @return [Dry::Monad::Failure(Array<Liquid::UndefinedVariable>)] if parsing errors occur
     def call(params)
       values = yield validate(params)
       html_doc = yield render(values)
@@ -45,13 +46,7 @@ module Templates
       end.bind do |parsed_doc|
         # rubocop:enable Style/MultilineBlockChain
 
-        if parsed_doc.errors.present?
-          return(
-            Failure(
-              "errors parsing section #{values[:title]}: #{parsed_doc.errors}"
-            )
-          )
-        end
+        return Failure(parsed_doc) if parsed_doc.errors.present?
 
         rendered_doc =
           parsed_doc.render(
@@ -59,12 +54,8 @@ module Templates
             { strict_variables: true }
           )
 
-        if parsed_doc.errors.present?
-          Failure(
-            "section #{values[:title]} render error: #{parsed_doc.errors}"
-          )
-        elsif rendered_doc.to_s.empty?
-          Failure("section #{values[:title]} render: output empty")
+        if parsed_doc.errors.present? || rendered_doc.to_s.empty?
+          Failure(parsed_doc)
         else
           Success(rendered_doc)
         end

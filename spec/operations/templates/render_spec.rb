@@ -148,6 +148,27 @@ RSpec.describe Templates::Render do
         expect(result.value!.lstrip).to eq rendered_doc
       end
     end
+
+    context 'and markup includes variable tags with neither a liquid tag nor a matching attribute value' do
+      let(:liquid_markup) { <<~MARKUP }
+        <p>{{ when }} is the time for all good {{ gender }} to come to the aid of their country</p>
+        <p>now is the time for all good {{ gender }} to come to the aid of their country</p>
+      MARKUP
+
+      let(:template) do
+        base_template.deep_merge(body: { markup: liquid_markup })
+      end
+
+      let(:error_message) { 'Liquid error (line 1): undefined variable when' }
+
+      it 'should render the content without error substituting the liquid variable' do
+        result = subject.call({ template: template })
+
+        expect(result.failure?).to be_truthy
+        expect(result.failure).to be_a Liquid::Template
+        expect(result.failure.errors.first.to_s).to eq error_message
+      end
+    end
   end
 
   context 'given a Template with a PDF content' do
