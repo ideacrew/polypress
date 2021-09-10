@@ -8,12 +8,13 @@ module Sections
 
     attribute :_id, Types::String.meta(omittable: true) # unique identifier
 
-    # @!attribute [r] key
-    # Unique identifier for this entity
-    # @return [Symbol]
+    # # @!attribute [r] key
+    # # Unique identifier for this entity
+    # # @return [Symbol]
     attribute :key, Types::String.meta(omittable: false)
 
-    attribute :section_item do
+    # attribute :section_item do
+
       # @!attribute [r] title
       # A human-friendly title for the template
       # @return [String]
@@ -33,6 +34,11 @@ module Sections
       # The content and composition to parse and render
       # @return [Bodies::Body]
       attribute :body, Bodies::Body.meta(omittable: true)
+
+      # @!attribute [r] marketplace
+      # @return [String]
+      attribute :marketplace,
+                AcaEntities::Types::MarketPlaceKinds.meta(omittable: false)
 
       # @!attribute [r] updated_by
       # The Account ID of the person who who originally created
@@ -54,7 +60,7 @@ module Sections
       # Date when this this entity was last updated
       # @return [Time]
       attribute :updated_at, Types::Time.meta(omittable: true)
-    end
+    # end
 
     def create_model
       values = flatten_map
@@ -63,8 +69,17 @@ module Sections
       result ? Success(result) : Failure(result)
     end
 
+    def update_model(record_id)
+      values = flatten_map
+
+      section = Sections::SectionModel.find(record_id)
+      result = section.update_attributes(values)
+
+      result ? Success(result) : Failure(result)
+    end
+
     def flatten_map
-      params = to_h.delete(:section_item).merge!(key: to_h[:key])
+      params = to_h#.delete(:section_item).merge!(key: to_h[:key])
       sanitize_attributes(params)
     end
 

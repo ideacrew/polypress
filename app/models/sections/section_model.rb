@@ -9,6 +9,7 @@ module Sections
     field :key, type: String
     field :title, type: String
     field :description, type: String
+    field :marketplace, type: String, default: 'aca_individual'
     field :locale, type: String
     field :author, type: String
     field :updated_by, type: String

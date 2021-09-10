@@ -1,0 +1,55 @@
+<div>
+    <div class="form-group col-xs-8">
+      <label for="noticeTitle">Title *</label>
+      <%= f.text_field :title, class: 'form-control', required: true %>
+    </div>
+
+    <div class="form-group col-xs-8">
+      <label for="noticeDescription">Description</label>
+      <%= f.text_field :description, class: 'form-control' %>
+    </div>
+
+    <div class="form-group col-xs-8">
+      <label for="noticeMarketplace">Select Marketplace</label>
+      <%= f.select(:marketplace, options_for_select(::AcaEntities::Types::MarketPlaceKinds.values.collect{ |market| [market.to_s.titleize, market] }, selected: template.marketplace), {include_blank: false}, {:class => 'form-control'} ) %>
+    </div>
+
+    <div class="form-group col-xs-8">
+      <label for="noticeContentType">Select Format</label>
+      <%= f.select(:content_type, options_for_select(['application/pdf', 'text/plain', 'text/csv'].collect{ |type| [type.split('/')[1], type] }, selected: template.content_type), {include_blank: false}, {:class => 'form-control'} ) %>
+    </div>
+
+    <% if @inserts.present? %>
+      <div class="form-group col-xs-8">
+        <%= f.label :inserts, "Select Inserts" %>
+        <% @inserts.each do |insert| %>
+          <div>
+            <%#= f.check_box :inserts, { multiple: true, style: "transform: scale(2.5); margin: 10px" }, insert.key, check_for_insert(insert, template) %>
+            <%= f.check_box :inserts, { multiple: true, style: "transform: scale(2.5); margin: 10px", checked: check_for_insert(insert, template)}, insert.key, false %>
+            <%= insert.title %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+
+    <div class="form-group col-xs-8">
+      <label for="noticeDescription">Print Vendor Reference</label>
+      <%= f.text_field :print_code, class: 'form-control', required: true %>
+    </div>
+
+    <div class="form-group col-xs-8">
+      <label for="noticeEventName">Event Name</label>
+      <%= f.text_field :key, class: 'form-control' %>
+      <p class='memo'>Find the event name on the associated ticket</p>
+    </div>
+
+    <!-- <div class="form-group col-xs-8">
+      <label for="noticeEventCriteria">Event Criteria</label>
+      <%#= f.text_field :key_criteria, class: 'form-control' %>
+    </div> -->
+    <% recipients = Services::NoticeKindService.new(template.marketplace).recipients %>
+    <div class="form-group col-xs-8">
+      <label for="noticeDescription">Recipient *</label>
+      <%= f.select(:recipient, options_for_select(recipients.inject([]) {|options, (k, v)| options << [k, v]}, selected: template.recipient), { include_blank: false }, { :class => 'form-control'} ) %>
+    </div>
+</div>

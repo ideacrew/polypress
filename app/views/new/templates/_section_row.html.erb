@@ -1,0 +1,12 @@
+<tr>
+	<td></td>
+    <td><%= section.key %></td>
+	<td><%= link_to section.title, preview_new_section_path(section), target: '_blank' %></td>
+	<td><%= section.description %></td>
+	<td><%= section.marketplace %></td>
+	<td><%= section.updated_at.in_time_zone('Eastern Time (US & Canada)').strftime('%m/%d/%Y %H:%M') %></td>
+	<td>
+	  <a class="text-reset" href="<%= edit_new_section_path(section) %>"><i class="fas fa-edit"></i></a>
+	  <a class="text-reset" href="<%= delete_section_new_section_path(section) %>"><i class="fas fa-trash"></i></a>
+	</td>
+</tr>

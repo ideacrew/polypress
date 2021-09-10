@@ -25,7 +25,7 @@ module Templates
 
     def validate(params)
       attributes = params[:attributes] || {}
-      result = Templates::TemplateContract.new.call(params[:template])
+      result = Templates::TemplateContract.new.call(params[:template].to_h)
 
       if result.success?
         Success({ template: result.to_h, attributes: attributes })

@@ -13,14 +13,48 @@ class RenderLiquid
   # @param [Hash] :options
   # @return [Dry::Monads::Result] Parsed template as string
   def call(params)
-    parsed_cover_page = yield parse_cover_page if params[:cover_page]
-    parsed_body = yield parse_body(params)
-    template = yield render(parsed_body, parsed_cover_page, params)
+    # parsed_cover_page = yield parse_cover_page if params[:cover_page]
+    # parsed_body = yield parse_body(params)
 
-    Success(template)
+    cover_page = yield render_cover_page(params)
+    body = yield render_body(params)
+    document = yield render_document(cover_page, body, params)
+
+    # document = yield render(parsed_body, parsed_cover_page, params)
+
+    Success(document)
   end
 
   private
+
+  def render_cover_page(params)
+    entity = construct_defaults(params)
+    markup = ApplicationController.new.render_to_string(template: 'templates/ivl_template', layout: false).to_str
+    template = Templates::Template.new({
+      title: 'coverpage',
+      key: 'coverpage',
+      marketplace: 'aca_individual',
+      body: {
+        markup: markup
+      }
+    })
+
+    Templates::Render.new.call(template: template, attributes: entity&.deep_stringify_keys)
+  end
+
+  def render_body(params)
+    entity = construct_defaults(params)
+    binding.pry
+    Templates::Render.new.call(template: params[:template], attributes: entity&.deep_stringify_keys)
+  end
+
+  def render_document(cover_page, body, params)
+    entity = construct_defaults(params)
+    document_body = cover_page + body
+    template = ApplicationController.new.render_to_string(inline: document_body, layout: 'layouts/ivl_pdf_layout')
+
+    Success({ rendered_template: template, entity: entity })
+  end
 
   def parse_cover_page
     cover_page_content = ApplicationController.new.render_to_string(template: 'templates/ivl_template', layout: false).to_str

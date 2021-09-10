@@ -49,12 +49,12 @@ module Templates
     attribute :marketplace,
               AcaEntities::Types::MarketPlaceKinds.meta(omittable: false)
 
-    attribute :author, Types::String.meta(omittable: true)
+    attribute :author, Types::String.optional.meta(omittable: true)
 
     # @!attribute [r] updated_by
     # The Account ID of the last person who updated this entity
     # @return [String]
-    attribute :updated_by, Types::String.meta(omittable: true)
+    attribute :updated_by, Types::String.optional.meta(omittable: true)
 
     # @!attribute [r] created_at
     # Timestamp when this this entity was created

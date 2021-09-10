@@ -17,7 +17,7 @@ module Documents
     def call(params)
       template = yield fetch_template(params)
       documents_hash = yield create_main_document(params: params, key: params[:event_key])
-      _inserts = yield append_inserts(params, template)
+      # _inserts = yield append_inserts(params, template)
       _other_pdfs = yield append_pdfs
       Success(documents_hash)
     end
@@ -25,7 +25,7 @@ module Documents
     private
 
     def fetch_template(params)
-      template = Template.where(key: params[:event_key]).first
+      template = Templates::TemplateModel.where(key: params[:event_key]).first
 
       if template
         Success(template)
@@ -37,6 +37,7 @@ module Documents
     # Creates main body of the document
     def create_main_document(params:, key:, cover_page: true, insert: false)
       result = document({ key: key, entity: params[:entity], cover_page: cover_page, preview: params[:preview] })
+
       if result.is_a?(Hash)
         if insert
           insert_path = result[:document].path

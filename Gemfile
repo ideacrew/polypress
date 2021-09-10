@@ -32,6 +32,7 @@ gem 'httparty',             '~> 0.16'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'jbuilder',             '~> 2.7'
 gem 'jquery-rails',         '~> 4.3'
+gem "jquery-ui-rails"
 
 # Had to clone to make nested search work in where filter
 gem 'liquid', path: './project_gems/liquid-5.0.1'
