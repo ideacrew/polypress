@@ -19,17 +19,17 @@ module Sections
       # @return [String]
       attribute :title, Types::String.meta(omittable: false)
 
-      # @!attribute [r] kind
-      # Classification of this Section that conveys intended use
-      # @return [String]
-      attribute :kind, Polypress::Types::SectionKind.meta(omittable: true)
-
       # @!attribute [r] description
       # An explanation of the purpose and use of this section
       # @return [String]
       attribute :description, Types::String.meta(omittable: true)
 
-      # @!attribute [r] sectionbody_body
+      # @!attribute [r] locale
+      # Language for this section
+      # @return [String]
+      attribute :locale, Types::String.meta(omittable: true)
+
+      # @!attribute [r] body
       # The content and composition to parse and render
       # @return [Bodies::Body]
       attribute :body, Bodies::Body.meta(omittable: true)
@@ -46,12 +46,12 @@ module Sections
       attribute :updated_by, Types::String.meta(omittable: true)
 
       # @!attribute [r] created_at
-      # Timestamp when this this section was created
+      # Timestamp when this this entity was created
       # @return [Time]
       attribute :created_at, Types::Time.meta(omittable: true)
 
-      # @!attribute [r] created_at
-      # Date when this this section was last updated
+      # @!attribute [r] updated_at
+      # Date when this this entity was last updated
       # @return [Time]
       attribute :updated_at, Types::Time.meta(omittable: true)
     end

@@ -16,8 +16,12 @@ RSpec.shared_context 'template_params' do
   let(:updated_by) { '1abc123' }
   let(:created_at) { Time.now }
   let(:updated_at) { created_at }
-  let(:markup_section) do
-    '<p>Now ruthless Ruth is a maid uncouth With scarlet cheeks and lips</p>'
+  let(:body) do
+    {
+      markup: '<h1>Goodbye Bruel World!</h1>',
+      content_type: 'text/xml',
+      encoding_type: 'base64'
+    }
   end
 
   let(:required_params) { { key: key, title: title, marketplace: marketplace } }
@@ -26,15 +30,14 @@ RSpec.shared_context 'template_params' do
       _id: _id,
       description: description,
       locale: locale,
+      body: body,
       content_type: content_type,
       print_code: print_code,
-      marketplace: marketplace,
       author: author,
       updated_by: updated_by,
       created_at: created_at,
-      updated_at: updated_at,
-      markup_section: markup_section
+      updated_at: updated_at
     }
   end
-  let(:all_params) { required_params.merge(optional_params) }
+  let(:all_params) { required_params.deep_merge(optional_params) }
 end

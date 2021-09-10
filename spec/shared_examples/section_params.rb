@@ -5,9 +5,8 @@ RSpec.shared_context 'section_params' do
   let(:key) { 'address_block' }
 
   let(:title) { 'Address Block' }
-  let(:kind) { 'component' }
   let(:description) { 'UQHP determination notice content' }
-
+  let(:locale) { 'en' }
   let(:body) do
     {
       markup: '<h1>Hollo World!</h1>',
@@ -21,9 +20,7 @@ RSpec.shared_context 'section_params' do
   let(:created_at) { Time.now }
   let(:updated_at) { created_at }
 
-  let(:required_params) do
-    { key: key, section_item: { title: title, kind: kind } }
-  end
+  let(:required_params) { { key: key, section_item: { title: title } } }
 
   let(:optional_params) do
     {
@@ -31,7 +28,7 @@ RSpec.shared_context 'section_params' do
       section_item: {
         description: description,
         body: body,
-        kind: kind,
+        locale: locale,
         author: author,
         updated_by: updated_by,
         created_at: created_at,

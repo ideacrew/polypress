@@ -17,9 +17,5 @@ RSpec.configure do |config|
   # DatabaseCleaner[:mongoid].strategy = :deletion, { except: ["users"] }
   # end
 
-  # config.around(:each) do |example|
-  #   DatabaseCleaner.cleaning do
-  #     example.run
-  #   end
-  # end
+  config.around(:each) { |example| DatabaseCleaner.cleaning { example.run } }
 end
