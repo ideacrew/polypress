@@ -3,14 +3,14 @@
 require 'dry/monads'
 require 'dry/monads/do'
 
-module Sections
+module Templates
   # Create a Liquid::Template instance that parses and renders the content of
   # a {Sections::SectionItem}
-  class RenderSectionItem
+  class Render
     include Dry::Monads[:result, :do, :try]
 
     # @param [Hash] opts the parameters to render a SectionItem
-    # @option opts [Hash] :section_item required
+    # @option opts [Hash] :template required
     # @option opts [Hash] :attributes optional
     # @return [Dry::Monad] result
     def call(params)
@@ -24,10 +24,10 @@ module Sections
 
     def validate(params)
       attributes = params[:attributes] || {}
-      result = Sections::SectionItemContract.new.call(params[:section_item])
+      result = Templates::TemplateContract.new.call(params[:template])
 
       if result.success?
-        Success({ section_item: result.to_h, attributes: attributes })
+        Success({ template: result.to_h, attributes: attributes })
       else
         Failure(result)
       end
@@ -37,7 +37,7 @@ module Sections
     def render(values)
       Try() do
         Liquid::Template.parse(
-          values[:section_item][:section_item_body][:markup],
+          values[:template][:body][:markup],
           error_mode: :strict,
           line_numbers: true
         )
