@@ -12,7 +12,7 @@ module Tags
     def initialize(tag_name, markup, options)
       super
 
-      unless markup =~ Liquid::SYNTAX
+      unless markup =~ SYNTAX
         raise SyntaxError, options[:locale].t('errors.syntax.render')
       end
 
@@ -27,7 +27,7 @@ module Tags
       @for = (with_or_for == FOR)
 
       @attributes = {}
-      markup.scan(TagAttributes) do |key, value|
+      markup.scan(Liquid::TagAttributes) do |key, value|
         @attributes[key] = parse_expression(value)
       end
     end
@@ -44,7 +44,7 @@ module Tags
       end
 
       partial =
-        Liquid::PartialCache.load(
+        PartialCache.load(
           template_name,
           context: context,
           parse_context: parse_context

@@ -7,9 +7,15 @@ class PartialCache
     cached = cached_partials[template_name]
     return cached if cached
 
-    result = Sections::FindSectionItem.call(section_item_key: template_name)
+    result =
+      Sections::Find.new.call(
+        scope_name: :by_key,
+        options: {
+          value: template_name
+        }
+      )
     if result.success?
-      source = result.value!
+      source = result.success.first.to_entity['body']['markup']
     else
       "Error #{result.failure} finding section: #{template_name}"
     end
