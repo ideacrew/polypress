@@ -5,7 +5,7 @@ RSpec.shared_context 'section_params' do
   let(:key) { 'address_block' }
 
   let(:title) { 'Address Block' }
-  let(:description) { 'UQHP determination notice content' }
+  let(:description) { 'A reusable address for customer letters' }
   let(:locale) { 'en' }
   let(:body) do
     {

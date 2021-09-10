@@ -2,34 +2,66 @@
 
 require 'rails_helper'
 
-RSpec.describe Sections::RenderSectionItem do
+RSpec.describe Templates::Render do
   subject { described_class.new }
 
+  let(:_id) { 'xxyyzz' }
+  let(:key) { 'typing_skills' }
   let(:title) { 'Typing drill' }
-  let(:kind) { 'body' }
+  let(:description) { 'A reusable address for customer letters' }
+  let(:marketplace) { 'aca_individual' }
+  let(:locale) { 'en' }
   let(:content_type) { 'text/html' }
-  let(:section) { { title: title, kind: kind } }
-  let(:body) { { content_type: content_type } }
+  let(:body) do
+    {
+      markup: '<h1>Hello World!</h1>',
+      content_type: 'text/xml',
+      encoding_type: 'base64'
+    }
+  end
+  let(:print_code) { 'ivl-022' }
+  let(:author) { 'klm555' }
+  let(:updated_by) { author }
+  let(:published_at) { Time.now }
+  let(:created_at) { Time.now }
+  let(:updated_at) { Time.now }
 
-  context 'given a SectionItem without markup content' do
-    let(:section_item_body) { body.merge(markup: '') }
-    let(:section_item) { section.merge(section_item_body: section_item_body) }
+  let(:base_template) do
+    {
+      _id: _id,
+      key: key,
+      title: title,
+      marketplace: marketplace,
+      description: description,
+      locale: locale,
+      body: body,
+      content_type: content_type,
+      print_code: print_code,
+      author: author,
+      updated_by: updated_by,
+      created_at: created_at,
+      updated_at: updated_at
+    }
+  end
+
+  context 'given a Template without markup content' do
+    let(:template) { base_template.deep_merge(body: { markup: '' }) }
+
     it 'the parser should return an error' do
-      result = subject.call(section_item: section_item)
+      result = subject.call(template: template)
       expect(result.failure?).to be_truthy
     end
   end
 
-  context 'given a SectionItem with markup content' do
+  context 'given a Template with markup content' do
     let(:liquid_markup) { <<~MARKUP }
       <p>now is the time for all good men to come to the aid of their country</p>
     MARKUP
 
-    let(:section_item_body) { body.merge(markup: liquid_markup) }
-    let(:section_item) { section.merge(section_item_body: section_item_body) }
+    let(:template) { base_template.deep_merge(body: { markup: liquid_markup }) }
 
     it 'should render the content without error' do
-      result = subject.call(section_item: section_item)
+      result = subject.call(template: template)
 
       expect(result.success?).to be_truthy
       expect(result.value!).to eq liquid_markup
@@ -40,10 +72,12 @@ RSpec.describe Sections::RenderSectionItem do
         <p>now is the time for all good {{ gender }} to come to the aid of their country</p>
       MARKUP
 
-      let(:section_item_body) { body.merge(markup: liquid_markup) }
-      let(:section_item) { section.merge(section_item_body: section_item_body) }
+      let(:template) do
+        base_template.deep_merge(body: { markup: liquid_markup })
+      end
+
       it 'the parser should return an error' do
-        result = subject.call(section_item: section_item)
+        result = subject.call(template: template)
         expect(result.failure?).to be_truthy
       end
     end
@@ -58,10 +92,12 @@ RSpec.describe Sections::RenderSectionItem do
         <p>now is the time for all good women to come to the aid of their country</p>
       RENDERED_DOC
 
-      let(:section_item_body) { body.merge(markup: liquid_markup) }
-      let(:section_item) { section.merge(section_item_body: section_item_body) }
+      let(:template) do
+        base_template.deep_merge(body: { markup: liquid_markup })
+      end
+
       it 'should render the content without error substituting the liquid variable' do
-        result = subject.call(section_item: section_item)
+        result = subject.call(template: template)
 
         expect(result.success?).to be_truthy
         expect(result.value!.lstrip!).to eq rendered_doc
@@ -77,13 +113,13 @@ RSpec.describe Sections::RenderSectionItem do
         <p>now is the time for all good women to come to the aid of their country</p>
       RENDERED_DOC
 
-      let(:section_item_body) { body.merge(markup: liquid_markup) }
-      let(:section_item) { section.merge(section_item_body: section_item_body) }
+      let(:template) do
+        base_template.deep_merge(body: { markup: liquid_markup })
+      end
       let(:attributes) { { gender: 'women' } }
 
       it 'should render the content without error substituting the passsed attribute' do
-        result =
-          subject.call({ section_item: section_item, attributes: attributes })
+        result = subject.call({ template: template, attributes: attributes })
 
         expect(result.success?).to be_truthy
         expect(result.value!).to eq rendered_doc
@@ -100,13 +136,13 @@ RSpec.describe Sections::RenderSectionItem do
         <p>now is the time for all good people to come to the aid of their country</p>
       RENDERED_DOC
 
-      let(:section_item_body) { body.merge(markup: liquid_markup) }
-      let(:section_item) { section.merge(section_item_body: section_item_body) }
+      let(:template) do
+        base_template.deep_merge(body: { markup: liquid_markup })
+      end
       let(:attributes) { { gender: 'women' } }
 
       it 'should render the content without error substituting the liquid variable' do
-        result =
-          subject.call({ section_item: section_item, attributes: attributes })
+        result = subject.call({ template: template, attributes: attributes })
 
         expect(result.success?).to be_truthy
         expect(result.value!.lstrip).to eq rendered_doc
@@ -114,7 +150,7 @@ RSpec.describe Sections::RenderSectionItem do
     end
   end
 
-  context 'given a SectionItem with a PDF content' do
-      it 'should render the content without error' do
+  context 'given a Template with a PDF content' do
+    it 'should render the content without error'
   end
 end
