@@ -62,6 +62,15 @@ module Templates
       result ? Success(result) : Failure(result)
     end
 
+    def update_model(record_id)
+      values = sanitize_attributes
+
+      template = Templates::TemplateModel.find(record_id)
+      result = template.update_attributes(values)
+
+      result ? Success(result) : Failure(result)
+    end
+
     # Strip any Mondoid-managed attributes from hash
     def sanitize_attributes
       to_h.reject { |k, v| Polypress::Types::MongoidPrivateKeys.include?(k) }

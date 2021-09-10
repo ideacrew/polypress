@@ -12,7 +12,8 @@ module Templates
     field :locale, type: String
     field :content_type, type: String
     field :print_code, type: String
-    field :marketplace, type: String
+    field :marketplace, type: String, default: 'aca_individual'
+    field :recipient, type: String
     field :markup_section, type: String
     field :author, type: String
     field :updated_by, type: String

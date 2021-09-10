@@ -26,6 +26,7 @@ module Templates
       optional(:content_type).maybe(:string)
       optional(:print_code).maybe(:string)
       optional(:markup_section).maybe(:string)
+      optional(:recipient).maybe(:string)
       optional(:author).maybe(:string)
       optional(:updated_by).maybe(:string)
       optional(:created_at).maybe(:time)
