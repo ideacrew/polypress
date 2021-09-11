@@ -19,17 +19,15 @@ module Sections
     params do
       optional(:_id).value(:string)
       required(:key).value(:string)
-      # optional(:section_item).hash do
-        required(:title).value(:string)
-        optional(:description).maybe(:string)
-        required(:marketplace).value(AcaEntities::Types::MarketPlaceKinds)
-        optional(:locale).maybe(:string)
-        optional(:body).value(Bodies::BodyContract.params)
-        optional(:author).maybe(:string)
-        optional(:updated_by).maybe(:string)
-        optional(:created_at).maybe(:time)
-        optional(:updated_at).maybe(:time)
-      # end
+      required(:title).value(:string)
+      optional(:description).maybe(:string)
+      required(:marketplace).value(AcaEntities::Types::MarketPlaceKinds)
+      optional(:locale).maybe(:string)
+      optional(:body).value(Bodies::BodyContract.params)
+      optional(:author).maybe(:string)
+      optional(:updated_by).maybe(:string)
+      optional(:created_at).maybe(:time)
+      optional(:updated_at).maybe(:time)
     end
   end
 end

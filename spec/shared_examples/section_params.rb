@@ -5,7 +5,8 @@ RSpec.shared_context 'section_params' do
   let(:key) { 'address_block' }
 
   let(:title) { 'Address Block' }
-  let(:description) { 'A reusable address for customer letters' }
+  let(:description) { 'UQHP determination notice content' }
+  let(:marketplace) { 'aca_individual' }
   let(:locale) { 'en' }
   let(:body) do
     {
@@ -20,20 +21,18 @@ RSpec.shared_context 'section_params' do
   let(:created_at) { Time.now }
   let(:updated_at) { created_at }
 
-  let(:required_params) { { key: key, section_item: { title: title } } }
+  let(:required_params) { { key: key, title: title, marketplace: marketplace } }
 
   let(:optional_params) do
     {
       _id: _id,
-      section_item: {
-        description: description,
-        body: body,
-        locale: locale,
-        author: author,
-        updated_by: updated_by,
-        created_at: created_at,
-        updated_at: updated_at
-      }
+      description: description,
+      body: body,
+      locale: locale,
+      author: author,
+      updated_by: updated_by,
+      created_at: created_at,
+      updated_at: updated_at
     }
   end
 
