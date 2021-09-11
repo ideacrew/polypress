@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# rubocop:disable Style/BlockDelimiters
+
 require 'rails_helper'
 require 'shared_examples/section_params'
 
@@ -40,10 +42,7 @@ RSpec.describe Sections::Section do
 
   context '#create_model' do
     context 'and a new record is added to the database' do
-      before do
-        section_entity = described_class.call(all_params)
-        result = section_entity.create_model
-      end
+      before { described_class.call(all_params).create_model }
 
       it 'database should have one Section record present' do
         result = Sections::SectionModel.all.to_a
@@ -60,3 +59,4 @@ RSpec.describe Sections::Section do
     end
   end
 end
+# rubocop:enable Style/BlockDelimiters

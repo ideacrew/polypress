@@ -1,5 +1,9 @@
 # frozen_string_literal: true
 
+# rubocop:disable Layout/MultilineMethodCallIndentation
+# rubocop:disable Layout/FirstArgumentIndentation
+# rubocop:disable Layout/MultilineOperationIndentation
+
 # RenderLiquid
 class RenderLiquid
   send(:include, Config::SiteHelper)
@@ -29,34 +33,55 @@ class RenderLiquid
 
   def render_cover_page(params)
     entity = construct_defaults(params)
-    markup = ApplicationController.new.render_to_string(template: 'templates/ivl_template', layout: false).to_str
-    template = Templates::Template.new({
-      title: 'coverpage',
-      key: 'coverpage',
-      marketplace: 'aca_individual',
-      body: {
-        markup: markup
-      }
-    })
+    markup =
+      ApplicationController
+        .new
+        .render_to_string(template: 'templates/ivl_template', layout: false)
+        .to_str
+    template =
+      Templates::Template.new(
+        {
+          title: 'coverpage',
+          key: 'coverpage',
+          marketplace: 'aca_individual',
+          body: {
+            markup: markup
+          }
+        }
+      )
 
-    Templates::Render.new.call(template: template, attributes: entity&.deep_stringify_keys)
+    Templates::Render.new.call(
+      template: template,
+      attributes: entity&.deep_stringify_keys
+    )
   end
 
   def render_body(params)
     entity = construct_defaults(params)
-    Templates::Render.new.call(template: params[:template], attributes: entity&.deep_stringify_keys)
+    Templates::Render.new.call(
+      template: params[:template],
+      attributes: entity&.deep_stringify_keys
+    )
   end
 
   def render_document(cover_page, body, params)
     entity = construct_defaults(params)
     document_body = cover_page + body
-    template = ApplicationController.new.render_to_string(inline: document_body, layout: 'layouts/ivl_pdf_layout')
+    template =
+      ApplicationController.new.render_to_string(
+        inline: document_body,
+        layout: 'layouts/ivl_pdf_layout'
+      )
 
     Success({ rendered_template: template, entity: entity })
   end
 
   def parse_cover_page
-    cover_page_content = ApplicationController.new.render_to_string(template: 'templates/ivl_template', layout: false).to_str
+    cover_page_content =
+      ApplicationController
+        .new
+        .render_to_string(template: 'templates/ivl_template', layout: false)
+        .to_str
     cover_page = Liquid::Template.parse(cover_page_content, line_numbers: true)
     Success(cover_page)
   rescue StandardError => e
@@ -73,7 +98,11 @@ class RenderLiquid
 
   def fetch_entity_hash(params)
     if params[:instant_preview] || params[:preview]
-      return family_hash if ['enrollment_submitted', '1_outstanding_verifications_insert'].include?(params[:key].to_s)
+      if %w[enrollment_submitted 1_outstanding_verifications_insert].include?(
+           params[:key].to_s
+         )
+        return family_hash
+      end
       application_hash
     else
       params[:entity].to_h
@@ -84,59 +113,83 @@ class RenderLiquid
     mailing_address = nil
     recipient_name =
       if params[:applicants]
-        applicant = params[:applicants].detect { |app| app[:is_primary_applicant] } || params[:applicants][0]
+        applicant =
+          params[:applicants].detect { |app| app[:is_primary_applicant] } ||
+            params[:applicants][0]
         mailing_address = applicant[:addresses][0]
         applicant[:name]
       else
-        applicant = params[:family_members].detect { |app| app[:is_primary_applicant] } || params[:family_members][0]
+        applicant =
+          params[:family_members].detect { |app| app[:is_primary_applicant] } ||
+            params[:family_members][0]
         mailing_address = applicant[:person][:addresses][0]
         applicant[:person][:person_name]
       end
-    ["#{recipient_name[:first_name].titleize} #{recipient_name[:last_name].titleize}", mailing_address]
+    [
+      "#{recipient_name[:first_name].titleize} #{recipient_name[:last_name].titleize}",
+      mailing_address
+    ]
   end
 
   def site_settings
-    Config::SiteHelper.instance_methods(false).sort.each_with_object({}) do |method, settings_hash|
-      begin
-        settings_hash[method] = self.send(method)
-      rescue StandardError => e
-        Rails.logger.error { "Undefined setting #{method} due to #{e.inspect}" }
+    Config::SiteHelper
+      .instance_methods(false)
+      .sort
+      .each_with_object({}) do |method, settings_hash|
+        begin
+          settings_hash[method] = self.send(method)
+        rescue StandardError => e
+          Rails.logger.error do
+            "Undefined setting #{method} due to #{e.inspect}"
+          end
+        end
+        settings_hash
       end
-      settings_hash
-    end
   end
 
-  # rubocop:disable Metrics/AbcSize
   def construct_defaults(params)
     entity_hash = fetch_entity_hash(params)
+
     # oe_end_on_year = entity_hash[:oe_start_on].year
-    settings_hash = {
-      :mailing_address => recipient_name_and_address(entity_hash)[1],
-      :recipient_full_name => recipient_name_and_address(entity_hash)[0],
-      :key => params[:key],
-      :notice_number => params[:subject],
-      :day_45_from_now => Date.today + 45.days,
-      :day_95_from_now => Date.today + 95.days,
-      :oe_end_on => Date.new(2021, 12, 15)
-    }.merge(site_settings)
+    settings_hash =
+      {
+        mailing_address: recipient_name_and_address(entity_hash)[1],
+        recipient_full_name: recipient_name_and_address(entity_hash)[0],
+        key: params[:key],
+        notice_number: params[:subject],
+        day_45_from_now: Date.today + 45.days,
+        day_95_from_now: Date.today + 95.days,
+        oe_end_on: Date.new(2021, 12, 15)
+      }.merge(site_settings)
     entity_hash.merge(settings_hash)
   end
-  # rubocop:enable Metrics/AbcSize
 
   def render(body, cover_page, params)
     entity = construct_defaults(params)
-    rendered_body = body.render(entity&.deep_stringify_keys, { strict_variables: true })
+    rendered_body =
+      body.render(entity&.deep_stringify_keys, { strict_variables: true })
     document_body =
       if cover_page
-        rendered_cover_page = cover_page.render(entity&.deep_stringify_keys, { strict_variables: true })
+        rendered_cover_page =
+          cover_page.render(
+            entity&.deep_stringify_keys,
+            { strict_variables: true }
+          )
         rendered_cover_page + rendered_body
       else
         rendered_body
       end
-    template = ApplicationController.new.render_to_string(inline: document_body, layout: 'layouts/ivl_pdf_layout')
+    template =
+      ApplicationController.new.render_to_string(
+        inline: document_body,
+        layout: 'layouts/ivl_pdf_layout'
+      )
 
     return Failure(body.errors) if body.errors.present?
 
     Success({ rendered_template: template, entity: entity })
   end
 end
+# rubocop:enable Layout/MultilineMethodCallIndentation
+# rubocop:enable Layout/FirstArgumentIndentation
+# rubocop:enable Layout/MultilineOperationIndentation
