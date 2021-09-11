@@ -86,5 +86,6 @@ module Tags
   end
 
   # Template.register_tag('render', Render)
-  Liquid::Template.register_tag('render_section', Tags::RenderSection)
 end
+
+Liquid::Template.register_tag('render_section', Tags::RenderSection)
