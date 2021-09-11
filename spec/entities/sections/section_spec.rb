@@ -7,7 +7,7 @@ RSpec.describe Sections::Section do
   subject { described_class.new }
   include_context 'section_params'
 
-  before { Sections::SectionModel.create_indexes }
+  # before { Sections::SectionModel.create_indexes }
 
   context '.new' do
     context 'given missing or invalid parameters' do
