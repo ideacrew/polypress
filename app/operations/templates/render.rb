@@ -17,7 +17,6 @@ module Templates
     def call(params)
       values = yield validate(params)
       html_doc = yield render(values)
-
       Success(html_doc)
     end
 
@@ -36,30 +35,37 @@ module Templates
 
     # rubocop:disable Metrics/MethodLength
     def render(values)
-      Try() do
-        Liquid::Template.parse(
-          values[:template][:body][:markup],
-          error_mode: :strict,
-          line_numbers: true
-        )
+      # Try() do
+
+      begin
+        parsed_doc = Liquid::Template.parse(
+            values[:template][:body][:markup],
+            error_mode: :strict,
+            line_numbers: true
+          )
+      rescue Exception => e
+        return Failure(e)
+      end
+
         # rubocop:disable Style/MultilineBlockChain
-      end.bind do |parsed_doc|
+      # end.bind do |parsed_doc|
         # rubocop:enable Style/MultilineBlockChain
-
         return Failure(parsed_doc) if parsed_doc.errors.present?
-
+      
         rendered_doc =
           parsed_doc.render(
             values[:attributes].deep_stringify_keys,
             { strict_variables: true }
           )
 
+
         if parsed_doc.errors.present? || rendered_doc.to_s.empty?
           Failure(parsed_doc)
         else
           Success(rendered_doc)
         end
-      end
+
+      # end
       # rubocop:enable Metrics/MethodLength
     end
   end
