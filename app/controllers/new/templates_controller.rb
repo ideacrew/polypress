@@ -94,7 +94,9 @@ class New::TemplatesController < ::ApplicationController
     if template.success?
       @rendered_template = template.success[:rendered_template]
     else
-      @errors = Array.wrap(template.failure).flatten
+      errors = template.failure
+      errors = template.failure.errors if template.failure.respond_to?(:errors)
+      @errors = Array.wrap(errors).flatten
     end
   end
 
