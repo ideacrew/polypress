@@ -11,6 +11,7 @@ class New::TemplatesController < ::ApplicationController
   def index
     @notice_kinds = Templates::TemplateModel.all
     @datatable = Effective::Datatables::NoticesDatatable.new
+    @tab = params[:tab] || 'templates'
     @errors = []
   end
 
@@ -74,6 +75,15 @@ class New::TemplatesController < ::ApplicationController
     template = RenderLiquid.new.call(
       {
         body: instant_preview_params[:body],
+        template: {
+          key: instant_preview_params[:key],
+          subject: instant_preview_params[:subject],
+          title: instant_preview_params[:title],
+          marketplace: instant_preview_params[:marketplace],
+          body: {
+            markup: instant_preview_params[:body]
+          }
+        },
         subject: instant_preview_params[:subject],
         key: instant_preview_params[:key],
         cover_page: true,
@@ -197,7 +207,7 @@ class New::TemplatesController < ::ApplicationController
   private
 
   def instant_preview_params
-    params.permit(:body, :subject, :key)
+    params.permit(:body, :subject, :key, :title, :marketplace)
   end
 
   def file_content_type

@@ -38,6 +38,10 @@
 
 <script type="text/javascript" charset="utf-8">
 
+  $(function () {
+    $("#nav-<%= @tab %>-tab").tab('show');
+  })
+
   // initializeDataTables();
 
   $('a.download-notices').click(function(e) {

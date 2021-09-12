@@ -31,11 +31,11 @@ class New::SectionsController < ApplicationController
         @errors = Array.wrap(record.failure)
         @sections = Sections::SectionModel.all
 
-        redirect_to controller: 'new/templates', action: :index
+        redirect_to controller: 'new/templates', action: :index, tab: 'sections'
       end
     else
       flash[:error] = "Unable to create section due to #{result.errors}"
-      redirect_to controller: 'new/templates', action: :index
+      redirect_to controller: 'new/templates', action: :index, tab: 'sections'
     end
   end
 
@@ -47,7 +47,7 @@ class New::SectionsController < ApplicationController
     if result.success?
       Sections::Section.new(result.to_h).update_model(params['id'])
       flash[:notice] = 'Section content updated successfully'
-      redirect_to controller: 'new/templates', action: :index
+      redirect_to controller: 'new/templates', action: :index, tab: 'sections'
     else
       flash[:error] = "Unable to update section due to #{result.errors}"
       render :action => 'index'  
