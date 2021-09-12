@@ -7,31 +7,34 @@ RSpec.describe Templates::Template do
   subject { described_class.new }
   include_context 'template_params'
 
+  before { Templates::TemplateModel.create_indexes }
+
   context '.new' do
     context 'given missing or invalid parameters' do
       it 'operation should fail' do
         invalid_params = required_params.delete(required_params.keys.first)
         expect {
-          described_class.new.call(invalid_params)
+          described_class.call(invalid_params)
         }.to raise_error Dry::Struct::Error
       end
     end
 
     context 'given valid parameters' do
-      it 'all params should pass validation' do
-        values = Templates::TemplateContract.new.call(all_params)
-
-        expect(values.success?).to be_truthy
+      it 'required params only should pass contract validation' do
+        valid_params = Templates::TemplateContract.new.call(required_params)
+        expect(valid_params.success?).to be_truthy
+        expect(valid_params.to_h).to eq required_params
       end
 
-      it 'required params only should pass validation' do
-        result = described_class.call(required_params)
-        expect(result.to_h).to eq required_params
+      it 'all params should pass contract validation' do
+        valid_params = Templates::TemplateContract.new.call(all_params)
+        expect(valid_params.success?).to be_truthy
+        expect(valid_params.to_h).to eq all_params
       end
 
-      it 'operation should succeed' do
-        result = described_class.call(all_params)
-        expect(result.to_h).to eq all_params
+      it 'all params should sucessfully create an entity' do
+        valid_params = Templates::TemplateContract.new.call(all_params)
+        expect(valid_params.to_h).to eq all_params
       end
     end
   end
@@ -39,15 +42,14 @@ RSpec.describe Templates::Template do
   context '#create_model' do
     context 'and a new record is added to the database' do
       before do
-        template_entity = described_class.call(all_params)
-        result = template_entity.create_model
+        validated_template = Templates::TemplateContract.new.call(all_params)
+        described_class.call(validated_template.to_h).create_model
       end
 
       it 'database should have one Template record present' do
-        result = Templates::TemplateModel.all.to_a
-
-        expect(result.size).to eq 1
-        expect(result.first[:key]).to eq all_params[:key]
+        result = Templates::Find.new.call(scope_name: :all)
+        expect(result.success.size).to eq 1
+        expect(result.success.first[:key]).to eq all_params[:key]
       end
 
       it 'a second attempt to add record with same key should fail' do

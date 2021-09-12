@@ -29,6 +29,8 @@ module Templates
       optional(:content_type).maybe(:string)
       optional(:body).value(Bodies::BodyContract.params)
       optional(:print_code).maybe(:string)
+      optional(:publisher).maybe(EventRoutes::EventRouteContract.params)
+      optional(:subscriber).maybe(EventRoutes::EventRouteContract.params)
       optional(:author).maybe(:string)
       optional(:updated_by).maybe(:string)
       optional(:published_at).maybe(:time)

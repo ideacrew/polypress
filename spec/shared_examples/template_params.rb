@@ -24,6 +24,12 @@ RSpec.shared_context 'template_params' do
     }
   end
 
+  let(:publisher_event_name) { 'on_polypress.greeting_notice.published' }
+  let(:publisher) { { event_name: publisher_event_name } }
+
+  let(:subscriber_event_name) { 'enroll_app.customer_created' }
+  let(:subscriber) { { event_name: subscriber_event_name } }
+
   let(:required_params) { { key: key, title: title, marketplace: marketplace } }
   let(:optional_params) do
     {
@@ -33,6 +39,8 @@ RSpec.shared_context 'template_params' do
       body: body,
       content_type: content_type,
       print_code: print_code,
+      publisher: publisher,
+      subscriber: subscriber,
       author: author,
       updated_by: updated_by,
       created_at: created_at,

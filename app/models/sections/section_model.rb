@@ -24,8 +24,7 @@ module Sections
     scope :by_id, ->(value) { value[:_id] }
 
     def to_entity
-      # self.serializable_hash(except: %w[_id])
-      serializable_hash
+      serializable_hash.merge('_id' => id.to_s).deep_symbolize_keys
     end
   end
 end
