@@ -12,7 +12,7 @@ module ApplicationHelper
   end
 
   def path_for_notice_preview(template)
-    link_to template.subject, preview_template_path(template), target: '_blank'
+    link_to template.subject, preview_new_template_path(template), target: '_blank'
   end
 
   def individual_market(_recipient)

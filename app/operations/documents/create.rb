@@ -18,10 +18,15 @@ module Documents
     private
 
     def fetch_template(params)
-      template = Template.where(key: params[:key]).first
-
-      if template
-        Success(template)
+      record = Templates::TemplateModel.where(key: params[:key]).first
+      if record
+        result = Templates::TemplateContract.new.call(record.to_entity)
+        if result.success?
+          template = Templates::Template.new(result.to_h)
+          Success(template)
+        else
+          Failure(result)
+        end
       else
         Failure("Unable to find template with #{params[:key]}")
       end
@@ -30,7 +35,8 @@ module Documents
     def render_liquid_template(template, params)
       RenderLiquid.new.call(
         body: template.body,
-        subject: template.subject,
+        template: template,
+        subject: template.print_code,
         key: params[:key],
         cover_page: params[:cover_page],
         entity: params[:entity],

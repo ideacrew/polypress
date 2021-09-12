@@ -1,0 +1,18 @@
+<div>
+    <div class="form-group col-xs-8">
+      <label for="noticeTitle">Title *</label>
+      <%= f.text_field :title, class: 'form-control', required: true %>
+    </div>
+
+    <div class="form-group col-xs-8">
+      <label for="noticeDescription">Description</label>
+      <%= f.text_field :description, class: 'form-control' %>
+    </div>
+
+    <div class="form-group col-xs-8">
+      <label for="noticeMarketplace">Select Marketplace</label>
+      <%= f.select(:marketplace, options_for_select(::AcaEntities::Types::MarketPlaceKinds.values.collect{ |market| [market.to_s.titleize, market] }, selected: section.marketplace), {include_blank: false}, {:class => 'form-control'} ) %>
+    </div>
+
+    <%= hidden_field_tag 'section_recipient' %>
+</div>

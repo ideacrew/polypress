@@ -26,36 +26,35 @@ services:
       RABBITMQ_URL_EVENT_SOURCE: ${RABBITMQ_URL_EVENT_SOURCE:-amqp://guest:guest@amqp:5672}
       RABBITMQ_USERNAME: ${AMQP_USERNAME:-guest}
       RAILS_ENV: ${RAILS_ENV:-development}
-    tmpfs:
-      - /tmp
-    command: bash -c "rm -f tmp/pids/server.pid && mkdir -p tmp/pids && yarn install --check-files && bundle install && bundle exec puma -C config/puma.rb"
     depends_on:
       - mongodb
-      - rabbitmq
+      # - rabbitmq
+    tmpfs:
+      - /tmp
+    command: bash -c "rm -rf tmp/pids/server.pid && mkdir -p tmp/pids && bundle exec bundle install &&  bin/rails server --port 3000 --binding 0.0.0.0"
 
   mongodb:
-    image: mongo:4.2
+    image: mongo:4.4
     volumes:
       - mongodb:/data/db
-      - mongodb_config:/data/configdb
+      - mongodb:/data/var/log/mongodb/
+      # - mongodb_config:/data/configdb
     ports:
       - 27017:27017
 
   rabbitmq:
-    image: rabbitmq:3.8-management
-    container_name: polypress_rabbitmq
+    build: .docker/rabbitmq
+    hostname: rabbitmq
+    env_file:
+      - .docker/rabbitmq/rabbitmq.env
     volumes:
       - rabbitmq_etc:/etc/rabbitmq/
       - rabbitmq_data:/var/lib/rabbitmq/
       - rabbitmq_logs:/var/log/rabbitmq/
-    environment:
-      - RABBITMQ_ERLANG_COOKIE=${RABBITMQ_ERLANG_COOKIE:-123456789}
-      - RABBITMQ_USER=${RABBITMQ_DEFAULT_USER:-guest}
-      - RABBITMQ_PASSWORD=${RABBITMQ_DEFAULT_PASS:-guest}
+      - ./.docker/rabbitmq/rabbitmq.config:/etc/rabbitmq/rabbitmq.config:ro
+      - ./.docker/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
     ports:
-      - 4369
       - 5672:5672
-      - 25672:25672
       - 15672:15672
 
 volumes:
@@ -64,7 +63,7 @@ volumes:
   node_modules:
   packs:
   mongodb:
-  mongodb_config:
+  # mongodb_config:
   rabbitmq_etc:
   rabbitmq_data:
   rabbitmq_logs:
