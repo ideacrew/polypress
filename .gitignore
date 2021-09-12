@@ -22,10 +22,11 @@
 /public/assets
 .byebug_history
 .bash_history
-.local
 .irb_history
-.yardoc/
-/doc
+.local
+.yardoc
+
+doc/
 
 # Ignore master key for decrypting credentials and more.
 /config/master.key
@@ -36,3 +37,4 @@
 /yarn-error.log
 yarn-debug.log*
 .yarn-integrity
+.vscode/
