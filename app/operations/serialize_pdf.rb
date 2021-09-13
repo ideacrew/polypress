@@ -43,7 +43,7 @@ class SerializePdf
   def set_margin
     {
       top: 10,
-      bottom: 20,
+      bottom: 24,
       left: 22,
       right: 22
     }
