@@ -32,6 +32,8 @@ class RenderLiquid
   private
 
   def render_cover_page(params)
+    return Success(String.new) if params[:section_preview]
+
     entity = construct_defaults(params)
     markup =
       ApplicationController

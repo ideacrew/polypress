@@ -54,11 +54,44 @@ class New::SectionsController < ApplicationController
     end
   end
 
+  def instant_preview
+    template = RenderLiquid.new.call(
+      {
+        body: instant_preview_params[:body],
+        template: {
+          key: instant_preview_params[:title].split(/\s/).join('_').downcase,
+          subject: instant_preview_params[:subject],
+          title: instant_preview_params[:title],
+          marketplace: instant_preview_params[:marketplace],
+          body: {
+            markup: instant_preview_params[:body]
+          }
+        },
+        subject: instant_preview_params[:subject],
+        key: instant_preview_params[:title].split(/\s/).join('_').downcase,
+        cover_page: true,
+        instant_preview: 'true',
+        section_preview: true
+      }
+    )
+
+    if template.success?
+      @rendered_template = template.success[:rendered_template]
+    else
+      errors = template.failure
+      errors = template.failure.errors if template.failure.respond_to?(:errors)
+      @errors = Array.wrap(errors).flatten
+    end
+  end
 
   def delete_section
   end
 
   private
+
+  def instant_preview_params
+    params.permit(:body, :subject, :key, :title, :marketplace)
+  end
 
   def section_params
     params.require(:section).permit(*::Sections::SectionContract.params.key_map.dump)
