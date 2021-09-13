@@ -11,19 +11,38 @@ module Templates
     field :description, type: String
     field :locale, type: String
     field :marketplace, type: String, default: 'aca_individual'
-
     field :print_code, type: String
     field :content_type, type: String
     field :published_at, type: DateTime
     field :recipient, type: String
-
-    embeds_one :body, class_name: 'Bodies::BodyModel'
-    accepts_nested_attributes_for :body
-
     field :author, type: String
     field :updated_by, type: String
 
+    embeds_one :publisher,
+               inverse_of: :publisher_event,
+               class_name: 'EventRoutes::EventRouteModel',
+               cascade_callbacks: true
+
+    embeds_one :subscriber,
+               inverse_of: :subscriber_event,
+               class_name: 'EventRoutes::EventRouteModel',
+               cascade_callbacks: true
+
+    embeds_one :body, class_name: 'Bodies::BodyModel', cascade_callbacks: true
+
+    accepts_nested_attributes_for :body, :publisher, :subscriber
+
     index({ key: 1 }, { unique: true, name: 'key_index' })
+    index({ published_at: 1 }, { sparse: true })
+    index({ marketpalce: 1 })
+    index(
+      { 'publisher.event_name': 1 },
+      { sparse: true, name: 'publisher_index' }
+    )
+    index(
+      { 'subscriber.event_name': 1 },
+      { sparse: true, name: 'subscriber_index' }
+    )
 
     scope :all, -> { exists(_id: true) }
     scope :aca_individual_market, -> { where(marketplace: 'aca_individual') }
@@ -32,9 +51,13 @@ module Templates
     scope :draft, -> { exists(published_at: false) }
     scope :by_key, ->(value) { where(key: value[:value]) }
     scope :by_id, ->(value) { value[:_id] }
+    scope :by_publisher,
+          ->(value) { where('publisher.event_name': value[:event_name]) }
+    scope :by_subscriber,
+          ->(value) { where('subscriber.event_name': value[:event_name]) }
 
     def to_entity
-      serializable_hash.merge("_id" => id.to_s).deep_symbolize_keys
+      serializable_hash.merge('_id' => id.to_s).deep_symbolize_keys
     end
 
     def to_s

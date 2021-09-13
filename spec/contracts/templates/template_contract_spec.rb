@@ -28,6 +28,12 @@ RSpec.describe Templates::TemplateContract do
     }
   end
 
+  let(:publisher_event_name) { 'on_polypress.greeting_notice.published' }
+  let(:publisher) { { event_name: publisher_event_name } }
+
+  let(:subscriber_event_name) { 'enroll_app.customer_created' }
+  let(:subscriber) { { event_name: subscriber_event_name } }
+
   let(:required_params) { { key: key, title: title, marketplace: marketplace } }
   let(:optional_params) do
     {
@@ -37,6 +43,8 @@ RSpec.describe Templates::TemplateContract do
       body: body,
       content_type: content_type,
       print_code: print_code,
+      publisher: publisher,
+      subscriber: subscriber,
       author: author,
       updated_by: updated_by,
       created_at: created_at,
@@ -55,7 +63,18 @@ RSpec.describe Templates::TemplateContract do
 
     context 'and the marketplace param is invalid' do
       let(:invalid_marketplace) { 'bogus_marketplace' }
-      it 'should return an error message'
+      let(:marketplace_error_message) do
+        [
+          'must be one of: aca_individual, aca_shop, aca_congress, individual, cover_all, group, fehb, medicaid'
+        ]
+      end
+      it 'should return an error message' do
+        result =
+          subject.call(required_params.merge(marketplace: invalid_marketplace))
+
+        expect(result.success?).to be_falsey
+        expect(result.errors.to_h[:marketplace]).to eq marketplace_error_message
+      end
     end
   end
 

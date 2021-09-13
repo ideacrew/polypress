@@ -1,9 +1,16 @@
 # frozen_string_literal: true
 
 module Templates
+  # Definition - typically combined with merged data - for generating a
+  # structured document.  The class includes information about subscribe
+  # and publish events that enable automatated document creation and
+  # distribution
   class Template < Dry::Struct
     include Dry::Monads[:result, :do, :try]
 
+    # @!attribute [r] key
+    # The backing store's unique identifier for this entity
+    # @return [Symbol]
     attribute :_id, Types::String.meta(omittable: true) # unique identifier
 
     # @!attribute [r] key
@@ -29,43 +36,60 @@ module Templates
     attribute :locale, Types::String.optional.meta(omittable: true)
 
     # @!attribute [r] body
-    # The content and composition to parse and render
+    # The document content and composition to parse and render
     # @return [Bodies::Body]
-    attribute :body, Bodies::Body.meta(omittable: true)
+    attribute :body, Bodies::Body.optional.meta(omittable: true)
 
-    # @!attribute [r] locale
-    # Template's written Language
+    # @!attribute [r] content_type
+    # The mime type of the generated document
     # @return [String]
     attribute :content_type, Types::String.optional.meta(omittable: true)
 
     # @!attribute [r] print_code
-    # Reference to the person/topic that output document discusses/deals with
+    # Customer-assigned code reference reagarding the subject or topic of the
+    # generated document
     # For example, notice_number: IVL_FEL
     # @return [String]
     attribute :print_code, Types::String.optional.meta(omittable: true)
 
     # @!attribute [r] marketplace
+    # The system marketplace that this document belongs to
     # @return [String]
     attribute :marketplace,
               AcaEntities::Types::MarketPlaceKinds.meta(omittable: false)
 
+    # @!attribute [r] publisher
+    # The Event used to publish a document generated from this Template
+    # @return [EventRoutes::EventRoute]
+    attribute :publisher, EventRoutes::EventRoute.optional.meta(omittable: true)
+
+    # @!attribute [r] subscriber
+    # The Event that triggers generation of a document using this template
+    # @return [EventRoutes::EventRoute]
+    attribute :subscriber,
+              EventRoutes::EventRoute.optional.meta(omittable: true)
+
+    # @!attribute [r] author
+    # The Account ID of person who created this Template
+    # @return [String]
     attribute :author, Types::String.optional.meta(omittable: true)
 
     # @!attribute [r] updated_by
-    # The Account ID of the last person who updated this entity
+    # The Account ID of the person who last updated this entity
     # @return [String]
     attribute :updated_by, Types::String.optional.meta(omittable: true)
 
     # @!attribute [r] created_at
-    # Timestamp when this this entity was created
+    # Timestamp when this entity was created
     # @return [Time]
     attribute :created_at, Types::Time.meta(omittable: true)
 
     # @!attribute [r] updated_at
-    # Date when this this entity was last updated
+    # Date when this entity was last updated
     # @return [Time]
     attribute :updated_at, Types::Time.meta(omittable: true)
 
+    # Persist the template to the backing store
     def create_model
       values = sanitize_attributes
 
@@ -73,6 +97,7 @@ module Templates
       result ? Success(result) : Failure(result)
     end
 
+    # Update the template in the backing store
     def update_model(record_id)
       values = sanitize_attributes
 
@@ -81,6 +106,8 @@ module Templates
 
       result ? Success(result) : Failure(result)
     end
+
+    private
 
     # Strip any Mondoid-managed attributes from hash
     def sanitize_attributes
