@@ -79,6 +79,7 @@ RSpec.describe Tags::RenderSection do
     end
 
     context "given markup with the render_section tag and the section doesn't exist" do
+      # TODO
     end
 
     context 'given markup with the render_section tag and the section does exist' do

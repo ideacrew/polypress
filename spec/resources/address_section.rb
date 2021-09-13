@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# AddressSection
 class AddressSection
   markup = <<~MARKUP
     {% assign primary_member = family.family_members | where: 'primary_member', true | first %}

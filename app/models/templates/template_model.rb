@@ -64,6 +64,7 @@ module Templates
       [raw_header, raw_body, raw_footer].join('\n\n')
     end
 
+    # rubocop:disable Metrics/MethodLength
     def data_elements
       return unless body.present?
 
@@ -99,6 +100,7 @@ module Templates
         end
       data_elements + iterator_subloop_tokens
     end
+    # rubocop:enable Metrics/MethodLength
 
     def conditional_tokens
       keywords = {

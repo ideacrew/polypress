@@ -46,10 +46,23 @@ module Tags
           context: context,
           parse_context: parse_context
         )
+      render_partial_func = render_partial_func(partial, context, template_name, output)
 
+      variable =
+        @variable_name_expr ? context.evaluate(@variable_name_expr) : nil
+      if @for && variable.respond_to?(:each) && variable.respond_to?(:count)
+        forloop = Liquid::ForloopDrop.new(template_name, variable.count, nil)
+        variable.each { |var| render_partial_func.call(var, forloop) }
+      else
+        render_partial_func.call(variable, nil)
+      end
+
+      output
+    end
+
+    def render_partial_func(partial, context, template_name, output)
       context_variable_name = @alias_name || template_name.split('/').last
-
-      render_partial_func = lambda do |var, forloop|
+      lambda do |var, forloop|
         inner_context = context.new_isolated_subcontext
         inner_context.template_name = template_name
         inner_context.partial = true
@@ -62,17 +75,6 @@ module Tags
         partial.render_to_output_buffer(inner_context, output)
         forloop&.send(:increment!)
       end
-
-      variable =
-        @variable_name_expr ? context.evaluate(@variable_name_expr) : nil
-      if @for && variable.respond_to?(:each) && variable.respond_to?(:count)
-        forloop = Liquid::ForloopDrop.new(template_name, variable.count, nil)
-        variable.each { |var| render_partial_func.call(var, forloop) }
-      else
-        render_partial_func.call(variable, nil)
-      end
-
-      output
     end
 
     # ParseTreeVisitor

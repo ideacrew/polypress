@@ -44,6 +44,14 @@ module Config
       PolypressRegistry[:enroll_app].setting(:contact_center_short_number).item
     end
 
+    def contact_center_short_number
+      PolypressRegistry[:enroll_app].setting(:contact_center_short_number).item
+    end
+
+    def contact_center_tty_number
+      PolypressRegistry[:enroll_app].setting(:contact_center_tty_number).item
+    end
+
     def health_benefit_exchange_authority_phone_number
       PolypressRegistry[:enroll_app].setting(:health_benefit_exchange_authority_phone_number).item
     end

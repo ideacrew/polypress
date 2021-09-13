@@ -42,7 +42,7 @@ module FinancialApplicationHelper
       :family_member_hbx_id => "1000",
       :first_name => "Gerald",
       :last_name => "Rivers",
-      :person_hbx_id => "95",
+      :person_hbx_id => "95000000",
       :is_primary_family_member => true
     }
   end
@@ -80,8 +80,8 @@ module FinancialApplicationHelper
 
   def benchmark_premium
     {
-      :health_only_lcsp_premiums => [{ :member_identifier => "95", :monthly_premium => 430.48 }],
-      :health_only_slcsp_premiums => [{ :member_identifier => "95", :monthly_premium => 496.23 }]
+      :health_only_lcsp_premiums => [{ :member_identifier => "95000000", :monthly_premium => 430.48 }],
+      :health_only_slcsp_premiums => [{ :member_identifier => "95000000", :monthly_premium => 496.23 }]
     }
   end
 
@@ -134,7 +134,7 @@ module FinancialApplicationHelper
         :citizenship_immigration_status_information => citizenship_immigration_status_information,
         :is_applying_coverage => true,
         :family_member_reference => family_member_reference,
-        :person_hbx_id => "95",
+        :person_hbx_id => "95000000",
         :is_required_to_file_taxes => true,
         :tax_filer_kind => "tax_filer",
         :is_joint_tax_filing => true,
@@ -186,8 +186,8 @@ module FinancialApplicationHelper
       :us_state => "DC",
       :hbx_id => "200000126",
       :oe_start_on => Date.new(current_date.year, 11, 1),
-      :mitc_households => [{ :household_id => "1", :people => [{ :person_id => 95 }] }],
-      :mitc_tax_returns => [{ :filers => [{ :person_id => 95 }], :dependents => [] }]
+      :mitc_households => [{ :household_id => "1", :people => [{ :person_id => 9_5000_000 }] }],
+      :mitc_tax_returns => [{ :filers => [{ :person_id => 9_500_0000 }], :dependents => [] }]
     }
   end
 
@@ -226,7 +226,7 @@ module FinancialApplicationHelper
           :first_name => "Gerald",
           :last_name => "Rivers",
           :dob => member_dob,
-          :person_hbx_id => "95"
+          :person_hbx_id => "9500000"
         }
       },
       {
@@ -247,7 +247,7 @@ module FinancialApplicationHelper
           :first_name => "Alicia",
           :last_name => "Rivers",
           :dob => member_dob,
-          :person_hbx_id => "96"
+          :person_hbx_id => "9600000"
         }
       }
     ]

@@ -42,7 +42,7 @@ module Templates
           error_mode: :strict,
           line_numbers: true
         )
-      rescue Exception => e
+      rescue StandardError => e
         return Failure(e)
       end
 

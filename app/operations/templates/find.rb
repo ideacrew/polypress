@@ -30,14 +30,15 @@ module Templates
     end
 
     def search(values)
-      Try() do
+      output = Try() do
         scope_name = values[:scope_name]
         if values[:options].present?
           Templates::TemplateModel.send(scope_name, values[:options])
         else
           Templates::TemplateModel.send(scope_name)
         end
-      end.bind do |result|
+      end
+      output.bind do |result|
         return Failure(result) unless result.is_a?(Mongoid::Criteria)
         Success(result.to_a)
       end
