@@ -206,50 +206,34 @@ module FinancialApplicationHelper
     ]
   end
 
+  def tax_household_member_determination(f_name, l_name, hbx_id)
+    {
+      :product_eligibility_determination => {
+        :is_ia_eligible => true,
+        :is_medicaid_chip_eligible => false,
+        :is_totally_ineligible => nil,
+        :is_magi_medicaid => false,
+        :is_uqhp_eligible => nil,
+        :is_csr_eligible => true,
+        :is_eligible_for_non_magi_reasons => true,
+        :csr => "94",
+        :is_non_magi_medicaid_eligible => false,
+        :is_without_assistance => false,
+        :category_determinations => category_determinations
+      },
+      :applicant_reference => {
+        :first_name => f_name,
+        :last_name => l_name,
+        :dob => member_dob,
+        :person_hbx_id => hbx_id
+      }
+    }
+  end
+
   def tax_household_members
     [
-      {
-        :product_eligibility_determination => {
-          :is_ia_eligible => true,
-          :is_medicaid_chip_eligible => false,
-          :is_totally_ineligible => nil,
-          :is_magi_medicaid => false,
-          :is_uqhp_eligible => nil,
-          :is_csr_eligible => true,
-          :is_eligible_for_non_magi_reasons => true,
-          :csr => "94",
-          :is_non_magi_medicaid_eligible => false,
-          :is_without_assistance => false,
-          :category_determinations => category_determinations
-        },
-        :applicant_reference => {
-          :first_name => "Gerald",
-          :last_name => "Rivers",
-          :dob => member_dob,
-          :person_hbx_id => "9500000"
-        }
-      },
-      {
-        :product_eligibility_determination => {
-          :is_ia_eligible => true,
-          :is_medicaid_chip_eligible => false,
-          :is_totally_ineligible => nil,
-          :is_magi_medicaid => false,
-          :is_uqhp_eligible => nil,
-          :is_csr_eligible => true,
-          :is_eligible_for_non_magi_reasons => true,
-          :csr => "94",
-          :is_non_magi_medicaid_eligible => false,
-          :is_without_assistance => false,
-          :category_determinations => category_determinations
-        },
-        :applicant_reference => {
-          :first_name => "Alicia",
-          :last_name => "Rivers",
-          :dob => member_dob,
-          :person_hbx_id => "9600000"
-        }
-      }
+      tax_household_member_determination('Gerald', 'Rivers', '9500000'),
+      tax_household_member_determination('Alicia', 'Rivers', '9600000')
     ]
   end
 
