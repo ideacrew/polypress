@@ -11,9 +11,9 @@ RSpec.describe Templates::Template do
     context 'given missing or invalid parameters' do
       it 'operation should fail' do
         invalid_params = required_params.delete(required_params.keys.first)
-        expect {
+        expect do
           described_class.new.call(invalid_params)
-        }.to raise_error Dry::Struct::Error
+        end.to raise_error Dry::Struct::Error
       end
     end
 
@@ -47,9 +47,9 @@ RSpec.describe Templates::Template do
       end
 
       it 'a second attempt to add record with same key should fail' do
-        expect {
+        expect do
           described_class.call(all_params).create_model
-        }.to raise_error Mongo::Error::OperationFailure
+        end.to raise_error Mongo::Error::OperationFailure
       end
     end
   end

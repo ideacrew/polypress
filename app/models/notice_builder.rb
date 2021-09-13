@@ -476,11 +476,11 @@ module NoticeBuilder
 
   def recipient_target
     @recipient_target ||= begin
-      if employer?
-        resource.staff_roles.first
-      elsif employee? || consumer?
-        resource.person
-      end
+                            if employer?
+                              resource.staff_roles.first
+                            elsif employee? || consumer?
+                             resource.person
+                            end
     end
   end
 end

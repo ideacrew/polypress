@@ -111,7 +111,7 @@ module Templates
 
     # Strip any Mondoid-managed attributes from hash
     def sanitize_attributes
-      to_h.reject { |k, v| Polypress::Types::MongoidPrivateKeys.include?(k) }
+      to_h.reject { |k, _v| Polypress::Types::MONGOID_PRIVATE_KEYS.include?(k) }
     end
   end
 end

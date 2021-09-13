@@ -1,11 +1,15 @@
-class Bodies::BodyModel
-  include Mongoid::Document
-  include Mongoid::Timestamps
+# frozen_string_literal: true
 
-  embedded_in :section, class_name: 'Sections::SectionModel'
-  embedded_in :template, class_name: 'Templates::TemplateModel'
+module Bodies
+  class BodyModel
+    include Mongoid::Document
+    include Mongoid::Timestamps
 
-  field :markup, type: String
-  field :content_type, type: String
-  field :encoding_type, type: String
+    embedded_in :section, class_name: 'Sections::SectionModel'
+    embedded_in :template, class_name: 'Templates::TemplateModel'
+
+    field :markup, type: String
+    field :content_type, type: String
+    field :encoding_type, type: String
+  end
 end

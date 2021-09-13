@@ -1,99 +1,108 @@
-class New::SectionsController < ApplicationController
+# frozen_string_literal: true
 
-  def new
-    @section = Sections::SectionModel.new
+module New
+  # SectionsController
+  class SectionsController < ApplicationController
 
-    respond_to do |format|
-      format.html
-      format.js
+    def new
+      @section = Sections::SectionModel.new
+
+      respond_to do |format|
+        format.html
+        format.js
+      end
     end
-  end
 
-  def edit
-    @section = Sections::SectionModel.find(params[:id])
-    @section.body = Bodies::BodyModel.new unless @section.body
+    def edit
+      @section = Sections::SectionModel.find(params[:id])
+      @section.body = Bodies::BodyModel.new unless @section.body
 
-    render :layout => 'application'
-  end
+      render :layout => 'application'
+    end
 
-  def create
-    filtered_section_params = section_params.to_h
-    filtered_section_params[:key] = section_params.to_h[:title].split(/\s/).join('_').downcase
+    def create
+      filtered_section_params = section_params.to_h
+      filtered_section_params[:key] = section_params.to_h[:title].split(/\s/).join('_').downcase
 
-    result = Sections::SectionContract.new.call(filtered_section_params)
-    if result.success?
-      record = Sections::Section.new(result.to_h).create_model
+      result = Sections::SectionContract.new.call(filtered_section_params)
+      if result.success?
+        record = Sections::Section.new(result.to_h).create_model
 
-      if record.success?
-        flash[:notice] = 'Section created successfully'
-        redirect_to action: :edit, id: record.success.id
+        if record.success?
+          flash[:notice] = 'Section created successfully'
+          redirect_to action: :edit, id: record.success.id
+        else
+          @errors = Array.wrap(record.failure)
+          @sections = Sections::SectionModel.all
+
+          redirect_to controller: 'new/templates', action: :index, tab: 'sections'
+        end
       else
-        @errors = Array.wrap(record.failure)
-        @sections = Sections::SectionModel.all
-
+        flash[:error] = "Unable to create section due to #{result.errors}"
         redirect_to controller: 'new/templates', action: :index, tab: 'sections'
       end
-    else
-      flash[:error] = "Unable to create section due to #{result.errors}"
-      redirect_to controller: 'new/templates', action: :index, tab: 'sections'
     end
-  end
 
-  def update
-    filtered_section_params = section_params.to_h
-    filtered_section_params[:key] = section_params.to_h[:title].split(/\s/).join('_').downcase
+    def update
+      filtered_section_params = section_params.to_h
+      filtered_section_params[:key] = section_params.to_h[:title].split(/\s/).join('_').downcase
 
-    result = Sections::SectionContract.new.call(filtered_section_params)    
-    if result.success?
-      Sections::Section.new(result.to_h).update_model(params['id'])
-      flash[:notice] = 'Section content updated successfully'
-      redirect_to controller: 'new/templates', action: :index, tab: 'sections'
-    else
-      flash[:error] = "Unable to update section due to #{result.errors}"
-      render :action => 'index'  
+      result = Sections::SectionContract.new.call(filtered_section_params)
+      if result.success?
+        Sections::Section.new(result.to_h).update_model(params['id'])
+        flash[:notice] = 'Section content updated successfully'
+        redirect_to controller: 'new/templates', action: :index, tab: 'sections'
+      else
+        flash[:error] = "Unable to update section due to #{result.errors}"
+        render :action => 'index'
+      end
     end
-  end
 
-  def instant_preview
-    template = RenderLiquid.new.call(
-      {
-        body: instant_preview_params[:body],
-        template: {
-          key: instant_preview_params[:title].split(/\s/).join('_').downcase,
+    def instant_preview
+      template = RenderLiquid.new.call(
+        {
+          body: instant_preview_params[:body],
+          template: template_params,
           subject: instant_preview_params[:subject],
-          title: instant_preview_params[:title],
-          marketplace: instant_preview_params[:marketplace],
-          body: {
-            markup: instant_preview_params[:body]
-          }
-        },
-        subject: instant_preview_params[:subject],
-        key: instant_preview_params[:title].split(/\s/).join('_').downcase,
-        cover_page: true,
-        instant_preview: 'true',
-        section_preview: true
-      }
-    )
+          key: instant_preview_params[:title].split(/\s/).join('_').downcase,
+          cover_page: true,
+          instant_preview: 'true',
+          section_preview: true
+        }
+      )
 
-    if template.success?
-      @rendered_template = template.success[:rendered_template]
-    else
-      errors = template.failure
-      errors = template.failure.errors if template.failure.respond_to?(:errors)
-      @errors = Array.wrap(errors).flatten
+      if template.success?
+        @rendered_template = template.success[:rendered_template]
+      else
+        errors = template.failure
+        errors = template.failure.errors if template.failure.respond_to?(:errors)
+        @errors = Array.wrap(errors).flatten
+      end
     end
-  end
 
-  def delete_section
-  end
+    def delete_section
+    end
 
-  private
+    private
 
-  def instant_preview_params
-    params.permit(:body, :subject, :key, :title, :marketplace)
-  end
+    def template_params
+      {
+        key: instant_preview_params[:title].split(/\s/).join('_').downcase,
+        subject: instant_preview_params[:subject],
+        title: instant_preview_params[:title],
+        marketplace: instant_preview_params[:marketplace],
+        body: {
+          markup: instant_preview_params[:body]
+        }
+      }
+    end
 
-  def section_params
-    params.require(:section).permit(*::Sections::SectionContract.params.key_map.dump)
+    def instant_preview_params
+      params.permit(:body, :subject, :key, :title, :marketplace)
+    end
+
+    def section_params
+      params.require(:section).permit(*::Sections::SectionContract.params.key_map.dump)
+    end
   end
 end

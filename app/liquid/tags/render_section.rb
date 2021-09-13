@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
 module Tags
+  # RenderSection
   class RenderSection < Tags::LiquidTagBase
     FOR = 'for'
-    SYNTAX = /(#{Liquid::QuotedString}+)(\s+(with|#{FOR})\s+(#{Liquid::QuotedFragment}+))?(\s+(?:as)\s+(#{Liquid::VariableSegment}+))?/o
+    SYNTAX = /(#{Liquid::QuotedString}+)(\s+(with|#{FOR})\s+(#{Liquid::QuotedFragment}+))?(\s+(?:as)\s+(#{Liquid::VariableSegment}+))?/o.freeze
 
     disable_tags 'include'
 
@@ -12,9 +13,7 @@ module Tags
     def initialize(tag_name, markup, options)
       super
 
-      unless markup =~ SYNTAX
-        raise SyntaxError, options[:locale].t('errors.syntax.render')
-      end
+      raise SyntaxError, options[:locale].t('errors.syntax.render') unless markup =~ SYNTAX
 
       template_name = Regexp.last_match(1)
       with_or_for = Regexp.last_match(3)
@@ -39,9 +38,7 @@ module Tags
     def render_tag(context, output)
       # Though we evaluate this here we will only ever parse it as a string literal.
       template_name = context.evaluate(@template_name_expr)
-      unless template_name
-        raise ArgumentError, options[:locale].t('errors.argument.include')
-      end
+      raise ArgumentError, options[:locale].t('errors.argument.include') unless template_name
 
       partial =
         PartialCache.load(
@@ -52,7 +49,7 @@ module Tags
 
       context_variable_name = @alias_name || template_name.split('/').last
 
-      render_partial_func = ->(var, forloop) do
+      render_partial_func = lambda do |var, forloop|
         inner_context = context.new_isolated_subcontext
         inner_context.template_name = template_name
         inner_context.partial = true

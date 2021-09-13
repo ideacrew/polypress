@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-# rubocop:disable Style/Documentation, Lint/ConstantDefinitionInBlock
+# rubocop:disable Lint/ConstantDefinitionInBlock
 RSpec.describe ::Publishers::DocumentMetaDataPublisher, dbclean: :after_each do
   module Operations
     class DocumentCreate
@@ -11,7 +11,7 @@ RSpec.describe ::Publishers::DocumentMetaDataPublisher, dbclean: :after_each do
       def execute(payload)
         event =
           event('events.documents.document_created', attributes: payload)
-            .success
+          .success
         event.publish
       end
     end
@@ -50,4 +50,4 @@ RSpec.describe ::Publishers::DocumentMetaDataPublisher, dbclean: :after_each do
     #  TODO verify exchange.on_return
   end
 end
-# rubocop:enable Style/Documentation, Lint/ConstantDefinitionInBlock
+# rubocop:enable Lint/ConstantDefinitionInBlock

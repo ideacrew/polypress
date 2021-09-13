@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'database_cleaner-mongoid'
 
 # Configure to clean database once at start of each rspec test run

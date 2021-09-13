@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-# rubocop:disable Metrics/ModuleLength
 # FamilyHelper
 module FamilyHelper
   # TODO: dynamically load data using contracts/entities
@@ -159,4 +158,3 @@ module FamilyHelper
     }
   end
 end
-# rubocop:enable Metrics/ModuleLength

@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-HTML_FORMATTER = lambda { |context| }
+HTML_FORMATTER = ->(context) { }
 
-PDF_FORMATTER = lambda { |context| }
+PDF_FORMATTER = ->(context) { }
 
 EDI_834_FORMATTER = {}.freeze
 
-JSON_FORMATTER = lambda { |context| }
+JSON_FORMATTER = ->(context) { }
 
 TEXT_FORMATTER =
   lambda do |context|
@@ -14,7 +14,7 @@ TEXT_FORMATTER =
     context.text.each { |line| puts "#{line}\n" }
   end
 
-XML_FORMATTER = lambda { |context| }
+XML_FORMATTER = ->(context) { }
 
 module Documents
   # An instance of a parsed template

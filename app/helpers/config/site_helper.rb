@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-# rubocop:disable Metrics/ModuleLength
 module Config
   # Site wide helpers
   module SiteHelper
@@ -262,5 +261,3 @@ module Config
     end
   end
 end
-# rubocop:enable Metrics/ModuleLength
-

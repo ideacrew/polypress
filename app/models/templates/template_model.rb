@@ -109,10 +109,10 @@ module Templates
         'unless' => ''
       }
       body.scan(/\[\[([\s|\w.?]*)/).flatten.map(&:strip).collect do |ele|
-          ele.gsub(/\w+/) { |m| keywords.fetch(m, m) }
-        end.map(&:strip)
-        .reject(&:blank?)
-        .uniq
+        ele.gsub(/\w+/) { |m| keywords.fetch(m, m) }
+      end.map(&:strip)
+          .reject(&:blank?)
+          .uniq
     end
 
     def tokens

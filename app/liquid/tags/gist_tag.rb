@@ -1,16 +1,16 @@
 # frozen_string_literal: true
+
 module Tags
+  # GistTag
   class GistTag < Tags::LiquidTagBase
-    PARTIAL = 'liquids/gist'.freeze
+    PARTIAL = 'liquids/gist'
     VALID_LINK_REGEXP = %r{\Ahttps://gist\.github\.com/([a-zA-Z0-9](-?[a-zA-Z0-9]){0,38})/([a-zA-Z0-9]){1,32}(/[a-zA-Z0-9]+)?\Z}
-      .freeze
+                        .freeze
 
     def initialize(_tag_name, link, _parse_context)
       super
 
-      if link.blank?
-        raise StandardError, 'Invalid Gist link: You must provide a Gist link'
-      end
+      raise StandardError, 'Invalid Gist link: You must provide a Gist link' if link.blank?
 
       @uri = build_uri(link)
     end
