@@ -15,7 +15,7 @@ class PartialCache
         }
       )
     if result.success?
-      source = result.success.first.to_entity['body']['markup']
+      source = result.success.first.to_entity[:body][:markup]
     else
       "Error #{result.failure} finding section: #{template_name}"
     end
