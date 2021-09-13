@@ -15,7 +15,7 @@ module Documents
     # @param [String] :event_key
     # @return [Dry::Monads::Result] Parsed template as string
     def call(params)
-      template = yield fetch_template(params)
+      _template = yield fetch_template(params)
       documents_hash = yield create_main_document(params: params, key: params[:event_key])
       # _inserts = yield append_inserts(params, template)
       _other_pdfs = yield append_pdfs

@@ -75,6 +75,7 @@ module Tags
       output
     end
 
+    # ParseTreeVisitor
     class ParseTreeVisitor < Liquid::ParseTreeVisitor
       def children
         [@node.template_name_expr] + @node.attributes.values
