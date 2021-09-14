@@ -4,9 +4,10 @@ module New
   # TemplatesController
   class TemplatesController < ::ApplicationController
     include ::DataTablesAdapter
+
     # include ::DataTablesSearch
     # before_action :check_hbx_staff_role
-    protect_from_forgery :except => [:new], with: :exception
+    protect_from_forgery except: [:new], with: :exception
     layout 'application'
 
     def index
@@ -35,7 +36,7 @@ module New
       @template = Templates::TemplateModel.find(params[:id])
       @template.body = Bodies::BodyModel.new unless @template.body
       @inserts = Templates::TemplateModel.where(doc_type: :insert)
-      render :layout => 'application'
+      render layout: 'application'
     end
 
     def create
@@ -51,11 +52,11 @@ module New
           @errors = Array.wrap(record.failure)
           @templates = Templates::TemplateModel.all
 
-          render :action => 'index'
+          render action: 'index'
         end
       else
         flash[:error] = "Unable to create template due to #{result.errors}"
-        render :action => 'index'
+        render action: 'index'
       end
     end
 
@@ -68,69 +69,81 @@ module New
         redirect_to action: :index
       else
         flash[:error] = "Unable to update template due to #{result.errors}"
-        render :action => 'index'
+        render action: 'index'
       end
     end
 
     def instant_preview
-      template = RenderLiquid.new.call(
-        {
-          body: instant_preview_params[:body],
-          template: {
-            key: instant_preview_params[:key],
+      template =
+        RenderLiquid.new.call(
+          {
+            body: instant_preview_params[:body],
+            template: {
+              key: instant_preview_params[:key],
+              subject: instant_preview_params[:subject],
+              title: instant_preview_params[:title],
+              marketplace: instant_preview_params[:marketplace],
+              body: {
+                markup: instant_preview_params[:body]
+              }
+            },
             subject: instant_preview_params[:subject],
-            title: instant_preview_params[:title],
-            marketplace: instant_preview_params[:marketplace],
-            body: {
-              markup: instant_preview_params[:body]
-            }
-          },
-          subject: instant_preview_params[:subject],
-          key: instant_preview_params[:key],
-          cover_page: true,
-          instant_preview: 'true'
-        }
-      )
+            key: instant_preview_params[:key],
+            cover_page: true,
+            instant_preview: 'true'
+          }
+        )
 
       if template.success?
         @rendered_template = template.success[:rendered_template]
       else
         errors = template.failure
-        errors = template.failure.errors if template.failure.respond_to?(:errors)
+        errors = template.failure.errors if template.failure.respond_to?(
+          :errors
+        )
         @errors = Array.wrap(errors).flatten
       end
     end
 
     def preview
       template = Templates::TemplateModel.find(params['id'])
-      documents_operation = Documents::CreateWithInsert.new.call({ event_key: template.key, preview: 'true', cover_page: true })
+      documents_operation =
+        Documents::CreateWithInsert.new.call(
+          { event_key: template.key, preview: 'true', cover_page: true }
+        )
 
       if documents_operation.success?
         send_file documents_operation.success[:document].path,
-                  :type => documents_operation.success[:template][:content_type],
-                  :disposition => 'inline'
+                  type: documents_operation.success[:template][:content_type],
+                  disposition: 'inline'
       else
         flash[:error] = 'Failed to load preview.'
         @notice_kinds = Templates::TemplateModel.all
         @datatable = Effective::Datatables::NoticesDatatable.new
-        redirect_back(fallback_location: root_path, :flash => { error: documents_operation.failure })
+        redirect_back(
+          fallback_location: root_path,
+          flash: {
+            error: documents_operation.failure
+          }
+        )
       end
     end
 
-    def delete_notice
-      Template.where(:id => params['id']).first.delete
+    def destroy
+      Templates::TemplateModel.where(id: params['id']).first.delete
 
       flash[:notice] = 'Notices deleted successfully'
-      redirect_to templates_path
+      redirect_to action: :index
     end
 
     def download_notices
-      templates = Templates::TemplateModel.where(:id.in => params['ids'].split(","))
+      templates =
+        Templates::TemplateModel.where(:id.in => params['ids'].split(','))
 
       send_data templates.to_csv,
-                :filename => "notices_#{Date.today.strftime('%m_%d_%Y')}.csv",
-                :disposition => 'attachment',
-                :type => 'text/csv'
+                filename: "notices_#{Date.today.strftime('%m_%d_%Y')}.csv",
+                disposition: 'attachment',
+                type: 'text/csv'
     end
 
     def upload_notices
@@ -144,7 +157,10 @@ module New
 
           if Template.where(subject: template_row[1]).blank?
             template = build_notice_kind(template_row)
-            @errors << "Notice #{template_row[1]} got errors: #{template.errors}" unless template.save
+            unless template.save
+              @errors <<
+                "Notice #{template_row[1]} got errors: #{template.errors}"
+            end
           else
             @errors << "Notice #{template_row[1]} already exists."
           end
@@ -158,7 +174,7 @@ module New
       @notice_kinds = Templates::TemplateModel.all
       @datatable = Effective::Datatables::NoticesDatatable.new
 
-      render :action => 'index'
+      render action: 'index'
     end
 
     def build_notice_kind(template_row)
@@ -190,16 +206,17 @@ module New
         format.html
         format.json do
           render json: {
-            sections: service.sections,
-            placeholders: service.placeholders,
-            setting_placeholders: service.setting_placeholders
-          }
+                   sections: service.sections,
+                   placeholders: service.placeholders,
+                   setting_placeholders: service.setting_placeholders
+                 }
         end
       end
     end
 
     def fetch_recipients
-      recipients = Services::NoticeKindService.new(params['market_kind']).recipients
+      recipients =
+        Services::NoticeKindService.new(params['market_kind']).recipients
 
       respond_to do |format|
         format.html
@@ -221,24 +238,31 @@ module New
       return unless current_user.blank? || !current_user.has_hbx_staff_role?
 
       redirect_to main_app.root_path,
-                  :flash => { :error => "You must be an HBX staff member" }
+                  flash: {
+                    error: 'You must be an HBX staff member'
+                  }
     end
 
     def template_params
-      params.require(:template).permit(*::Templates::TemplateContract.params.key_map.dump)
+      params
+        .require(:template)
+        .permit(*::Templates::TemplateContract.params.key_map.dump)
     end
 
     def entities_contracts_mapping
       {
-        "AcaEntities::People::ConsumerRole" => 'AcaEntities::Contracts::People::ConsumerRoleContract',
-        "::AcaEntities::Families::Family" => "::AcaEntities::Contracts::Families::FamilyContract",
-        "::AcaEntities::MagiMedicaid::Application" => "::AcaEntities::MagiMedicaid::Contracts::ApplicationContract"
-
+        'AcaEntities::People::ConsumerRole' =>
+          'AcaEntities::Contracts::People::ConsumerRoleContract',
+        '::AcaEntities::Families::Family' =>
+          '::AcaEntities::Contracts::Families::FamilyContract',
+        '::AcaEntities::MagiMedicaid::Application' =>
+          '::AcaEntities::MagiMedicaid::Contracts::ApplicationContract'
       }
     end
 
     def builder_param
-      entities_contracts_mapping[params['builder']] || '::AcaEntities::MagiMedicaid::Contracts::ApplicationContract'
+      entities_contracts_mapping[params['builder']] ||
+        '::AcaEntities::MagiMedicaid::Contracts::ApplicationContract'
     end
   end
 end

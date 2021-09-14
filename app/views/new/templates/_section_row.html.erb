@@ -7,6 +7,6 @@
 	<td><%= section.updated_at.in_time_zone('Eastern Time (US & Canada)').strftime('%m/%d/%Y %H:%M') %></td>
 	<td>
 	  <a class="text-reset" href="<%= edit_new_section_path(section) %>"><i class="fas fa-edit"></i></a>
-	  <a class="text-reset" href="<%= delete_section_new_section_path(section) %>"><i class="fas fa-trash"></i></a>
+	  <a class="text-reset" href="<%= new_section_path(section) %>" data-confirm="Are you sure?" data-method="delete"><i class="fas fa-trash"></i></a>
 	</td>
 </tr>
