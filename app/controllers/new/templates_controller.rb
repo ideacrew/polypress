@@ -75,24 +75,7 @@ module New
 
     def instant_preview
       template =
-        RenderLiquid.new.call(
-          {
-            body: instant_preview_params[:body],
-            template: {
-              key: instant_preview_params[:key],
-              subject: instant_preview_params[:subject],
-              title: instant_preview_params[:title],
-              marketplace: instant_preview_params[:marketplace],
-              body: {
-                markup: instant_preview_params[:body]
-              }
-            },
-            subject: instant_preview_params[:subject],
-            key: instant_preview_params[:key],
-            cover_page: true,
-            instant_preview: 'true'
-          }
-        )
+        Templates::TemplateModel.instant_preview_for(instant_preview_params)
 
       if template.success?
         @rendered_template = template.success[:rendered_template]
@@ -156,7 +139,7 @@ module New
           next if template_row[1] == 'Notice Number'
 
           if Template.where(subject: template_row[1]).blank?
-            template = build_notice_kind(template_row)
+            template = Templates::TemplateModel.new # build_notice_kind(template_row)
             unless template.save
               @errors <<
                 "Notice #{template_row[1]} got errors: #{template.errors}"
@@ -177,19 +160,6 @@ module New
       render action: 'index'
     end
 
-    def build_notice_kind(template_row)
-      Template.new(
-        category: template_row[0],
-        subject: template_row[1],
-        title: template_row[2],
-        description: template_row[3],
-        recipient: template_row[4],
-        key: template_row[5],
-        body: template_row[6],
-        content_type: template_row[7]
-      )
-    end
-
     def fetch_tokens
       service = Services::NoticeKindService.new(params['market_kind'])
       service.builder = builder_param
@@ -206,10 +176,10 @@ module New
         format.html
         format.json do
           render json: {
-                   sections: service.sections,
-                   placeholders: service.placeholders,
-                   setting_placeholders: service.setting_placeholders
-                 }
+            sections: service.sections,
+            placeholders: service.placeholders,
+            setting_placeholders: service.setting_placeholders
+          }
         end
       end
     end

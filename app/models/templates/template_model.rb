@@ -100,6 +100,28 @@ module Templates
         end
       data_elements + iterator_subloop_tokens
     end
+
+    def self.instant_preview_for(attributes)
+      RenderLiquid.new.call(
+        {
+          body: attributes[:body],
+          template: {
+            key: attributes[:key],
+            subject: attributes[:subject],
+            title: attributes[:title],
+            marketplace: attributes[:marketplace],
+            body: {
+              markup: attributes[:body]
+            }
+          },
+          subject: attributes[:subject],
+          key: attributes[:key],
+          cover_page: true,
+          instant_preview: 'true'
+        }
+      )
+    end
+
     # rubocop:enable Metrics/MethodLength
 
     def conditional_tokens
@@ -111,10 +133,10 @@ module Templates
         'unless' => ''
       }
       body.scan(/\[\[([\s|\w.?]*)/).flatten.map(&:strip).collect do |ele|
-        ele.gsub(/\w+/) { |m| keywords.fetch(m, m) }
-      end.map(&:strip)
-          .reject(&:blank?)
-          .uniq
+          ele.gsub(/\w+/) { |m| keywords.fetch(m, m) }
+        end.map(&:strip)
+        .reject(&:blank?)
+        .uniq
     end
 
     def tokens
