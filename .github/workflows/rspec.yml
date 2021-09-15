@@ -1,6 +1,9 @@
 name: RSpec
 on: push
 
+env:
+  POLYPRESS_DB_URL: 'localhost:27017'
+
 jobs:
   rspec:
     runs-on: ubuntu-latest
@@ -16,8 +19,6 @@ jobs:
           sudo rabbitmqctl add_vhost event_source
           sudo rabbitmqctl set_permissions -p event_source guest ".*" ".*" ".*"
       - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 2.7.3
       - uses: actions/cache@v2
         with:
           path: vendor/bundle
