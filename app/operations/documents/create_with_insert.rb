@@ -113,9 +113,9 @@ module Documents
 
     def append_pdfs
       attach_blank_page
-      ivl_appeal_rights
+      # ivl_appeal_rights
       # ivl_non_discrimination
-      # ivl_attach_envelope
+      ivl_attach_envelope
       Success(true)
     end
   end
