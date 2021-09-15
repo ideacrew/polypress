@@ -46,7 +46,7 @@ RSpec.describe EventRoutes::EventRouteContract do
 
   let(:required_params) { { event_name: event_name } }
   let(:optional_params) do
-    { attributes: attributes, filter_criteria: filter_criteria }
+    { event_attributes: event_attributes, filter_criteria: filter_criteria }
   end
   let(:all_params) { required_params.deep_merge(optional_params) }
 

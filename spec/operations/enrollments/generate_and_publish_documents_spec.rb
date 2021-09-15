@@ -16,46 +16,44 @@ RSpec.describe Enrollments::GenerateAndPublishDocuments do
       FactoryBot.create(
         :template,
         key: event_key,
-        body: body,
+        body: {
+          markup: body
+        },
         title: title,
-        subject: template_subject,
-        category: 'aca_individual',
+        marketplace: 'aca_individual',
         recipient: 'AcaEntities::Families::Family',
         content_type: 'application/pdf',
         description: 'Uqhp Descriptoin'
       )
     end
 
-    let!(:docs_insert) do
-      FactoryBot.create(
-        :template,
-        key: '1_outstanding_verifications_insert',
-        body: body,
-        title: title,
-        subject: template_subject,
-        category: 'aca_individual',
-        recipient: 'AcaEntities::Families::Family',
-        content_type: 'application/pdf',
-        description: 'Uqhp Descriptoin'
-      )
+    let(:application_entity) do
+      ::AcaEntities::Families::Family.new(family_hash)
     end
-
-    let(:application_entity) { ::AcaEntities::Families::Family.new(family_hash) }
 
     subject do
       described_class.new.call(family_hash: family_hash, event_key: event_key)
     end
 
-    context "when payload has all the required params" do
+    context 'when payload has all the required params' do
+      before do
+        Events::Documents::DocumentCreated
+          .any_instance
+          .stub(:publish)
+          .and_return(true)
+      end
+
       it 'should return success' do
         expect(subject.success?).to be_truthy
       end
     end
 
-    context "when event key is missing" do
+    context 'when event key is missing' do
       let(:event_key) { nil }
 
-      let(:error) { "Missing event key for given payload: #{family_hash[:hbx_id]}" }
+      let(:error) do
+        "Missing event key for given payload: #{family_hash[:hbx_id]}"
+      end
 
       it 'should return failure' do
         expect(subject.failure?).to be_truthy
@@ -66,8 +64,10 @@ RSpec.describe Enrollments::GenerateAndPublishDocuments do
       end
     end
 
-    context "when input application hash is invalid" do
-      let(:error) { '[AcaEntities::Families::Family.new] :hbx_id is missing in Hash input' }
+    context 'when input application hash is invalid' do
+      let(:error) do
+        '[AcaEntities::Families::Family.new] :hbx_id is missing in Hash input'
+      end
 
       before { family_hash.delete(:hbx_id) }
 

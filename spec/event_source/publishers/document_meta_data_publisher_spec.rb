@@ -34,8 +34,8 @@ RSpec.describe ::Publishers::DocumentMetaDataPublisher, dbclean: :after_each do
     connection_manager_instance.find_publish_operation(publish_params)
   end
 
-  # let(:publish_proxy) { publish_operation.subject }
-  # let(:bunny_exchange) { publish_proxy.subject }
+  let(:publish_proxy) { publish_operation.subject }
+  let(:bunny_exchange) { publish_proxy.subject }
 
   it 'should create exchanges' do
     expect(bunny_exchange).to be_present

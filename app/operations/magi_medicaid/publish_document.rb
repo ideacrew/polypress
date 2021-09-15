@@ -31,7 +31,11 @@ module MagiMedicaid
       if result.success?
         Success(result.success)
       else
-        logger.error("Couldn't create document for the given payload: #{result.failure}") unless Rails.env.test?
+        unless Rails.env.test?
+          logger.error(
+            "Couldn't create document for the given payload: #{result.failure}"
+          )
+        end
         Failure(result.failure)
       end
     end
@@ -48,13 +52,14 @@ module MagiMedicaid
     end
 
     def upload_document(document_payload, resource_id)
-      upload = Documents::Upload.new.call(
-        resource_id: resource_id,
-        title: document_payload[:template][:title],
-        file: document_payload[:document],
-        user_id: nil,
-        subjects: nil
-      )
+      upload =
+        Documents::Upload.new.call(
+          resource_id: resource_id,
+          title: document_payload[:template][:title],
+          file: document_payload[:document],
+          user_id: nil,
+          subjects: nil
+        )
 
       return Failure("Couldn't upload document for the given payload") unless upload.success?
 
@@ -62,7 +67,8 @@ module MagiMedicaid
     end
 
     def build_event(payload)
-      result = event("events.documents.document_created", attributes: payload.to_h)
+      result =
+        event('events.documents.document_created', attributes: payload.to_h)
       unless Rails.env.test?
         logger.info('-' * 100)
         logger.info(
