@@ -1,6 +1,9 @@
 name: RSpec
 on: push
 
+env:
+  POLYPRESS_DB_URL: 'localhost:27017'
+
 jobs:
   rspec:
     runs-on: ubuntu-latest
