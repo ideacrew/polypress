@@ -19,8 +19,6 @@ jobs:
           sudo rabbitmqctl add_vhost event_source
           sudo rabbitmqctl set_permissions -p event_source guest ".*" ".*" ".*"
       - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 2.7.3
       - uses: actions/cache@v2
         with:
           path: vendor/bundle
