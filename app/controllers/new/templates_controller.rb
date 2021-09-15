@@ -26,6 +26,7 @@ module New
     def new
       @template = Templates::TemplateModel.new
       @inserts = Templates::TemplateModel.where(doc_type: :insert)
+
       respond_to do |format|
         format.html
         format.js

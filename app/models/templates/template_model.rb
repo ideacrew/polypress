@@ -122,6 +122,35 @@ module Templates
       )
     end
 
+    def publisher_options
+      event_map = AcaEntities::AsyncApi::Operations::EventMap.new.call
+
+      if event_map.success?
+        event_map
+          .success
+          .each_with_object({}) do |(k, v), data|
+            data[v[:publishers][:description]] = k if v[:publishers].present?
+          end
+      else
+        {}
+      end
+    end
+
+    def subscriber_options
+      event_map = AcaEntities::AsyncApi::Operations::EventMap.new.call
+
+      if event_map.success?
+        event_map
+          .success
+          .each_with_object({}) do |(k, v), data|
+            data[v[:subscribeers][:description]] = k if v[:subscribeers]
+                                                        .present?
+          end
+      else
+        {}
+      end
+    end
+
     # rubocop:enable Metrics/MethodLength
 
     def conditional_tokens
@@ -133,10 +162,10 @@ module Templates
         'unless' => ''
       }
       body.scan(/\[\[([\s|\w.?]*)/).flatten.map(&:strip).collect do |ele|
-          ele.gsub(/\w+/) { |m| keywords.fetch(m, m) }
-        end.map(&:strip)
-        .reject(&:blank?)
-        .uniq
+        ele.gsub(/\w+/) { |m| keywords.fetch(m, m) }
+      end.map(&:strip)
+          .reject(&:blank?)
+          .uniq
     end
 
     def tokens

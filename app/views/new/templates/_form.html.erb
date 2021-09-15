@@ -1,187 +1,50 @@
-<h2><%= template.persisted? ? 'Edit' : 'Create' %> Template</h2>
-
-<div>
-  <%#= form_for [:new, template], as: :template do |f| %>
-  <%= form_with scope: :template, url: new_templates_path(template.id), method: :post do |f| %>
-    <ul id="progressbar" style="display: none">
-      <li class="active" id="notice_info"><strong>Notice Info</strong></li>
-      <li id="template"><strong>Template</strong></li>
-    </ul> <!-- fieldsets -->
-
-    <div class="form-group col-xs-8">
-      <label for="noticeTitle">Title *</label>
-      <%= f.text_field :title, class: 'form-control', required: true %>
-    </div>
-
-    <div class="form-group col-xs-8">
-      <label for="noticeDescription">Description</label>
-      <%= f.text_field :description, class: 'form-control' %>
-    </div>
-
-    <div class="form-group col-xs-8">
-      <label for="noticeMarketplace">Select Marketplace</label>
-      <%= f.select(:marketplace, options_for_select(::AcaEntities::Types::MarketPlaceKinds.values.collect{ |market| [market.to_s.titleize, market] }, selected: template.marketplace), {include_blank: false}, {:class => 'form-control'} ) %>
-    </div>
-
-    <div class="form-group col-xs-8">
-      <label for="noticeContentType">Select Format</label>
-      <%= f.select(:content_type, options_for_select(['application/pdf', 'text/plain', 'text/csv'].collect{ |type| [type.split('/')[1], type] }, selected: template.content_type), {include_blank: false}, {:class => 'form-control'} ) %>
-    </div>
-
-    <% if @inserts.present? %>
-      <div class="form-group col-xs-8">
-        <%= f.label :inserts, "Select Inserts" %>
-        <% @inserts.each do |insert| %>
-          <div>
-            <%#= f.check_box :inserts, { multiple: true, style: "transform: scale(2.5); margin: 10px" }, insert.key, check_for_insert(insert, template) %>
-            <%= f.check_box :inserts, { multiple: true, style: "transform: scale(2.5); margin: 10px", checked: check_for_insert(insert, template)}, insert.key, false %>
-            <%= insert.title %>
-          </div>
-        <% end %>
-      </div>
-    <% end %>
-
-    <div class="form-group col-xs-8">
-      <label for="noticeDescription">Print Vendor Reference</label>
-      <%= f.text_field :print_code, class: 'form-control', required: true %>
-    </div>
-
-    <div class="form-group col-xs-8">
-      <label for="noticeEventName">Event Name</label>
-      <%= f.text_field :key, class: 'form-control' %>
-      <p class='memo'>Find the event name on the associated ticket</p>
-    </div>
-
-    <!-- <div class="form-group col-xs-8">
-      <label for="noticeEventCriteria">Event Criteria</label>
-      <%#= f.text_field :key_criteria, class: 'form-control' %>
-    </div> -->
-
-
-    <% recipients = Services::NoticeKindService.new(template.marketplace).recipients %>
-    <div class="form-group col-xs-8">
-      <label for="noticeDescription">Recipient *</label>
-      <%= f.select(:recipient, options_for_select(recipients.inject([]) {|options, (k, v)| options << [k, v]}, selected: template.recipient), { include_blank: false }, { :class => 'form-control'} ) %>
-    </div>
-
-    <div class="form-group col-xs-12">
-      <div>
-        <button type="submit" class="btn btn-primary">Create</button>
-        <%= link_to 'Cancel', new_templates_path, class: "btn btn-secondary" %>
-      </div>
-    </div>
-  <% end %>
+<div class="form-group col-xs-8">
+  <label for="noticeTitle">Title *</label>
+  <%= f.text_field :title, class: 'form-control', required: true %>
 </div>
 
+<div class="form-group col-xs-8">
+  <label for="noticeDescription">Description</label>
+  <%= f.text_field :description, class: 'form-control' %>
+</div>
 
-<script>
-    var CKEDITOR_BASEPATH = '/assets/ckeditor/';
-</script>
+<div class="form-group col-xs-8">
+  <label for="noticeMarketplace">Select Marketplace</label>
+  <%= f.select(:marketplace, options_for_select(::AcaEntities::Types::MarketPlaceKinds.values.collect{ |market| [market.to_s.titleize, market] }, selected: template.marketplace), {include_blank: false}, {:class => 'form-control'} ) %>
+</div>
 
-<%= javascript_include_tag 'ckeditor/ckeditor' %>
+<div class="form-group col-xs-8">
+  <label for="noticeContentType">Select Format</label>
+  <%= f.select(:content_type, options_for_select(['application/pdf', 'text/plain', 'text/csv'].collect{ |type| [type.split('/')[1], type] }, selected: template.content_type), {include_blank: false}, {:class => 'form-control'} ) %>
+</div>
 
-<script>
+<div class="form-group col-xs-8">
+  <label for="noticeDescription">Print Vendor Reference</label>
+  <%= f.text_field :print_code, class: 'form-control', required: true %>
+</div>
 
-  function updateCkEditor() {
-    for (instance in CKEDITOR.instances){ 
-      CKEDITOR.instances[instance].destroy(true); 
-    }
+<div class="form-group col-xs-8">
+  <label for="noticeEventName">Event Name</label>
+  <%= f.text_field :key, class: 'form-control' %>
+  <p class='memo'>Find the event name on the associated ticket</p>
+</div>
 
-    CKEDITOR.replace('template_body', {
-      customConfig: '/assets/ckeditor/config.js'
-    });
+<%= f.fields_for :publisher do |publisher_form| %>
+<div class="form-group col-xs-8">
+  <label for="noticeDescription">Publisher Event *</label>
+  <%= publisher_form.select(:event_name, options_for_select(template.publisher_options.inject([]) {|options, (k, v)| options << [k, v]}, selected: template&.publisher&.event_name), { include_blank: false }, { :class => 'form-control'} ) %>
+</div>
+<% end %>
 
-    CKEDITOR.editorConfig = function (config) {
-      config.placeholder_selects = [
-        {
-          key: "select_system_settings",
-          title: "Select Application Settings",
-          placeholders: update_placeholders.setting_placeholders,
-        },
-        {
-          key: "select_conditional_statement",
-          title: "Select Condition/Loop",
-          placeholders: update_placeholders.placeholders,
-        },
-      ];
-      config.availableTokens = update_tokens.tokens;
-    }
-  }
+<%= f.fields_for :subscriber do |subscriber_form| %>
+<div class="form-group col-xs-8">
+  <label for="noticeDescription">Subscriber Event *</label>
+  <%= subscriber_form.select(:event_name, options_for_select(template.subscriber_options.inject([]) {|options, (k, v)| options << [k, v]}, selected: template&.subscriber&.event_name), { include_blank: false }, { :class => 'form-control'} ) %>
+</div>
+<% end %>
 
-  function update_placeholders(config) {  
-    $.ajax({
-      type:"GET",
-      url:"/new/templates/fetch_placeholders",
-      dataType:"json",
-      async: false,
-      data: {builder: $('#template_recipient').val(), market_kind: $('#template_marketplace').val()},
-      success:function(result){
-        config.placeholder_selects = [
-          {
-            key: 'select_system_settings',
-            title: 'Select Application Settings',
-            placeholders: result.setting_placeholders
-          },
-          {
-            key: 'select_conditional_statement',
-            title: 'Select Condition/Loop',
-            placeholders: result.placeholders
-          }
-        ];
-      }});
-
-    return config;
-  }
-
-  function update_tokens(config) {
-    $.ajax({
-      type:"GET",
-      url:"/new/templates/fetch_tokens",
-      dataType:"json",
-      async: false,
-      data: {builder: $('#template_recipient').val(), market_kind: $('#template_marketplace').val()},
-      success:function(result){
-        config.availableTokens = result.tokens;
-        update_placeholders(config);
-      }
-    });
-  }
-
-  $('#instant_preview').click(function(e) {
-    $.ajax({
-      type:"POST",
-      url: "/new/templates/instant_preview",
-      // dataType: 'json',
-      data: { body: CKEDITOR.instances.template_body.getData(), subject: $('#template_print_code').val(), key: $('#template_key').val()},
-      success: function(result){
-      }
-    })
-  })
-
-  $('#template_marketplace').change(function() {
-    $.ajax({
-      type:"GET",
-      url:"/new/templates/fetch_recipients",
-      dataType:"json",
-      data: {market_kind: $('#template_marketplace').val()},
-      complete:function(result){
-        var select = $('#template_recipient');
-        select.empty();
-
-        $.each( result.responseJSON.recipients, function( key, value ) {
-          select.append("<option value='" +value+ "'>" +key+ "</option>");
-        });
-        updateCkEditor();
-      }
-    })
-  })
-
-  $('#template_recipient').change(function() {
-    updateCkEditor();
-  })
-
-  $(document).ready(function() {
-    updateCkEditor();
-  });
-
-</script>
+<% recipients = Services::NoticeKindService.new(template.marketplace).recipients %>
+<div class="form-group col-xs-8">
+  <label for="noticeDescription">Recipient *</label>
+  <%= f.select(:recipient, options_for_select(recipients.inject([]) {|options, (k, v)| options << [k, v]}, selected: template.recipient), { include_blank: false }, { :class => 'form-control'} ) %>
+</div>
