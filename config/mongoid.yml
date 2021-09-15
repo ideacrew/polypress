@@ -172,7 +172,7 @@ test:
     default:
       database: polypress_test
       hosts:
-        - <%= ENV['POLYPRESS_DB_URL'] || mongodb:27017 %>
+        - <%= ENV['POLYPRESS_DB_URL'] || 'mongodb:27017' %>
       options:
         read:
           mode: :primary
