@@ -6,7 +6,7 @@ RSpec.describe Config::SiteHelper, type: :helper, dbclean: :after_each do
   describe 'Site settings' do
     context '.site_name' do
       it 'should return application name' do
-        expect(helper.site_name).to eq 'enroll_me'
+        expect(helper.site_name).to eq 'CoverME'
       end
     end
 
@@ -26,7 +26,7 @@ RSpec.describe Config::SiteHelper, type: :helper, dbclean: :after_each do
 
     context '.marketplace_phone' do
       it 'should return contact center short phone number' do
-        expect(helper.marketplace_phone).to eq '(866) 636-0355'
+        expect(helper.marketplace_phone).to eq '(866) 636-0355 TTY:711'
       end
     end
 

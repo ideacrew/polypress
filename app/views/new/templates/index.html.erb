@@ -47,7 +47,7 @@
   $('a.download-notices').click(function(e) {
     e.preventDefault();
     var selected_notices = new Array();
-    $("input:checkbox[name='bulk_actions_resources[]']:checked").each(function(){
+    $("input:checkbox[name='template_ids[]']:checked").each(function(){
         selected_notices.push($(this).val());
     });
     window.location=$(this).attr('href') + "?ids=" + selected_notices.toString();

@@ -198,16 +198,29 @@ module Templates
         all.each do |template|
           csv << [
             template.marketplace,
-            template.subject,
+            template.print_code,
             template.title,
             template.description,
             template.recipient,
             template.key,
-            template.body,
+            template.body.markup,
             template.content_type
           ]
         end
       end
+    end
+
+    def self.build_notice_kind(template_row)
+      self.new(
+        marketplace: template_row[0],
+        print_code: template_row[1],
+        title: template_row[2],
+        description: template_row[3],
+        recipient: template_row[4],
+        key: template_row[5],
+        body: { markup: template_row[6] },
+        content_type: template_row[7]
+      )
     end
   end
 end
