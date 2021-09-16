@@ -198,12 +198,12 @@ module Templates
         all.each do |template|
           csv << [
             template.marketplace,
-            template.subject,
+            template.print_code,
             template.title,
             template.description,
             template.recipient,
             template.key,
-            template.body,
+            template.body.markup,
             template.content_type
           ]
         end

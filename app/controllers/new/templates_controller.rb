@@ -20,7 +20,7 @@ module New
     def show
       return unless params['id'] == 'upload_notices'
 
-      redirect_to templates_path
+      redirect_to action: :index
     end
 
     def new
@@ -132,15 +132,14 @@ module New
 
     def upload_notices
       @errors = []
-
       if file_content_type == 'text/csv'
         templates = Roo::Spreadsheet.open(params[:file].tempfile.path)
 
         templates.each do |template_row|
           next if template_row[1] == 'Notice Number'
 
-          if Template.where(subject: template_row[1]).blank?
-            template = Templates::TemplateModel.new # build_notice_kind(template_row)
+          if Templates::TemplateModel.where(subject: template_row[1]).blank?
+            template = build_notice_kind(template_row)
             unless template.save
               @errors <<
                 "Notice #{template_row[1]} got errors: #{template.errors}"
@@ -154,7 +153,6 @@ module New
       end
 
       flash[:notice] = 'Notices loaded successfully.' if @errors.empty?
-
       @notice_kinds = Templates::TemplateModel.all
       @datatable = Effective::Datatables::NoticesDatatable.new
 
@@ -196,6 +194,19 @@ module New
     end
 
     private
+
+    def build_notice_kind(template_row)
+      Templates::TemplateModel.new(
+        marketplace: template_row[0],
+        print_code: template_row[1],
+        title: template_row[2],
+        description: template_row[3],
+        recipient: template_row[4],
+        key: template_row[5],
+        body: { markup: template_row[6] },
+        content_type: template_row[7]
+      )
+    end
 
     def instant_preview_params
       params.permit(:body, :subject, :key, :title, :marketplace)

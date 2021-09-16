@@ -1,5 +1,5 @@
 <tr>
-	<td></td>
+	<td><%= check_box_tag "template_ids[]", template.id, false, class: 'selectable' %></td>
 	<%#= prepend_glyph_to_text(template) %>
 	<td><%= link_to template.title, edit_new_template_path(template), target: '_blank' %></td>
 	<td><%#= template.doc_type %></td>
