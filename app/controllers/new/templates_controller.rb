@@ -5,8 +5,6 @@ module New
   class TemplatesController < ::ApplicationController
     include ::DataTablesAdapter
 
-    # include ::DataTablesSearch
-    # before_action :check_hbx_staff_role
     protect_from_forgery except: [:new], with: :exception
     layout 'application'
 
@@ -115,7 +113,6 @@ module New
 
     def destroy
       Templates::TemplateModel.where(id: params['id']).first.delete
-
       flash[:notice] = 'Notices deleted successfully'
       redirect_to action: :index
     end
@@ -134,12 +131,11 @@ module New
       @errors = []
       if file_content_type == 'text/csv'
         templates = Roo::Spreadsheet.open(params[:file].tempfile.path)
-
         templates.each do |template_row|
           next if template_row[1] == 'Notice Number'
 
           if Templates::TemplateModel.where(subject: template_row[1]).blank?
-            template = build_notice_kind(template_row)
+            template = Templates::TemplateModel.build_notice_kind(template_row)
             unless template.save
               @errors <<
                 "Notice #{template_row[1]} got errors: #{template.errors}"
@@ -194,19 +190,6 @@ module New
     end
 
     private
-
-    def build_notice_kind(template_row)
-      Templates::TemplateModel.new(
-        marketplace: template_row[0],
-        print_code: template_row[1],
-        title: template_row[2],
-        description: template_row[3],
-        recipient: template_row[4],
-        key: template_row[5],
-        body: { markup: template_row[6] },
-        content_type: template_row[7]
-      )
-    end
 
     def instant_preview_params
       params.permit(:body, :subject, :key, :title, :marketplace)
