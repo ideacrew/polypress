@@ -14,7 +14,7 @@ registry:
           is_visible: true
         settings:
           - key: :application_name
-            item: "enroll_me"
+            item: "CoverME"
           - key: :copyright_period_start
             item: ""
           - key: :policies_url
@@ -38,11 +38,11 @@ registry:
           - key: :subdomain
             item: "cme"
           - key: :domain_name
-            item: "cme.enroll.openhbx.org"
+            item: "enroll.CoverME.gov"
           - key: :site_title
-            item: "Maine Cover ME"
+            item: "CoverME.gov"
           - key: :home_url
-            item: "https://cme.enroll.openhbx.org/"
+            item: "https://enroll.CoverME.gov/"
           - key: :home_business_url
             item: "https://www.coverme.gov"
           - key: :help_url
@@ -70,7 +70,7 @@ registry:
           - key: :byline
             item: "Maine's Official Health Insurance Marketplace"
           - key: :long_name
-            item: "Maine Cover ME"
+            item: "CoverME.gov"
           - key: :header_message
             item: "Maine's Official Health Insurance Marketplace"
           - key: :byline
@@ -133,7 +133,7 @@ registry:
           - key: :forms
             item: ""
           - key: :website_url
-            item: "www.coverme.gov"
+            item: "www.CoverME.gov"
           - key: :healthcare_name
             item: "www.healthcare.gov"
           - key: :healthcare_url
@@ -177,7 +177,7 @@ registry:
           - key: :statewide_area
             item: "Maine"
           - key: :exchange_name
-            item: "Cover ME Health Benefit Exchange"
+            item: "CoverME.gov"
           - key: :social_media
             item: ''
           - key: :state_long_title
@@ -199,11 +199,11 @@ registry:
           - key: :social_media
             item: ''
           - key: :health_benefit_exchange_authority_phone_number
-            item: "1-866-636-0355"
+            item: "(866) 636-0355 TTY:711"
           - key: :contact_center_name
-            item: "Cover ME's Customer Care Center"
+            item: "CoverME.gov Consumer Assistance Center"
           - key: :contact_center_short_number
-            item: "(866) 636-0355"
+            item: "(866) 636-0355 TTY:711"
           - key: :contact_center_tty_number # Need to figure out what this should be for Maine
             item: "711"
           - key: :producer_advisory_committee_url

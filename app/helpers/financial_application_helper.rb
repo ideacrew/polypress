@@ -185,6 +185,7 @@ module FinancialApplicationHelper
       :relationships => [],
       :us_state => "DC",
       :hbx_id => "200000126",
+      :notice_options => { send_eligibility_notices: true, send_open_enrollment_notices: false },
       :oe_start_on => Date.new(current_date.year, 11, 1),
       :mitc_households => [{ :household_id => "1", :people => [{ :person_id => 95_000_000 }] }],
       :mitc_tax_returns => [{ :filers => [{ :person_id => 95_000_000 }], :dependents => [] }]
