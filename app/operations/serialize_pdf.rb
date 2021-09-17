@@ -10,7 +10,7 @@ class SerializePdf
   # @param [Dry::Struct] AcaEntities::Entity to proccess
   # @return [Dry:Monad] passed params into pdf
   def call(params)
-    _document_path = yield document_path(params[:template])
+    _document_path = yield document_path(params)
     pdf_options = yield pdf_options(params[:entity])
     serialized_pdf = yield generate_pdf(params, pdf_options)
 
@@ -19,9 +19,12 @@ class SerializePdf
 
   private
 
-  def document_path(template)
-    document_title = template.title.titleize.gsub(/\s+/, '_')
-    @document_path = Rails.root.join("tmp", "#{document_title}.pdf")
+  def document_path(params)
+    template = params[:template]
+    entity = params[:entity]
+    document_title = template.title.titleize.gsub(/[^0-9A-Za-z]/, '')
+    hbx_id = recipient_hbx_id(entity)
+    @document_path = Rails.root.join("tmp", "#{hbx_id}_#{document_title}_#{template.print_code}_IVL_#{DateTime.now.strftime("%Y%m%d%H%M%S")}.pdf")
     Success(@document_path)
   end
 
@@ -49,15 +52,18 @@ class SerializePdf
     }
   end
 
-  def header(entity)
+  def recipient_hbx_id(entity)
     members = entity[:applicants] || entity[:family_members]
-    hbx_id = members.detect { |a| a[:is_primary_applicant] == true }[:person_hbx_id]
+    members.detect { |a| a[:is_primary_applicant] == true }[:person_hbx_id]
+  end
+
+  def header(entity)
     {
       content: ApplicationController.new.render_to_string(
         {
           template: Settings.notices.individual.partials.header,
           layout: false,
-          locals: { primary_hbx_id: hbx_id }
+          locals: { primary_hbx_id: recipient_hbx_id(entity) }
         }
       )
     }
