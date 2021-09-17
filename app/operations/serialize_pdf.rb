@@ -24,7 +24,7 @@ class SerializePdf
     entity = params[:entity]
     document_title = template.title.titleize.gsub(/[^0-9A-Za-z]/, '')
     hbx_id = recipient_hbx_id(entity)
-    @document_path = Rails.root.join("tmp", "#{hbx_id}_#{document_title}_#{template.print_code}_IVL_#{DateTime.now.strftime("%Y%m%d%H%M%S")}.pdf")
+    @document_path = Rails.root.join("tmp", "#{hbx_id}_#{document_title}_#{template.print_code}_IVL_#{DateTime.now.strftime('%Y%m%d%H%M%S')}.pdf")
     Success(@document_path)
   end
 

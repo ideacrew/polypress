@@ -16,7 +16,7 @@ RSpec.describe Documents::Create do
       '<p>Uqhp Eligible Document for {{ family_reference.hbx_id }} {{ assistance_year }}</p>'
     end
 
-    let(:template) do
+    let!(:template) do
       FactoryBot.create(
         :template,
         key: event_key,
@@ -24,6 +24,7 @@ RSpec.describe Documents::Create do
           markup: body
         },
         title: title,
+        print_code: 'ERA',
         marketplace: 'aca_individual',
         recipient: 'AcaEntities::Families::Family',
         content_type: 'application/pdf',
@@ -40,7 +41,7 @@ RSpec.describe Documents::Create do
 
       it 'should create document' do
         expect(
-          subject.success[:document].path.match?('tmp/Uqhp_Document.pdf')
+          subject.success[:document].path.include?('tmp/95_UqhpDocument')
         ).to be_truthy
       end
     end
