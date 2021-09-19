@@ -42,7 +42,7 @@ module FinancialApplicationHelper
       :family_member_hbx_id => "1000",
       :first_name => "Gerald",
       :last_name => "Rivers",
-      :person_hbx_id => "95000000",
+      :person_hbx_id => "1009501",
       :is_primary_family_member => true
     }
   end
@@ -80,8 +80,8 @@ module FinancialApplicationHelper
 
   def benchmark_premium
     {
-      :health_only_lcsp_premiums => [{ :member_identifier => "95000000", :monthly_premium => 430.48 }],
-      :health_only_slcsp_premiums => [{ :member_identifier => "95000000", :monthly_premium => 496.23 }]
+      :health_only_lcsp_premiums => [{ :member_identifier => "1009501", :monthly_premium => 430.48 }],
+      :health_only_slcsp_premiums => [{ :member_identifier => "1009501", :monthly_premium => 496.23 }]
     }
   end
 
@@ -134,7 +134,7 @@ module FinancialApplicationHelper
         :citizenship_immigration_status_information => citizenship_immigration_status_information,
         :is_applying_coverage => true,
         :family_member_reference => family_member_reference,
-        :person_hbx_id => "95000000",
+        :person_hbx_id => "1009501",
         :is_required_to_file_taxes => true,
         :tax_filer_kind => "tax_filer",
         :is_joint_tax_filing => true,
@@ -187,8 +187,8 @@ module FinancialApplicationHelper
       :hbx_id => "200000126",
       :notice_options => { send_eligibility_notices: true, send_open_enrollment_notices: false },
       :oe_start_on => Date.new(current_date.year, 11, 1),
-      :mitc_households => [{ :household_id => "1", :people => [{ :person_id => 95_000_000 }] }],
-      :mitc_tax_returns => [{ :filers => [{ :person_id => 95_000_000 }], :dependents => [] }]
+      :mitc_households => [{ :household_id => "1", :people => [{ :person_id => 1_009_501 }] }],
+      :mitc_tax_returns => [{ :filers => [{ :person_id => 1_009_501 }], :dependents => [] }]
     }
   end
 
@@ -233,8 +233,8 @@ module FinancialApplicationHelper
 
   def tax_household_members
     [
-      tax_household_member_determination('Gerald', 'Rivers', '9500000'),
-      tax_household_member_determination('Alicia', 'Rivers', '9600000')
+      tax_household_member_determination('Gerald', 'Rivers', '1009501'),
+      tax_household_member_determination('Alicia', 'Rivers', '1009502')
     ]
   end
 
