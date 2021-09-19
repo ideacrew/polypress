@@ -1,20 +1,21 @@
-<h2><%= template.persisted? ? 'Edit' : 'Create' %> Template</h2>
+<div class='col-sm'>
+  <h2>
+    <%= template.persisted? ? 'Edit' : 'Create' %> Template</h2>
 
-<div>
-  <%#= form_for [:new, template], as: :template do |f| %>
-  <%= form_with scope: :template, url: new_templates_path(template.id), method: :post do |f| %>
-    <ul id="progressbar" style="display: none">
-      <li class="active" id="notice_info"><strong>Notice Info</strong></li>
-      <li id="template"><strong>Template</strong></li>
-    </ul>
+  <div>
+    <%#= form_for [:new, template], as: :template do |f| %>
+      <%= form_with scope: :template, url: new_templates_path(template.id), method: :post do |f| %>
+        <ul id="progressbar" style="display: none">
+          <li class="active" id="notice_info"><strong>Notice Info</strong></li>
+          <li id="template"><strong>Template</strong></li>
+        </ul>
 
-    <%= render(:partial => 'form', :locals => { template: template, f: f }) %>
+        <%= render(:partial => 'form', :locals => { template: template, f: f }) %>
 
-    <div class="form-group col-xs-12">
-      <div class="mt-3">
-        <button type="submit" class="btn btn-primary">Create</button>
-        <%= link_to 'Cancel', new_templates_path, class: "btn btn-secondary" %>
-      </div>
-    </div>
-  <% end %>
+          <div class="col-sm col-md-12 col-lg-8 mb-3">
+            <button type="submit" class="btn btn-primary">Create</button>
+            <%= link_to 'Cancel', new_templates_path, class: "btn btn-secondary" %>
+          </div>
+          <% end %>
+  </div>
 </div>

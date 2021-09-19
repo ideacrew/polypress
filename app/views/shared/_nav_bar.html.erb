@@ -1,22 +1,13 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <a class="navbar-brand" href="<%= root_url %>">Notice Engine</a>
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
-  <div class="collapse navbar-collapse" id="navbarNavDropdown">
-    <ul class="navbar-nav ml-auto">
-      <% if account_signed_in? %>
-        <li class="nav-item active">
-          <%= link_to 'Sign Out', destroy_account_session_path, method: :delete, class: 'nav-link' %>
-        </li>
-      <% else %>
-        <li class="nav-item active">
-          <%= link_to 'Sign Up', new_account_registration_path, class: 'nav-link' %>
-        </li>
-        <li class="nav-item active">
-          <%= link_to 'Sign In', new_account_session_path, class: 'nav-link' %>
-        </li>
-      <% end %>
-    </ul>
+<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="<%= root_url %>">Polypress Service</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavDropdown">
+      <ul class="navbar-nav me-auto mb-2 mb-md-0">
+        <%= render 'layouts/nav_links' %>
+      </ul>
+    </div>
   </div>
 </nav>

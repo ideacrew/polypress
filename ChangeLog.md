@@ -1,12 +1,12 @@
 # ChangeLog
 
-## Version 0.7.0
+## Version 0.7.0 (September 13, 2021)
 
 ### Improve Data Model
 
 1. Update data model to enable Section component sharing between Templates
 
-### Refactor for Abstraction
+### Refactor Codebase for Abstraction
 
 1. Refactor hard-coded notice references and substitute for end-user accessible and managed objects
 
@@ -34,7 +34,6 @@
    8. Move application settings into tokens dropdown
    9. Rename Application Settings dropdown to insert section dropdown
    10. Add ability to insert emtpy token from tokens dropdown
-
 
 ### Error Reporting Improvements
 

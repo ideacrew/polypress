@@ -1,50 +1,52 @@
-<div class="form-group col-xs-8">
-  <label for="noticeTitle">Title *</label>
-  <%= f.text_field :title, class: 'form-control', required: true %>
+<div class="row g-2">
+  <div class="col-sm col-md-12 col-lg-8 mb-3">
+    <%= f.label :title, "Title *", class: 'form-label' %>
+      <%= f.text_field :title, id: "title", class: "form-control" %>
+  </div>
+  <div class="col-sm col-md-12 col-lg-4 mb-3">
+    <%= f.label :print_code, "Print Vendor Code", class: 'form-label' %>
+      <%= f.text_field :print_code, id: "print_code", class: "form-control" %>
+  </div>
 </div>
 
-<div class="form-group col-xs-8">
-  <label for="noticeDescription">Description</label>
-  <%= f.text_field :description, class: 'form-control' %>
+<div class="row">
+  <div class="col-sm col-md-12 col-lg-12 mb-3">
+    <%= f.label :description, "Description", class: 'form-label' %>
+      <%= f.text_area :description, id: "description", class: "form-control" %>
+  </div>
 </div>
 
-<div class="form-group col-xs-8">
-  <label for="noticeMarketplace">Select Marketplace</label>
-  <%= f.select(:marketplace, options_for_select(::AcaEntities::Types::MarketPlaceKinds.values.collect{ |market| [market.to_s.titleize, market] }, selected: template.marketplace), {include_blank: false}, {:class => 'form-control'} ) %>
+<div class="row g-2">
+  <div class="col-sm col-md-12 col-lg-6 mb-3">
+    <%= f.fields_for :subscriber do |subscriber_form| %>
+      <%= f.label :subscriber, "Template Trigger Event", class: 'form-label' %>
+        <%= subscriber_form.select(:event_name, options_for_select(template.subscriber_options.inject(['Select one']) {|options, (k, v)| options << [k, v]}, selected: 'Select One'), { include_blank: false }, { :class => 'form-select'} ) %>
+          <% end %>
+  </div>
+
+  <div class="col-sm col-md-12 col-lg-6 mb-3">
+    <%= f.fields_for :publisher do |publisher_form| %>
+      <%= f.label :publisher, "Template Publish Event", class: 'form-label' %>
+        <%= publisher_form.select(:event_name, options_for_select(template.publisher_options.inject(['Select one']) {|options, (k, v)| options << [k, v]}, selected: 'Select One'), { include_blank: false }, { :class => 'form-select'} ) %>
+          <% end %>
+  </div>
 </div>
 
-<div class="form-group col-xs-8">
-  <label for="noticeContentType">Select Format</label>
-  <%= f.select(:content_type, options_for_select(['application/pdf', 'text/plain', 'text/csv'].collect{ |type| [type.split('/')[1], type] }, selected: template.content_type), {include_blank: false}, {:class => 'form-control'} ) %>
+<div class="row">
+  <div class="col-sm col-md-12 col-lg-6 mb-3">
+    <%= f.label :marketplace, "Marketplace", class: 'form-label' %>
+      <%= f.select(:marketplace, options_for_select(::AcaEntities::Types::MarketPlaceKinds.values.collect{ |market| [market.to_s.titleize, market] }, selected: template.marketplace), {include_blank: false}, {:class => 'form-select'} ) %>
+  </div>
+
+  <div class="col-sm col-md-12 col-lg-6 mb-3">
+    <%= f.label :content_type, "Output Format", class: 'form-label' %>
+      <%= f.select(:content_type, options_for_select(['application/pdf', 'text/plain', 'text/csv'].collect{ |type| [type.split('/')[1], type] }, selected: template.content_type), {include_blank: false}, {:class => 'form-select'} ) %>
+  </div>
 </div>
 
-<div class="form-group col-xs-8">
-  <label for="noticeDescription">Print Vendor Reference</label>
-  <%= f.text_field :print_code, class: 'form-control', required: true %>
-</div>
-
-<div class="form-group col-xs-8">
-  <label for="noticeEventName">Event Name</label>
-  <%= f.text_field :key, class: 'form-control' %>
-  <p class='memo'>Find the event name on the associated ticket</p>
-</div>
-
-<%= f.fields_for :publisher do |publisher_form| %>
-<div class="form-group col-xs-8">
-  <label for="noticeDescription">Publisher Event *</label>
-  <%= publisher_form.select(:event_name, options_for_select(template.publisher_options.inject([]) {|options, (k, v)| options << [k, v]}, selected: template&.publisher&.event_name), { include_blank: false }, { :class => 'form-control'} ) %>
-</div>
-<% end %>
-
-<%= f.fields_for :subscriber do |subscriber_form| %>
-<div class="form-group col-xs-8">
-  <label for="noticeDescription">Subscriber Event *</label>
-  <%= subscriber_form.select(:event_name, options_for_select(template.subscriber_options.inject([]) {|options, (k, v)| options << [k, v]}, selected: template&.subscriber&.event_name), { include_blank: false }, { :class => 'form-control'} ) %>
-</div>
-<% end %>
-
-<% recipients = Services::NoticeKindService.new(template.marketplace).recipients %>
-<div class="form-group col-xs-8">
-  <label for="noticeDescription">Recipient *</label>
-  <%= f.select(:recipient, options_for_select(recipients.inject([]) {|options, (k, v)| options << [k, v]}, selected: template.recipient), { include_blank: false }, { :class => 'form-control'} ) %>
+<div class="row">
+  <div class="col-sm col-md-12 col-lg-12 mb-3">
+    <%= f.label :published_on, "Published On", class: 'form-label' %>
+      <%= f.text_field :published_on, id: "published_on", class: "form-control" %>
+  </div>
 </div>
