@@ -27,7 +27,7 @@ RSpec.shared_context 'template_params' do
   let(:publisher_event_name) { 'on_polypress.greeting_notice.published' }
   let(:publisher) { { event_name: publisher_event_name } }
 
-  let(:subscriber_event_name) { "enroll_app.customer_created_#{rand(20)}" }
+  let!(:subscriber_event_name) { "enroll_app.customer_created_#{rand(200)}" }
   let(:subscriber) { { event_name: subscriber_event_name } }
 
   let(:required_params) { { key: key, title: title, marketplace: marketplace } }

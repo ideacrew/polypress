@@ -7,17 +7,17 @@ RSpec.describe Templates::Find, dbclean: :after_each do
   subject { described_class.new }
   include_context 'template_params'
 
-  context 'with some records added to the database' do
+  context 'with some records added to the database', dbclean: :after_each do
     let!(:individual_market_recs) do
       3.times do |index|
-        Templates::Template.new(all_params.merge(key: index.to_s)).create_model
+        Templates::Template.new(all_params.merge(key: index.to_s, subscriber: { event_name: "enroll_app.customer_created_#{index}"})).create_model
       end
     end
 
     let!(:shop_market_recs) do
       2.times do |index|
         Templates::Template.new(
-          all_params.merge({ key: (index + 10).to_s, marketplace: 'aca_shop' })
+          all_params.merge({ key: (index + 10).to_s, marketplace: 'aca_shop', subscriber: { event_name: "enroll_app.customer_created_#{index + 10}"} })
         ).create_model
       end
     end

@@ -7,7 +7,10 @@ RSpec.describe Templates::Template, dbclean: :after_each do
   subject { described_class.new }
   include_context 'template_params'
 
-  # before { Templates::TemplateModel.create_indexes }
+  before do
+    Templates::TemplateModel.remove_indexes
+    Templates::TemplateModel.create_indexes
+  end
 
   context '.new' do
     context 'given missing or invalid parameters' do
@@ -41,25 +44,22 @@ RSpec.describe Templates::Template, dbclean: :after_each do
 
   context '#create_model' do
     context 'and a new record is added to the database' do
-      let(:template_params) do
-        all_params[:subscriber][:event_name] = "enroll_app.customer_created"
-        all_params
-      end
+      let(:subscriber_event_name) { "enroll_app.customer_created" }
 
       before do
-        validated_template = Templates::TemplateContract.new.call(template_params)
+        validated_template = Templates::TemplateContract.new.call(all_params)
         described_class.call(validated_template.to_h).create_model
       end
 
       it 'database should have one Template record present' do
         result = Templates::Find.new.call(scope_name: :all)
         expect(result.success.size).to eq 1
-        expect(result.success.first[:key]).to eq template_params[:key]
+        expect(result.success.first[:key]).to eq all_params[:key]
       end
 
-      it 'a second attempt to add record with same key should fail' do
+      it 'a second attempt to add record with subscriver event name should fail' do
         expect do
-          described_class.call(template_params).create_model
+          described_class.call(all_params.merge(key: 'uqhp_determination_notice_test_1')).create_model
         end.to raise_error Mongo::Error::OperationFailure
       end
     end
