@@ -100,26 +100,26 @@ module Documents
 
     def ivl_appeal_rights
       join_pdfs [
-                  @main_document_path,
-                  Rails.root.join('lib/pdf_templates', 'appeals_maine.pdf')
-                ]
+        @main_document_path,
+        Rails.root.join('lib/pdf_templates', 'appeals_maine.pdf')
+      ]
     end
 
     def ivl_non_discrimination
       join_pdfs [
-                  @main_document_path,
-                  Rails.root.join(
-                    'lib/pdf_templates',
-                    'ivl_non_discrimination.pdf'
-                  )
-                ]
+        @main_document_path,
+        Rails.root.join(
+          'lib/pdf_templates',
+          'ivl_non_discrimination.pdf'
+        )
+      ]
     end
 
     def ivl_attach_envelope
       join_pdfs [
-                  @main_document_path,
-                  Rails.root.join('lib/pdf_templates', 'taglines.pdf')
-                ]
+        @main_document_path,
+        Rails.root.join('lib/pdf_templates', 'taglines.pdf')
+      ]
     end
 
     def verifications_insert_needed?(params, insert)
@@ -134,22 +134,22 @@ module Documents
     def append_inserts(params, template)
       output =
         template
-          .inserts
-          .sort
-          .collect do |insert|
-            unless verifications_insert_needed?(params, insert) ||
-                     insert_present?(insert)
-              Success(true)
-              next
-            end
-            attach_blank_page
-            create_main_document(
-              params: params,
-              key: insert,
-              cover_page: false,
-              insert: true
-            )
+        .inserts
+        .sort
+        .collect do |insert|
+          unless verifications_insert_needed?(params, insert) ||
+                 insert_present?(insert)
+            Success(true)
+            next
           end
+          attach_blank_page
+          create_main_document(
+            params: params,
+            key: insert,
+            cover_page: false,
+            insert: true
+          )
+        end
       failures = output.select(&:failure?)
       return Failure(failures) if failures.present?
 

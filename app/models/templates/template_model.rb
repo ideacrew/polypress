@@ -64,7 +64,6 @@ module Templates
       [raw_header, raw_body, raw_footer].join('\n\n')
     end
 
-    # rubocop:disable Metrics/MethodLength
     def data_elements
       []
     end
@@ -121,14 +120,12 @@ module Templates
           .success
           .each_with_object({}) do |(k, v), data|
             data[v[:subscribeers][:description]] = k if v[:subscribeers]
-              .present?
+                                                        .present?
           end
       else
         {}
       end
     end
-
-    # rubocop:enable Metrics/MethodLength
 
     def conditional_tokens
       keywords = {
@@ -139,10 +136,10 @@ module Templates
         'unless' => ''
       }
       body.scan(/\[\[([\s|\w.?]*)/).flatten.map(&:strip).collect do |ele|
-          ele.gsub(/\w+/) { |m| keywords.fetch(m, m) }
-        end.map(&:strip)
-        .reject(&:blank?)
-        .uniq
+        ele.gsub(/\w+/) { |m| keywords.fetch(m, m) }
+      end.map(&:strip)
+          .reject(&:blank?)
+          .uniq
     end
 
     def tokens

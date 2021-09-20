@@ -26,7 +26,7 @@ module FamilyHelper
     {
       :is_primary_applicant => true,
       :person => {
-        :hbx_id => "1009501",
+        :hbx_id => "1009522",
         :person_name => { :first_name => "John", :last_name => "Smith1" },
         :person_demographics => {
           :ssn => "784796992",
@@ -47,7 +47,7 @@ module FamilyHelper
     {
       :is_primary_applicant => false,
       :person => {
-        :hbx_id => "1009502",
+        :hbx_id => "1009523",
         :person_name => { :first_name => "John", :last_name => "Smith2" },
         :person_demographics => {
           :ssn => "784796993",
@@ -97,8 +97,8 @@ module FamilyHelper
         :enrollment_period_kind => "open_enrollment",
         :product_kind => "health",
         :hbx_enrollment_members => [
-          hbx_enrollment_member('1', 'Smith1', "1009501", 45, true),
-          hbx_enrollment_member('2', 'Smith2', "1009502", 46, false)
+          hbx_enrollment_member('1', 'Smith1', "1009522", 45, true),
+          hbx_enrollment_member('2', 'Smith2', "1009523", 46, false)
         ],
         :product_reference => product_reference,
         :issuer_profile_reference => issuer_profile_reference,

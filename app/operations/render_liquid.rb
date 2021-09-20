@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 # rubocop:disable Layout/MultilineMethodCallIndentation
-# rubocop:disable Layout/FirstArgumentIndentation
 # rubocop:disable Layout/MultilineOperationIndentation
 
 # RenderLiquid
@@ -99,15 +98,12 @@ class RenderLiquid
   end
 
   def fetch_entity_hash(params)
-    if params[:instant_preview] || params[:preview]
-      if %w[enrollment_submitted 1_outstanding_verifications_insert].include?(
-           params[:key].to_s
-         )
-        return family_hash
-      end
-      application_hash
+    return params[:entity].to_h unless params[:instant_preview] || params[:preview]
+
+    if params[:template].recipient.to_s == '::AcaEntities::Families::Family'
+      family_hash
     else
-      params[:entity].to_h
+      application_hash
     end
   end
 
@@ -193,5 +189,4 @@ class RenderLiquid
   end
 end
 # rubocop:enable Layout/MultilineMethodCallIndentation
-# rubocop:enable Layout/FirstArgumentIndentation
 # rubocop:enable Layout/MultilineOperationIndentation

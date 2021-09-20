@@ -67,10 +67,7 @@ module ApplicationHelper
           rendered <<
             render(
               partial: 'layouts/flash',
-              locals: {
-                type: type,
-                message: m
-              }
+              locals: { type: type, message: m }
             )
         end
       else
@@ -78,10 +75,7 @@ module ApplicationHelper
           rendered <<
             render(
               partial: 'layouts/flash',
-              locals: {
-                type: type,
-                message: messages
-              }
+              locals: { type: type, message: messages }
             )
         end
       end

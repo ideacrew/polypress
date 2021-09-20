@@ -53,8 +53,11 @@ class SerializePdf
   end
 
   def recipient_hbx_id(entity)
-    members = entity[:applicants] || entity[:family_members]
-    members.detect { |a| a[:is_primary_applicant] == true }[:person_hbx_id]
+    if entity[:applicants]
+      entity[:applicants].detect { |a| a[:is_primary_applicant] == true }[:person_hbx_id]
+    elsif entity[:family_members]
+      entity[:family_members].detect { |a| a[:is_primary_applicant] == true }[:person][:hbx_id]
+    end
   end
 
   def header(entity)
