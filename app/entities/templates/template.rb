@@ -16,7 +16,7 @@ module Templates
     # @!attribute [r] key
     # Unique identifier for this entity
     # @return [Symbol]
-    attribute :key, Types::String.meta(omittable: false) # unique identifier
+    attribute :key, Types::String.optional.meta(omittable: true) # unique identifier
 
     # @!attribute [r] title
     # A human-friendly title for the template
@@ -78,6 +78,8 @@ module Templates
     # The Account ID of the person who last updated this entity
     # @return [String]
     attribute :updated_by, Types::String.optional.meta(omittable: true)
+
+    attribute :published_at, Types::Date.optional.meta(omittable: true)
 
     # @!attribute [r] created_at
     # Timestamp when this entity was created

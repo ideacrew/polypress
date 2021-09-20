@@ -129,7 +129,16 @@ module Templates
         event_map
           .success
           .each_with_object({}) do |(k, v), data|
-            data[v[:publishers][:description]] = k if v[:publishers].present?
+            if v[:publishers].present?
+              protocol = v[:publishers][:protocol]
+              routing_key =
+                v[:publishers][:bindings][protocol]&.send(:[], :routing_key)
+
+              data[v[:publishers][:description]] = (routing_key || k)
+              data
+            else
+              {}
+            end
           end
       else
         {}
@@ -144,7 +153,7 @@ module Templates
           .success
           .each_with_object({}) do |(k, v), data|
             data[v[:subscribeers][:description]] = k if v[:subscribeers]
-                                                        .present?
+              .present?
           end
       else
         {}
@@ -162,10 +171,10 @@ module Templates
         'unless' => ''
       }
       body.scan(/\[\[([\s|\w.?]*)/).flatten.map(&:strip).collect do |ele|
-        ele.gsub(/\w+/) { |m| keywords.fetch(m, m) }
-      end.map(&:strip)
-          .reject(&:blank?)
-          .uniq
+          ele.gsub(/\w+/) { |m| keywords.fetch(m, m) }
+        end.map(&:strip)
+        .reject(&:blank?)
+        .uniq
     end
 
     def tokens
@@ -218,7 +227,9 @@ module Templates
         description: template_row[3],
         recipient: template_row[4],
         key: template_row[5],
-        body: { markup: template_row[6] },
+        body: {
+          markup: template_row[6]
+        },
         content_type: template_row[7]
       )
     end

@@ -21,7 +21,7 @@ module Templates
     # @return [Dry::Monads::Result] :result
     params do
       optional(:_id).filled(:string)
-      required(:key).filled(:string)
+      optional(:key).filled(:string)
       required(:title).filled(:string)
       required(:marketplace).value(AcaEntities::Types::MarketPlaceKinds)
       optional(:description).maybe(:string)

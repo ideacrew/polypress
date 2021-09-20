@@ -40,7 +40,6 @@ module New
 
     def create
       result = Templates::TemplateContract.new.call(template_params.to_h)
-
       if result.success?
         record = Templates::Template.new(result.to_h).create_model
 
@@ -171,10 +170,10 @@ module New
         format.html
         format.json do
           render json: {
-            sections: service.sections,
-            placeholders: service.placeholders,
-            setting_placeholders: service.setting_placeholders
-          }
+                   sections: service.sections,
+                   placeholders: service.placeholders,
+                   setting_placeholders: service.setting_placeholders
+                 }
         end
       end
     end
