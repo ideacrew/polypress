@@ -34,7 +34,7 @@ RSpec.describe Templates::TemplateContract do
   let(:subscriber_event_name) { 'enroll_app.customer_created' }
   let(:subscriber) { { event_name: subscriber_event_name } }
 
-  let(:required_params) { { key: key, title: title, marketplace: marketplace } }
+  let(:required_params) { { title: title, key: key, marketplace: marketplace } }
   let(:optional_params) do
     {
       _id: _id,

@@ -9,16 +9,16 @@ module Documents
     # @param [Dry::Struct] AcaEntities::Entity to proccess
     # @return [Dry:Monad] passed params into pdf
     def call(params)
-      template           = yield fetch_template(params)
-      rendered_template  = yield render_liquid_template(template, params)
-      output             = yield create_document(template, rendered_template, params)
+      template_entity    = yield fetch_template(params)
+      rendered_template  = yield render_liquid_template(template_entity, params)
+      output             = yield create_document(template_entity, rendered_template, params)
       Success(output)
     end
 
     private
 
     def fetch_template(params)
-      record = Templates::TemplateModel.where(key: params[:key]).first
+      record = params[:template_model]
       if record
         result = Templates::TemplateContract.new.call(record.to_entity)
         if result.success?
@@ -28,7 +28,7 @@ module Documents
           Failure(result)
         end
       else
-        Failure("Unable to find template with #{params[:key]}")
+        Failure("Missing template model")
       end
     end
 

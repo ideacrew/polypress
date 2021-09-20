@@ -12,11 +12,11 @@ module Documents
     send(:include, ::EventSource::Logging)
 
     # @param [Hash] AcaEntities::MagiMedicaid::Application
-    # @param [String] :event_key
+    # @param[Templates::TemplateModel] :template_model
     # @return [Dry::Monads::Result] Parsed template as string
     def call(params)
-      _template = yield fetch_template(params)
-      documents_hash = yield create_main_document(params: params, key: params[:event_key])
+      # _template = yield fetch_template(params)
+      documents_hash = yield create_main_document(params: params, template_model: params[:template_model])
       # _inserts = yield append_inserts(params, template)
       _other_pdfs = yield append_pdfs
       Success(documents_hash)
@@ -35,8 +35,8 @@ module Documents
     end
 
     # Creates main body of the document
-    def create_main_document(params:, key:, cover_page: true, insert: false)
-      result = document({ key: key, entity: params[:entity], cover_page: cover_page, preview: params[:preview] })
+    def create_main_document(params:, template_model:, cover_page: true, insert: false)
+      result = document({ template_model: template_model, entity: params[:entity], cover_page: cover_page, preview: params[:preview] })
 
       if result.is_a?(Hash)
         if insert

@@ -12,7 +12,7 @@ module MagiMedicaid
     send(:include, ::EventSource::Logging)
 
     # @param [Hash] AcaEntities::MagiMedicaid::Application or AcaEntities::Families::Family
-    # @param [String] :event_key
+    # @param [Templates::TemplateModel] :template_model
     # @return [Dry::Monads::Result] Parsed template as string
     def call(params)
       documents_hash = yield create_document_with_inserts(params)
@@ -42,10 +42,10 @@ module MagiMedicaid
 
     def fetch_resource_id(params)
       resource_id =
-        if params[:event_key].to_s == 'enrollment_submitted'
-          params[:entity].hbx_id
-        else
+        if params[:entity].respond_to?(:family_reference)
           params[:entity].family_reference.hbx_id
+        else
+          params[:entity].hbx_id
         end
 
       Success(resource_id)

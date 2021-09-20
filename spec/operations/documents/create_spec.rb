@@ -16,7 +16,7 @@ RSpec.describe Documents::Create do
       '<p>Uqhp Eligible Document for {{ family_reference.hbx_id }} {{ assistance_year }}</p>'
     end
 
-    let!(:template) do
+    let!(:template_model) do
       FactoryBot.create(
         :template,
         key: event_key,
@@ -32,7 +32,7 @@ RSpec.describe Documents::Create do
       )
     end
 
-    subject { described_class.new.call(key: template.key, entity: entity) }
+    subject { described_class.new.call(template_model: template_model, entity: entity) }
 
     context 'when payload has all the required params' do
       it 'should return success' do

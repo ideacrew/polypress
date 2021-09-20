@@ -34,7 +34,7 @@ module MagiMedicaid
     end
 
     def determine_eligibilities(application_entity, event_key)
-      return Success([event_key]) unless event_key.to_s == 'determined_mixed_determination'
+      return Success([event_key]) unless event_key.to_s.include?('determined_mixed_determination')
 
       peds = application_entity.tax_households.flat_map(&:tax_household_members).map(&:product_eligibility_determination)
       event_names =
@@ -50,14 +50,18 @@ module MagiMedicaid
               'determined_uqhp_eligible'
             end
 
-          e_names << e_name
+          e_names << "enroll.iap.applications.#{e_name}"
         end
       Success(event_names.uniq.compact)
     end
 
+    def template_model(event_key)
+      Templates::TemplateModel.where(:"subscriber.event_name" => event_key).first
+    end
+
     def publish_documents(application_entity, event_keys)
       event_keys.collect do |event_key|
-        result = MagiMedicaid::PublishDocument.new.call(entity: application_entity, event_key: event_key)
+        result = MagiMedicaid::PublishDocument.new.call(entity: application_entity, template_model: template_model(event_key))
         if result.success?
           Success(result.success)
         else

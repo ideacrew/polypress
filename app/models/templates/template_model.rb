@@ -34,7 +34,7 @@ module Templates
 
     index({ key: 1 }, { unique: true, name: 'key_index' })
     index({ published_at: 1 }, { sparse: true })
-    index({ marketpalce: 1 })
+    index({ marketplace: 1 })
     index(
       { 'publisher.event_name': 1 },
       { sparse: true, name: 'publisher_index' }

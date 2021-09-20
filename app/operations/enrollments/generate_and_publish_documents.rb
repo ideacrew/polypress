@@ -11,8 +11,9 @@ module Enrollments
     # @return [Dry::Monads::Result]
     def call(params)
       values = yield validate(params)
+      template_model = yield template_model(params)
       family_entity = yield init_family_entity(values)
-      publish_documents(family_entity, params[:event_key])
+      publish_documents(family_entity, template_model)
     end
 
     def validate(params)
@@ -22,6 +23,16 @@ module Enrollments
       result.success? ? Success(result.to_h) : Failure(result.errors.to_h)
     end
 
+    def template_model(params)
+      template_model = Templates::TemplateModel.where(:"subscriber.event_name" => params[:event_key]).first
+
+      if template_model.present?
+        Success(template_model)
+      else
+        Failure("Unable to find template model")
+      end
+    end
+
     def init_family_entity(params)
       family_entity = ::AcaEntities::Families::Family.new(params)
       Success(family_entity)
@@ -29,8 +40,9 @@ module Enrollments
       Failure(e)
     end
 
-    def publish_documents(family_entity, event_key)
-      result = MagiMedicaid::PublishDocument.new.call(entity: family_entity, event_key: event_key)
+    def publish_documents(family_entity, template_model)
+      result = MagiMedicaid::PublishDocument.new.call(entity: family_entity, template_model: template_model)
+
       if result.success?
         Success(result.success)
       else

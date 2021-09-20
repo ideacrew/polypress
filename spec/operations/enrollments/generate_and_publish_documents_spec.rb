@@ -8,7 +8,7 @@ RSpec.describe Enrollments::GenerateAndPublishDocuments do
     include_context 'family response from enroll'
 
     let(:title) { 'Enrollment Notice' }
-    let(:event_key) { 'enrollment_submitted' }
+    let(:event_key) { 'enroll.individual.notices.enrollment_submitted' }
     let(:body) { '<p>Uqhp Eligible Document for {{ hbx_id }}</p>' }
     let(:template_subject) { 'Enrollment Notice Subject' }
 
@@ -23,7 +23,8 @@ RSpec.describe Enrollments::GenerateAndPublishDocuments do
         marketplace: 'aca_individual',
         recipient: 'AcaEntities::Families::Family',
         content_type: 'application/pdf',
-        description: 'Uqhp Descriptoin'
+        description: 'Uqhp Description',
+        subscriber: EventRoutes::EventRouteModel.new(event_name: event_key)
       )
     end
 

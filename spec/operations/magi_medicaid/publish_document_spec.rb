@@ -8,7 +8,7 @@ RSpec.describe MagiMedicaid::PublishDocument do
     include_context 'application response from medicaid gateway'
 
     let(:title) { 'Uqhp Document' }
-    let(:event_key) { 'magi_medicaid.determined_uqhp_eligible' }
+    let(:event_key) { 'enroll.iap.applications.determined_uqhp_eligible' }
     let(:body) { '<p>Uqhp Eligible Document for {{ hbx_id }}</p>' }
 
     let!(:template) do
@@ -22,7 +22,8 @@ RSpec.describe MagiMedicaid::PublishDocument do
         marketplace: 'aca_individual',
         recipient: 'AcaEntities::Families::Family',
         content_type: 'application/pdf',
-        description: 'Uqhp Descriptoin'
+        description: 'Uqhp Description',
+        subscriber: EventRoutes::EventRouteModel.new(event_name: event_key)
       )
     end
 
@@ -31,7 +32,7 @@ RSpec.describe MagiMedicaid::PublishDocument do
     end
 
     subject do
-      described_class.new.call(entity: application_entity, event_key: event_key)
+      described_class.new.call(entity: application_entity, template_model: template)
     end
 
     context 'when payload has all the required params' do
@@ -57,7 +58,7 @@ RSpec.describe MagiMedicaid::PublishDocument do
 
       let(:invalid_event_key) { 'invalid_event_key' }
 
-      let(:error) { "Unable to find template with #{invalid_event_key}" }
+      let(:error) { "Missing template model" }
 
       it 'should return failure' do
         expect(invalid_subject.failure?).to be_truthy

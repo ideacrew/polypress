@@ -8,7 +8,7 @@ RSpec.describe MagiMedicaid::GenerateAndPublishEligibilityDocuments do
     include_context 'application response from medicaid gateway'
 
     let(:title) { 'Uqhp Document' }
-    let(:event_key) { 'determined_uqhp_eligible' }
+    let(:event_key) { 'enroll.iap.applications.determined_uqhp_eligible' }
     let(:body) { '<p>Uqhp Eligible Document for {{ hbx_id }}</p>' }
 
     let!(:template) do
@@ -22,7 +22,8 @@ RSpec.describe MagiMedicaid::GenerateAndPublishEligibilityDocuments do
         marketplace: 'aca_individual',
         recipient: 'AcaEntities::Families::Family',
         content_type: 'application/pdf',
-        description: 'Uqhp Descriptoin'
+        description: 'Uqhp Description',
+        subscriber: EventRoutes::EventRouteModel.new(event_name: event_key)
       )
     end
     let(:application_entity) do
@@ -73,7 +74,7 @@ RSpec.describe MagiMedicaid::GenerateAndPublishEligibilityDocuments do
       end
 
       it 'should eligibilities' do
-        expect(eligibilities.success).to eq ['determined_aptc_eligible']
+        expect(eligibilities.success).to eq ['enroll.iap.applications.determined_aptc_eligible']
       end
     end
 
