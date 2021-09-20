@@ -141,7 +141,7 @@
       type:"POST",
       url: "/new/templates/instant_preview",
       // dataType: 'json',
-      data: { body: CKEDITOR.instances.template_body_markup.getData(), subject: $('#template_print_code').val(), key: $('#template_key').val(), title: $('#template_title').val(), marketplace: $('#template_marketplace').val()},
+      data: { body: CKEDITOR.instances.template_body_markup.getData(), subject: $('#print_code').val(), key: $('#key').val(), title: $('#title').val(), marketplace: $('#template_marketplace').val()},
       success: function(result){
       }
     })

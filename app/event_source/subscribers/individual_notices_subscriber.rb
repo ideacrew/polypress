@@ -13,7 +13,8 @@ module Subscribers
         on_enroll_individual_notices with delivery_info: #{delivery_info}, response: #{response}"
 
       routing_key = delivery_info[:routing_key]
-      template_model = Templates::TemplateModel.where(key: routing_key).first
+      template_model =
+        Templates::TemplateModel.by_subscriber(event_name: routing_key).first
 
       # find notice template by routing key
       # call operation with template and payload to generate notice document
@@ -22,10 +23,7 @@ module Subscribers
       payload = JSON.parse(response, symbolize_names: true)
       result =
         Individuals::GenerateNotice.new.call(
-          {
-            template_model: template_model,
-            payload: payload
-          }
+          { template_model: template_model, payload: payload }
         )
 
       if result.success?

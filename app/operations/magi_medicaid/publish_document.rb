@@ -61,7 +61,9 @@ module MagiMedicaid
           subjects: nil
         )
 
-      return Failure("Couldn't upload document for the given payload") unless upload.success?
+      unless upload.success?
+        return Failure("Couldn't upload document for the given payload")
+      end
 
       Success(upload.success)
     end

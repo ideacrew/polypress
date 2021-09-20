@@ -79,6 +79,7 @@ module Templates
     # @return [String]
     attribute :updated_by, Types::String.optional.meta(omittable: true)
 
+    attribute :recipient, Types::String.optional.meta(omittable: true)
     attribute :published_at, Types::Date.optional.meta(omittable: true)
 
     # @!attribute [r] created_at

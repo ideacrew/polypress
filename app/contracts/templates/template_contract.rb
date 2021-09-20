@@ -21,7 +21,7 @@ module Templates
     # @return [Dry::Monads::Result] :result
     params do
       optional(:_id).filled(:string)
-      optional(:key).filled(:string)
+      optional(:key).maybe(:string)
       required(:title).filled(:string)
       required(:marketplace).value(AcaEntities::Types::MarketPlaceKinds)
       optional(:description).maybe(:string)
@@ -32,6 +32,7 @@ module Templates
       optional(:publisher).maybe(EventRoutes::EventRouteContract.params)
       optional(:subscriber).maybe(EventRoutes::EventRouteContract.params)
       optional(:author).maybe(:string)
+      optional(:recipient).maybe(:string)
       optional(:updated_by).maybe(:string)
       optional(:published_at).maybe(:time)
       optional(:created_at).maybe(:time)

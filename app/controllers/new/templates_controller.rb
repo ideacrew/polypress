@@ -90,7 +90,7 @@ module New
       template = Templates::TemplateModel.find(params['id'])
       documents_operation =
         Documents::CreateWithInsert.new.call(
-          { event_key: template.key, preview: 'true', cover_page: true }
+          { template_model: template, preview: 'true', cover_page: true }
         )
 
       if documents_operation.success?
@@ -170,10 +170,10 @@ module New
         format.html
         format.json do
           render json: {
-            sections: service.sections,
-            placeholders: service.placeholders,
-            setting_placeholders: service.setting_placeholders
-          }
+                   sections: service.sections,
+                   placeholders: service.placeholders,
+                   setting_placeholders: service.setting_placeholders
+                 }
         end
       end
     end
