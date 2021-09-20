@@ -7,7 +7,8 @@ module Subscribers
     include ::EventSource::Subscriber[amqp: 'enroll.individual.accounts']
 
     subscribe(:on_enroll_individual_accounts) do |delivery_info, _metadata, response|
-      logger.info "Subscribers::AccountCreatedSubscriber invoked on_enroll_individual_accounts with delivery_info: #{delivery_info}, response: #{response}"
+      logger.info "Subscribers::AccountCreatedSubscriber invoked
+        on_enroll_individual_accounts with delivery_info: #{delivery_info}, response: #{response}"
 
       payload = JSON.parse(response, :symbolize_names => true)
       result = Enrollments::GenerateAndPublishDocuments.new.call({ family_hash: payload, event_key: 'account_created' })

@@ -9,7 +9,8 @@ module Subscribers
     subscribe(
       :on_enroll_individual_notices
     ) do |delivery_info, _metadata, response|
-      logger.info "Subscribers::IndividualNoticesSubscriber invoked on_enroll_individual_notices with delivery_info: #{delivery_info}, response: #{response}"
+      logger.info "Subscribers::IndividualNoticesSubscriber invoked
+        on_enroll_individual_notices with delivery_info: #{delivery_info}, response: #{response}"
 
       routing_key = delivery_info[:routing_key]
       template_model = Templates::TemplateModel.where(key: routing_key).first

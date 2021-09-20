@@ -66,39 +66,7 @@ module Templates
 
     # rubocop:disable Metrics/MethodLength
     def data_elements
-      return unless body.present?
-
-      conditional_token_loops = []
-      iterator_subloop_tokens = []
-      loop_tokens = []
-      loop_iterators =
-        conditional_tokens.inject([]) do |iterators, conditional_token|
-          iterators unless conditional_token.match(/(.+)\.each/i)
-          loop_match = conditional_token.match(/\|(.+)\|/i)
-          if loop_match.present?
-            loop_token = conditional_token.match(/(.+)\.each/i)[1]
-            loop_tokens << loop_token
-            if iterators.any? do |iterator|
-                 loop_token.match(/^#{iterator}\.(.*)$/i).present?
-               end
-              iterator_subloop_tokens << loop_token
-            end
-            conditional_token_loops << conditional_token
-            iterators << loop_match[1].strip
-          else
-            iterators
-          end
-        end
-
-      filtered_conditional_tokens = conditional_tokens - conditional_token_loops
-      data_elements =
-        (tokens + filtered_conditional_tokens + loop_tokens).reject do |token|
-          loop_iterators.any? do |iterator|
-            token.match(/^#{iterator}\.(.*)$/i).present? &&
-              token.match(/(.+)\.each/i).blank?
-          end
-        end
-      data_elements + iterator_subloop_tokens
+      []
     end
 
     def self.instant_preview_for(attributes)

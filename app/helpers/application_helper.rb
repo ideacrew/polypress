@@ -7,7 +7,7 @@ module ApplicationHelper
     alert_type = name.to_s == 'notice' ? 'alert-success' : 'alert-danger'
     content_tag(
       :div,
-      msg + '\n' +
+      "#{msg} \n" +
         tag.button(
           nil,
           type: 'button',
