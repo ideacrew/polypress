@@ -41,20 +41,25 @@ RSpec.describe Templates::Template, dbclean: :after_each do
 
   context '#create_model' do
     context 'and a new record is added to the database' do
+      let(:template_params) do
+        all_params[:subscriber][:event_name] = "enroll_app.customer_created"
+        all_params
+      end
+
       before do
-        validated_template = Templates::TemplateContract.new.call(all_params)
+        validated_template = Templates::TemplateContract.new.call(template_params)
         described_class.call(validated_template.to_h).create_model
       end
 
       it 'database should have one Template record present' do
         result = Templates::Find.new.call(scope_name: :all)
         expect(result.success.size).to eq 1
-        expect(result.success.first[:key]).to eq all_params[:key]
+        expect(result.success.first[:key]).to eq template_params[:key]
       end
 
       it 'a second attempt to add record with same key should fail' do
         expect do
-          described_class.call(all_params).create_model
+          described_class.call(template_params).create_model
         end.to raise_error Mongo::Error::OperationFailure
       end
     end
