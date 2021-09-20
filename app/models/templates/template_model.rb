@@ -32,7 +32,7 @@ module Templates
 
     accepts_nested_attributes_for :body, :publisher, :subscriber
 
-    index({ key: 1 }, { unique: true, name: 'key_index' })
+    # index({ key: 1 }, { unique: true, name: 'key_index' })
     index({ published_at: 1 }, { sparse: true })
     index({ marketplace: 1 })
     index(
