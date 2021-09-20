@@ -153,7 +153,7 @@ module Templates
           .success
           .each_with_object({}) do |(k, v), data|
             data[v[:subscribeers][:description]] = k if v[:subscribeers]
-              .present?
+                                                        .present?
           end
       else
         {}
@@ -171,10 +171,10 @@ module Templates
         'unless' => ''
       }
       body.scan(/\[\[([\s|\w.?]*)/).flatten.map(&:strip).collect do |ele|
-          ele.gsub(/\w+/) { |m| keywords.fetch(m, m) }
-        end.map(&:strip)
-        .reject(&:blank?)
-        .uniq
+        ele.gsub(/\w+/) { |m| keywords.fetch(m, m) }
+      end.map(&:strip)
+          .reject(&:blank?)
+          .uniq
     end
 
     def tokens

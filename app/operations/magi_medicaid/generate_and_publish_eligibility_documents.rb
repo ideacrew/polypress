@@ -56,7 +56,7 @@ module MagiMedicaid
     end
 
     def template_model(event_key)
-      Templates::TemplateModel.where(:"subscriber.event_name" => event_key).first
+      Templates::TemplateModel.where(:'subscriber.event_name' => event_key).first
     end
 
     def publish_documents(application_entity, event_keys)

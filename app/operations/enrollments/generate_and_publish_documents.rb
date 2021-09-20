@@ -24,7 +24,7 @@ module Enrollments
     end
 
     def template_model(params)
-      template_model = Templates::TemplateModel.where(:"subscriber.event_name" => params[:event_key]).first
+      template_model = Templates::TemplateModel.where(:'subscriber.event_name' => params[:event_key]).first
 
       if template_model.present?
         Success(template_model)

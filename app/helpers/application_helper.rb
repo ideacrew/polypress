@@ -63,16 +63,15 @@ module ApplicationHelper
     flash.each do |type, messages|
       if messages.respond_to?(:each)
         messages.each do |m|
-          unless m.blank?
-            rendered <<
-              render(
-                partial: 'layouts/flash',
-                locals: {
-                  type: type,
-                  message: m
-                }
-              )
-          end
+          next if m.blank?
+          rendered <<
+            render(
+              partial: 'layouts/flash',
+              locals: {
+                type: type,
+                message: m
+              }
+            )
         end
       else
         unless messages.blank?
