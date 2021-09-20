@@ -3,11 +3,11 @@
 require 'rails_helper'
 require 'shared_examples/template_params'
 
-RSpec.describe Templates::Template do
+RSpec.describe Templates::Template, dbclean: :after_each do
   subject { described_class.new }
   include_context 'template_params'
 
-  before { Templates::TemplateModel.create_indexes }
+  # before { Templates::TemplateModel.create_indexes }
 
   context '.new' do
     context 'given missing or invalid parameters' do
