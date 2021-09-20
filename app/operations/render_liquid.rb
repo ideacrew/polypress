@@ -98,9 +98,7 @@ class RenderLiquid
   end
 
   def fetch_entity_hash(params)
-    unless params[:instant_preview] || params[:preview]
-      return params[:entity].to_h
-    end
+    return params[:entity].to_h unless params[:instant_preview] || params[:preview]
 
     if params[:template].recipient.to_s == '::AcaEntities::Families::Family'
       family_hash
