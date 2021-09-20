@@ -98,7 +98,9 @@ class RenderLiquid
   end
 
   def fetch_entity_hash(params)
-    return params[:entity].to_h unless params[:instant_preview] || params[:preview]
+    unless params[:instant_preview] || params[:preview]
+      return params[:entity].to_h
+    end
 
     if params[:template].recipient.to_s == '::AcaEntities::Families::Family'
       family_hash
@@ -120,7 +122,7 @@ class RenderLiquid
         applicant =
           params[:family_members].detect { |app| app[:is_primary_applicant] } ||
             params[:family_members][0]
-        mailing_address = applicant[:person][:addresses][0]
+        mailing_address = applicant[:person][:addresses]&.send(:[], 0)
         applicant[:person][:person_name]
       end
     [

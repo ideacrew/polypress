@@ -20,14 +20,14 @@
   <div class="col-sm col-md-12 col-lg-6 mb-3">
     <%= f.fields_for :subscriber do |subscriber_form| %>
       <%= f.label :subscriber, "Template Trigger Event", class: 'form-label' %>
-        <%= subscriber_form.select(:event_name, options_for_select(template.publisher_options.inject(['Select one']) {|options, (k, v)| options << [k, v]}, selected: 'Select One'), { include_blank: false }, { :class => 'form-select'} ) %>
+        <%= subscriber_form.select(:event_name, options_for_select(template.publisher_options.inject(['Select one']) {|options, (k, v)| options << [k, v]}, selected: template.subscriber&.event_name || 'Select One'), { include_blank: false }, { :class => 'form-select'} ) %>
           <% end %>
   </div>
 
   <div class="col-sm col-md-12 col-lg-6 mb-3">
     <%= f.fields_for :publisher do |publisher_form| %>
       <%= f.label :publisher, "Template Publish Event", class: 'form-label' %>
-        <%= publisher_form.select(:event_name, options_for_select(template.subscriber_options.inject(['Select one']) {|options, (k, v)| options << [k, v]}, selected: 'Select One'), { include_blank: false }, { :class => 'form-select'} ) %>
+        <%= publisher_form.select(:event_name, options_for_select(template.subscriber_options.inject(['Select one']) {|options, (k, v)| options << [k, v]}, selected: template.publisher&.event_name || 'Select One'), { include_blank: false }, { :class => 'form-select'} ) %>
           <% end %>
   </div>
 </div>
