@@ -3,12 +3,14 @@
 # TemplatesController
 class TemplatesController < ::ApplicationController
   include ::DataTablesAdapter
+
   # include ::DataTablesSearch
   # before_action :check_hbx_staff_role
-  protect_from_forgery :except => [:new], with: :exception
+  protect_from_forgery except: [:new], with: :exception
   layout 'application'
 
   def index
+    @user = JSON.parse Keycloak::Client.get_userinfo
     @notice_kinds = Template.all
     @datatable = Effective::Datatables::NoticesDatatable.new
     @errors = []
@@ -32,7 +34,7 @@ class TemplatesController < ::ApplicationController
   def edit
     @template = Template.find(params[:id])
     @inserts = Template.where(doc_type: :insert)
-    render :layout => 'application'
+    render layout: 'application'
   end
 
   def create
@@ -46,27 +48,30 @@ class TemplatesController < ::ApplicationController
       @templates = Template.all
       @datatable = Effective::Datatables::NoticesDatatable.new
 
-      render :action => 'index'
+      render action: 'index'
     end
   end
 
   def update
     template = Template.find(params['id'])
-    template.update_attributes(template_params.merge({ inserts: template_params[:inserts] || [] }))
+    template.update_attributes(
+      template_params.merge({ inserts: template_params[:inserts] || [] })
+    )
     flash[:notice] = 'Notice content updated successfully'
     redirect_to templates_path
   end
 
   def instant_preview
-    template = RenderLiquid.new.call(
-      {
-        body: instant_preview_params[:body],
-        subject: instant_preview_params[:subject],
-        key: instant_preview_params[:key],
-        cover_page: true,
-        instant_preview: 'true'
-      }
-    )
+    template =
+      RenderLiquid.new.call(
+        {
+          body: instant_preview_params[:body],
+          subject: instant_preview_params[:subject],
+          key: instant_preview_params[:key],
+          cover_page: true,
+          instant_preview: 'true'
+        }
+      )
 
     if template.success?
       @rendered_template = template.success[:rendered_template]
@@ -77,34 +82,42 @@ class TemplatesController < ::ApplicationController
 
   def preview
     template = Template.find(params['id'])
-    documents_operation = Documents::CreateWithInsert.new.call({ event_key: template.key, preview: 'true', cover_page: true })
+    documents_operation =
+      Documents::CreateWithInsert.new.call(
+        { event_key: template.key, preview: 'true', cover_page: true }
+      )
 
     if documents_operation.success?
       send_file documents_operation.success[:document].path,
-                :type => documents_operation.success[:template][:content_type],
-                :disposition => 'inline'
+                type: documents_operation.success[:template][:content_type],
+                disposition: 'inline'
     else
       flash[:error] = 'Failed to load preview.'
       @notice_kinds = Template.all
       @datatable = Effective::Datatables::NoticesDatatable.new
-      redirect_back(fallback_location: root_path, :flash => { error: documents_operation.failure })
+      redirect_back(
+        fallback_location: root_path,
+        flash: {
+          error: documents_operation.failure
+        }
+      )
     end
   end
 
   def delete_notice
-    Template.where(:id => params['id']).first.delete
+    Template.where(id: params['id']).first.delete
 
     flash[:notice] = 'Notices deleted successfully'
     redirect_to templates_path
   end
 
   def download_notices
-    templates = Template.where(:id.in => params['ids'].split(","))
+    templates = Template.where(:id.in => params['ids'].split(','))
 
     send_data templates.to_csv,
-              :filename => "notices_#{Date.today.strftime('%m_%d_%Y')}.csv",
-              :disposition => 'attachment',
-              :type => 'text/csv'
+              filename: "notices_#{Date.today.strftime('%m_%d_%Y')}.csv",
+              disposition: 'attachment',
+              type: 'text/csv'
   end
 
   def upload_notices
@@ -118,7 +131,10 @@ class TemplatesController < ::ApplicationController
 
         if Template.where(subject: template_row[1]).blank?
           template = build_notice_kind(template_row)
-          @errors << "Notice #{template_row[1]} got errors: #{template.errors}" unless template.save
+          unless template.save
+            @errors <<
+              "Notice #{template_row[1]} got errors: #{template.errors}"
+          end
         else
           @errors << "Notice #{template_row[1]} already exists."
         end
@@ -132,7 +148,7 @@ class TemplatesController < ::ApplicationController
     @notice_kinds = Template.all
     @datatable = Effective::Datatables::NoticesDatatable.new
 
-    render :action => 'index'
+    render action: 'index'
   end
 
   def build_notice_kind(template_row)
@@ -164,14 +180,16 @@ class TemplatesController < ::ApplicationController
       format.html
       format.json do
         render json: {
-          placeholders: service.placeholders, setting_placeholders: service.setting_placeholders
-        }
+                 placeholders: service.placeholders,
+                 setting_placeholders: service.setting_placeholders
+               }
       end
     end
   end
 
   def fetch_recipients
-    recipients = Services::NoticeKindService.new(params['market_kind']).recipients
+    recipients =
+      Services::NoticeKindService.new(params['market_kind']).recipients
 
     respond_to do |format|
       format.html
@@ -193,23 +211,41 @@ class TemplatesController < ::ApplicationController
     return unless current_user.blank? || !current_user.has_hbx_staff_role?
 
     redirect_to main_app.root_path,
-                :flash => { :error => "You must be an HBX staff member" }
+                flash: {
+                  error: 'You must be an HBX staff member'
+                }
   end
 
   def template_params
-    params.require(:template).permit(:content_type, :category, :doc_type, :subject, :title, :description, :key, :recipient, :body, :inserts => [])
+    params
+      .require(:template)
+      .permit(
+        :content_type,
+        :category,
+        :doc_type,
+        :subject,
+        :title,
+        :description,
+        :key,
+        :recipient,
+        :body,
+        inserts: []
+      )
   end
 
   def entities_contracts_mapping
     {
-      "AcaEntities::People::ConsumerRole" => 'AcaEntities::Contracts::People::ConsumerRoleContract',
-      "::AcaEntities::Families::Family" => "::AcaEntities::Contracts::Families::FamilyContract",
-      "::AcaEntities::MagiMedicaid::Application" => "::AcaEntities::MagiMedicaid::Contracts::ApplicationContract"
-
+      'AcaEntities::People::ConsumerRole' =>
+        'AcaEntities::Contracts::People::ConsumerRoleContract',
+      '::AcaEntities::Families::Family' =>
+        '::AcaEntities::Contracts::Families::FamilyContract',
+      '::AcaEntities::MagiMedicaid::Application' =>
+        '::AcaEntities::MagiMedicaid::Contracts::ApplicationContract'
     }
   end
 
   def builder_param
-    entities_contracts_mapping[params['builder']] || '::AcaEntities::MagiMedicaid::Contracts::ApplicationContract'
+    entities_contracts_mapping[params['builder']] ||
+      '::AcaEntities::MagiMedicaid::Contracts::ApplicationContract'
   end
 end

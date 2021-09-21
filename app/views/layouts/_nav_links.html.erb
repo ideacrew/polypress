@@ -1,3 +1,4 @@
+<% if false %>
 <% if account_signed_in? %>
   <li class="nav-item active">
     <%= link_to "Sign Out #{current_account.email}", destroy_account_session_path, method: :delete, class: 'nav-link' %>
@@ -10,3 +11,4 @@
       <%= link_to 'Sign Up', new_account_registration_path, class: 'nav-link' %>
     </li>
     <% end %>
+    <%end %>

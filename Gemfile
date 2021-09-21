@@ -5,15 +5,13 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
 ruby '2.7.3'
 
-gem 'aca_entities', git: 'https://github.com/ideacrew/aca_entities.git', branch: 'release_0.6.0'
+gem 'aca_entities', git: 'https://github.com/ideacrew/aca_entities.git', branch: 'release_0.7.0'
 # Reduces boot times through caching; required in config/boot.rb
 gem 'bootsnap', '>= 1.4.4', require: false
 
 gem 'ckeditor', '~> 4.2.4'
 gem 'combine_pdf', '~> 1.0'
 gem 'config', '~> 2.0' # Deprecate for Resource Registry
-
-gem 'devise', '~> 4.8'
 
 gem 'dry-matcher', '~> 0.8'
 gem 'dry-monads', '~> 1.3'
@@ -35,6 +33,8 @@ gem 'httparty', '~> 0.16'
 gem 'jbuilder', '~> 2.7'
 gem 'jquery-rails', '~> 4.3'
 gem 'jquery-ui-rails'
+
+gem 'keycloak', '~> 3.2'
 
 # Had to clone to make nested search work in where filter
 gem 'liquid', path: './project_gems/liquid-5.0.1'
