@@ -72,15 +72,18 @@ module Templates
       RenderLiquid.new.call(
         {
           body: attributes[:body],
-          template: {
-            key: attributes[:key],
-            subject: attributes[:subject],
-            title: attributes[:title],
-            marketplace: attributes[:marketplace],
-            body: {
-              markup: attributes[:body]
+          template: Templates::Template.new(
+            {
+              recipient: attributes[:recipient],
+              key: attributes[:key],
+              subject: attributes[:subject],
+              title: attributes[:title],
+              marketplace: attributes[:marketplace],
+              body: {
+                markup: attributes[:body]
+              }
             }
-          },
+          ),
           subject: attributes[:subject],
           key: attributes[:key],
           cover_page: true,

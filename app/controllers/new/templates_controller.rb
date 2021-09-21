@@ -191,7 +191,7 @@ module New
     private
 
     def instant_preview_params
-      params.permit(:body, :subject, :key, :title, :marketplace)
+      params.permit(:body, :subject, :key, :title, :marketplace, :recipient)
     end
 
     def file_content_type
