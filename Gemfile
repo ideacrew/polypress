@@ -71,7 +71,7 @@ gem 'webpacker', '~> 5.0'
 # Use Active Model has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 
-gem 'wicked_pdf', '~> 1.1.0'
+gem 'wicked_pdf', '~> 2.1'
 gem 'wkhtmltopdf-binary-edge', '~> 0.12.3.0'
 
 group :development, :test do
