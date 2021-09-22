@@ -3,11 +3,11 @@
 		<div class="login-panel panel panel-default">
 			<div class="panel-heading">
 				<h3 class="panel-title">
-					My application - Sign in
+					Polypress - Sign in
 				</h3>
 			</div>
 			<div class="panel-body">
-				<%= bootstrap_form_tag(url: session_signin_path, method: :post, data: {toggle:"validator"} ) do |f| %>
+				<%= bootstrap_form_tag(url: session_create_path, method: :post, data: {toggle:"validator"} ) do |f| %>
 					<fieldset>
 						<div class="form-group">
 							<%= f.email_field '', autofocus: true, class:"form-control", id:"email", name:"email", placeholder:"Email", required: "true" %>
@@ -19,7 +19,7 @@
 							<%= button_tag(nil, class: "btn btn-md btn-link", type:"button", :onClick => "location.href = '" + session_forgot_password_path + "';") do %>
 								<%= link_to("I forgot my password", "#") %>
 							<% end %>&nbsp;|&nbsp;
-							<%= button_tag(nil, class: "btn btn-md btn-link", type:"button", :onClick => "location.href = '" + new_user_path + "';") do %>
+							<%= button_tag(nil, class: "btn btn-md btn-link", type:"button", :onClick => "location.href = '" + new_account_path + "';") do %>
 								<%= link_to("Sign Up", "#") %>
 							<% end %>
 							<%= f.submit 'login', class:"btn btn-success" %>

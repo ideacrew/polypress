@@ -1,10 +1,13 @@
 {
     "realm": "sbe_business_operations",
-    "auth-server-url": "http://127.0.0.1:8080/auth/",
+    "auth-server-url": "http://host.docker.internal:8080/auth/",
     "ssl-required": "external",
     "resource": "polypress",
-    "public-client": true,
     "verify-token-audience": true,
+    "credentials": {
+        "secret": "5277f8a7-bb5c-4d85-bd41-20ecb5103d03"
+    },
     "use-resource-role-mappings": true,
-    "confidential-port": 0
+    "confidential-port": 0,
+    "policy-enforcer": {}
 }

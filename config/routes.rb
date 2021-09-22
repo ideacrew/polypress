@@ -8,6 +8,14 @@ Rails
     mount Ckeditor::Engine => '/ckeditor'
     root 'new/templates#index'
 
+    get 'session/new'
+    post 'session/create'
+    delete 'session/destroy'
+    get 'session/forgot_password'
+    put 'session/reset_password'
+
+    resources :accounts, only: %i[new create add_role]
+
     namespace :new do
       resources :templates do
         member do
