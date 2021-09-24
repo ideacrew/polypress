@@ -33,19 +33,21 @@ RUN apt-get update \
 
 # Install puppeteer so it's available in the container.
 RUN npm init -y &&  \
-    npm i puppeteer \
+    npm i puppeteer
+    # npm i puppeteer \
     # Add user so we don't need --no-sandbox.
     # same layer as npm install to keep re-chowned files from using up several hundred MBs more space
-    && groupadd -r pptruser && useradd -r -g pptruser -G audio,video pptruser \
-    && mkdir -p /home/pptruser/Downloads \
-    && chown -R pptruser:pptruser /home/pptruser \
-    && chown -R pptruser:pptruser /node_modules \
-    && chown -R pptruser:pptruser /package.json \
-    && chown -R pptruser:pptruser /package-lock.json
+    # && groupadd -r pptruser && useradd -r -g pptruser -G audio,video pptruser \
+    # && mkdir -p /home/pptruser/Downloads \
+    # && chown -R pptruser:pptruser /home/pptruser \
+    # && chown -R pptruser:pptruser /node_modules \
+    # && chown -R pptruser:pptruser /package.json \
+    # && chown -R pptruser:pptruser /package-lock.json
 
 # Run everything after as non-privileged user.
-USER pptruser
+# USER pptruser
 CMD ["google-chrome-stable"]
+RUN export CHROME_DEVEL_SANDBOX=/usr/local/sbin/chrome-devel-sandbox
 
 WORKDIR $HOME
 
@@ -62,6 +64,14 @@ RUN mkdir -p $BUNDLE_PATH && mkdir -p $BUNDLE_BIN
 ENV PATH $GEM_HOME/bin:$GEM_HOME/gems/bin:$PATH
 
 COPY . $HOME
+
+RUN cd /node_modules/puppeteer/.local-chromium/linux-901912/chrome-linux && \
+    chown root:root chrome_sandbox && \
+    chmod 4755 chrome_sandbox && \
+    # copy sandbox executable to a shared location
+    cp -p chrome_sandbox /usr/local/sbin/chrome-devel-sandbox
+    # export CHROME_DEVEL_SANDBOX env variable
+
 
 RUN gem install --source "https://rubygems.org" bundler --version '2.2.24'
 
