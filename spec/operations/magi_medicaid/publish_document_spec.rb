@@ -144,7 +144,7 @@ RSpec.describe MagiMedicaid::PublishDocument do
           )
           destination_documents =
             Dir[Rails.root.join('..', destination_folder, '**', '*.pdf')]
-              .map { |file| File.basename(file) }
+            .map { |file| File.basename(file) }
           expect(destination_documents).to include("#{document_name}.pdf")
         end
       end
@@ -170,7 +170,7 @@ RSpec.describe MagiMedicaid::PublishDocument do
           )
           destination_documents =
             Dir[Rails.root.join('..', destination_folder, '**', '*.pdf')]
-              .map { |file| File.basename(file) }
+            .map { |file| File.basename(file) }
           expect(destination_documents).to include("#{document_name}.pdf")
         end
       end
