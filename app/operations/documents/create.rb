@@ -9,9 +9,9 @@ module Documents
     # @param [Dry::Struct] AcaEntities::Entity to proccess
     # @return [Dry:Monad] passed params into pdf
     def call(params)
-      template_entity    = yield fetch_template(params)
-      rendered_template  = yield render_liquid_template(template_entity, params)
-      output             = yield create_document(template_entity, rendered_template, params)
+      template_entity = yield fetch_template(params)
+      rendered_template = yield render_liquid_template(template_entity, params)
+      output = yield create_document(template_entity, rendered_template, params)
       Success(output)
     end
 
@@ -28,7 +28,7 @@ module Documents
           Failure(result)
         end
       else
-        Failure("Missing template model")
+        Failure('Missing template model')
       end
     end
 
@@ -45,7 +45,14 @@ module Documents
     end
 
     def create_document(template, rendered_template, params)
-      doc_params = params.merge({ rendered_template: rendered_template[:rendered_template], template: template, entity: rendered_template[:entity] })
+      doc_params =
+        params.merge(
+          {
+            rendered_template: rendered_template[:rendered_template],
+            template: template,
+            entity: rendered_template[:entity]
+          }
+        )
 
       case template.content_type
       when 'application/pdf'

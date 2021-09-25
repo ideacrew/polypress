@@ -10,9 +10,9 @@ class SerializePdf
   # @param [Dry::Struct] AcaEntities::Entity to proccess
   # @return [Dry:Monad] passed params into pdf
   def call(params)
-    _document_path = yield document_path(params)
-    pdf_options = yield pdf_options(params[:entity])
-    serialized_pdf = yield generate_pdf(params, pdf_options)
+    document_path = yield document_path(params)
+    pdf_options = yield pdf_options(params)
+    serialized_pdf = yield generate_pdf(params, pdf_options, document_path)
 
     Success(serialized_pdf)
   end
@@ -20,15 +20,12 @@ class SerializePdf
   private
 
   def document_path(params)
-    template = params[:template]
-    entity = params[:entity]
-    document_title = template.title.titleize.gsub(/[^0-9A-Za-z]/, '')
-    hbx_id = recipient_hbx_id(entity)
-    @document_path = Rails.root.join("tmp", "#{hbx_id}_#{document_title}_#{template.print_code}_IVL_#{DateTime.now.strftime('%Y%m%d%H%M%S')}.pdf")
-    Success(@document_path)
+    document_path = Rails.root.join('tmp', "#{params[:document_name]}.pdf")
+
+    Success(document_path)
   end
 
-  def pdf_options(entity)
+  def pdf_options(params)
     options = {
       margin: set_margin,
       disable_smart_shrinking: true,
@@ -36,7 +33,7 @@ class SerializePdf
       page_size: 'Letter',
       formats: :html,
       encoding: 'utf8',
-      header: header(entity),
+      header: header(params[:recipient_hbx_id]),
       footer: footer
     }
 
@@ -44,59 +41,47 @@ class SerializePdf
   end
 
   def set_margin
-    {
-      top: 10,
-      bottom: 24,
-      left: 22,
-      right: 22
-    }
+    { top: 10, bottom: 24, left: 22, right: 22 }
   end
 
-  def recipient_hbx_id(entity)
-    if entity[:applicants]
-      entity[:applicants].detect { |a| a[:is_primary_applicant] == true }[:person_hbx_id]
-    elsif entity[:family_members]
-      entity[:family_members].detect { |a| a[:is_primary_applicant] == true }[:person][:hbx_id]
-    end
-  end
-
-  def header(entity)
+  def header(recipient_hbx_id)
     {
-      content: ApplicationController.new.render_to_string(
-        {
-          template: Settings.notices.individual.partials.header,
-          layout: false,
-          locals: { primary_hbx_id: recipient_hbx_id(entity) }
-        }
-      )
+      content:
+        ApplicationController.new.render_to_string(
+          {
+            template: Settings.notices.individual.partials.header,
+            layout: false,
+            locals: {
+              primary_hbx_id: recipient_hbx_id
+            }
+          }
+        )
     }
   end
 
   def footer
     {
-      content: ApplicationController.new.render_to_string(
-        {
-          template: Settings.notices.individual.partials.footer,
-          layout: false
-        }
-      )
+      content:
+        ApplicationController.new.render_to_string(
+          {
+            template: Settings.notices.individual.partials.footer,
+            layout: false
+          }
+        )
     }
   end
 
-  def generate_pdf(params, pdf_options)
-    document = File.open(@document_path, 'wb') do |file|
-      file << WickedPdf.new.pdf_from_string(params[:rendered_template], pdf_options)
-    end
+  def generate_pdf(params, pdf_options, document_path)
+    document =
+      File.open(document_path, 'wb') do |file|
+        file <<
+          WickedPdf.new.pdf_from_string(params[:rendered_template], pdf_options)
+      end
 
     if document
-      Success(
-        {
-          document: document,
-          template: params[:template].attributes
-        }
-      )
+      Success({ document: document, template: params[:template].attributes })
     else
-      Failure("Unable to generate PDF document")
+      Failure('Unable to generate PDF document')
     end
   end
 end

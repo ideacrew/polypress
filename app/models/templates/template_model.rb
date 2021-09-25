@@ -72,18 +72,19 @@ module Templates
       RenderLiquid.new.call(
         {
           body: attributes[:body],
-          template: Templates::Template.new(
-            {
-              recipient: attributes[:recipient],
-              key: attributes[:key],
-              subject: attributes[:subject],
-              title: attributes[:title],
-              marketplace: attributes[:marketplace],
-              body: {
-                markup: attributes[:body]
+          template:
+            Templates::Template.new(
+              {
+                recipient: attributes[:recipient],
+                key: attributes[:key],
+                subject: attributes[:subject],
+                title: attributes[:title],
+                marketplace: attributes[:marketplace],
+                body: {
+                  markup: attributes[:body]
+                }
               }
-            }
-          ),
+            ),
           subject: attributes[:subject],
           key: attributes[:key],
           cover_page: true,
@@ -128,6 +129,16 @@ module Templates
       else
         {}
       end
+    end
+
+    def document_name_for(prefix)
+      [
+        prefix,
+        title.titleize.gsub(/[^0-9A-Za-z]/, ''),
+        print_code,
+        'IVL',
+        DateTime.now.strftime('%Y%m%d%H%M%S')
+      ].compact.join('_').downcase
     end
 
     def conditional_tokens

@@ -32,7 +32,18 @@ RSpec.describe Documents::Create do
       )
     end
 
-    subject { described_class.new.call(template_model: template_model, entity: entity) }
+    let!(:document_name) do
+      template_model.document_name_for(primary_applicant_hbx_id)
+    end
+
+    subject do
+      described_class.new.call(
+        template_model: template_model,
+        entity: entity,
+        document_name: document_name,
+        recipient_hbx_id: primary_applicant_hbx_id
+      )
+    end
 
     context 'when payload has all the required params' do
       it 'should return success' do
@@ -41,7 +52,7 @@ RSpec.describe Documents::Create do
 
       it 'should create document' do
         expect(
-          subject.success[:document].path.include?('tmp/95_UqhpDocument')
+          subject.success[:document].path.include?(document_name)
         ).to be_truthy
       end
     end

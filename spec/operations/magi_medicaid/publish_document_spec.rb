@@ -2,8 +2,12 @@
 
 require 'rails_helper'
 require "#{Rails.root}/spec/shared_examples/eligibilities/application_response"
+require 'dry/monads'
+require 'dry/monads/do'
 
 RSpec.describe MagiMedicaid::PublishDocument do
+  send(:include, Dry::Monads[:result, :do])
+
   describe 'with valid arguments' do
     include_context 'application response from medicaid gateway'
 
@@ -19,6 +23,7 @@ RSpec.describe MagiMedicaid::PublishDocument do
           markup: body
         },
         title: title,
+        print_code: 'IVLMWE',
         marketplace: 'aca_individual',
         recipient: 'AcaEntities::Families::Family',
         content_type: 'application/pdf',
@@ -32,7 +37,10 @@ RSpec.describe MagiMedicaid::PublishDocument do
     end
 
     subject do
-      described_class.new.call(entity: application_entity, template_model: template)
+      described_class.new.call(
+        entity: application_entity,
+        template_model: template
+      )
     end
 
     context 'when payload has all the required params' do
@@ -58,7 +66,7 @@ RSpec.describe MagiMedicaid::PublishDocument do
 
       let(:invalid_event_key) { 'invalid_event_key' }
 
-      let(:error) { "Missing template model" }
+      let(:error) { 'Missing template model' }
 
       it 'should return failure' do
         expect(invalid_subject.failure?).to be_truthy
@@ -103,6 +111,68 @@ RSpec.describe MagiMedicaid::PublishDocument do
 
       it 'should return errors' do
         expect(subject.failure.to_s).to eq error
+      end
+    end
+
+    describe 'move documents after upload' do
+      let!(:document_name) do
+        template.document_name_for(primary_applicant_hbx_id)
+      end
+
+      before do
+        Events::Documents::DocumentCreated
+          .any_instance
+          .stub(:publish)
+          .and_return(true)
+
+        allow(template).to receive(:document_name_for)
+          .with(primary_applicant_hbx_id)
+          .and_return(document_name)
+      end
+
+      after { FileUtils.remove_dir Rails.root.join('..', destination_folder) }
+
+      context 'when a document uploaded successfully' do
+        let(:destination_folder) do
+          MagiMedicaid::PublishDocument::DOCUMENT_LOCAL_PATH
+        end
+
+        it 'should be moved document from tmp location to documents local path' do
+          subject
+          expect(Dir["#{Rails.root}/tmp/**/*.pdf"]).not_to include(
+            Rails.root.join('tmp', "#{document_name}.pdf").to_s
+          )
+          destination_documents =
+            Dir[Rails.root.join('..', destination_folder, '**', '*.pdf')]
+              .map { |file| File.basename(file) }
+          expect(destination_documents).to include("#{document_name}.pdf")
+        end
+      end
+
+      context 'when a document uploaded failed' do
+        let(:upload_instance) { Documents::Upload.new }
+        let(:destination_folder) do
+          MagiMedicaid::PublishDocument::DOCUMENT_LOCAL_ERROR_PATH
+        end
+
+        before do
+          allow(upload_instance).to receive(:call).and_return(
+            Failure('upload failed')
+          )
+          allow(Documents::Upload).to receive(:new).and_return(upload_instance)
+        end
+
+        it 'should be moved from tmp location to documents local errors path' do
+          subject
+
+          expect(Dir["#{Rails.root}/tmp/**/*.pdf"]).not_to include(
+            Rails.root.join('tmp', "#{document_name}.pdf").to_s
+          )
+          destination_documents =
+            Dir[Rails.root.join('..', destination_folder, '**', '*.pdf')]
+              .map { |file| File.basename(file) }
+          expect(destination_documents).to include("#{document_name}.pdf")
+        end
       end
     end
   end

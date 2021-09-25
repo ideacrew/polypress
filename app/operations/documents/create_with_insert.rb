@@ -48,12 +48,9 @@ module Documents
     )
       result =
         document(
-          {
-            template_model: template_model,
-            entity: params[:entity],
-            cover_page: cover_page,
-            preview: params[:preview]
-          }
+          params
+            .slice(:entity, :preview, :recipient_hbx_id, :document_name)
+            .merge({ template_model: template_model, cover_page: cover_page })
         )
 
       if result.is_a?(Hash)
