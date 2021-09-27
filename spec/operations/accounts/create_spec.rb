@@ -17,7 +17,12 @@ RSpec.describe Accounts::Create, type: :request do
 
   context 'Creating a Keycloak Account' do
     before do
-      Keycloak.proc_cookie_token = Keycloak::Client.get_token_by_client_credentials
+      Keycloak.proc_cookie_token =
+        Keycloak::Client.get_token_by_client_credentials
+    end
+
+    after do
+      # Delete user
     end
 
     context 'Given valid parameters for a new user' do
@@ -29,7 +34,7 @@ RSpec.describe Accounts::Create, type: :request do
 
       let(:required_params) do
         {
-          # username: username,
+          username: username,
           password: password,
           email: email,
           first_name: first_name,
@@ -39,8 +44,6 @@ RSpec.describe Accounts::Create, type: :request do
 
       it 'should create the new user' do
         response = subject.call(required_params)
-
-        binding.pry
       end
     end
   end

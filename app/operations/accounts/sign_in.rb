@@ -8,12 +8,12 @@ require 'dry/monads/do'
 module Accounts
   # Add a new Account
   # a {Sections::SectionItem}
-  class ResetPassword
+  class SignIn
     include Dry::Monads[:result, :do, :try]
 
     # @param [Hash] opts the parameters to render a SectionItem
-    # @option opts [Hash] :template required
-    # @option opts [Hash] :attributes optional
+    # @option opts [String] :username required
+    # @option opts [String] :password required
     # @return [Dry::Monad] result
     # @return [Dry::Monad::Failure(Array<Liquid::UndefinedVariable>)] if parsing errors occur
     def call(params)
