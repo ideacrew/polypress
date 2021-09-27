@@ -1,6 +1,6 @@
 {
     "realm": "sbe_business_operations",
-    "auth-server-url": "http://host.docker.internal:8080/auth/",
+    "auth-server-url": "http://keycloak:8080/auth",
     "ssl-required": "external",
     "resource": "polypress",
     "verify-token-audience": true,

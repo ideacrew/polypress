@@ -7,6 +7,20 @@ class ApplicationController < ActionController::Base
   def initialize
     Keycloak.proc_cookie_token = lambda { cookies.permanent[:keycloak_token] }
 
+    ### Use following to map custom attribute into user regsitry
+    #
+    # Keycloak.proc_external_attributes = -> do
+    #   attribute =
+    #     UsuariosAtributo.find_or_create_by(
+    #       user_keycloak_id: Keycloak::Client.get_attribute('sub')
+    #     )
+    #   if attribute.status.nil?
+    #     attribute.status = false
+    #     attribute.save
+    #   end
+    #   attribute
+    # end
+
     super
   end
 

@@ -4,19 +4,21 @@ require 'dry/monads'
 require 'dry/monads/do'
 
 module Accounts
-  # Add a new Account
+  # Create a new Keycloak Account
   # a {Sections::SectionItem}
   class Create
     include Dry::Monads[:result, :do, :try]
 
-    # @param [Hash] opts the parameters to render a SectionItem
-    # @option opts [Hash] :template required
-    # @option opts [Hash] :attributes optional
+    # @param [Hash] opts the parameters to create a {AcaEntities::Accounts::Account}
+    # @option opts [String] :username optional
+    # @option opts [String] :password optional
+    # @option opts [String] :email optional
+    # @option opts [String] :first_name optional
+    # @option opts [String] :last_name optional
     # @return [Dry::Monad] result
-    # @return [Dry::Monad::Failure(Array<Liquid::UndefinedVariable>)] if parsing errors occur
     def call(params)
       values = yield validate(params)
-      new_account = yield create(values)
+      new_account = yield create(values.to_h)
 
       Success(new_account)
     end
@@ -24,20 +26,28 @@ module Accounts
     private
 
     def validate(params)
-      Accounts::AccountContract.new.call(params)
+      AcaEntities::Accounts::Contracts::AccountContract.new.call(params)
     end
 
     def create(values)
-      Keycloak::Internal.create_simple_user(
-        params[:email],
-        params[:password],
-        params[:email],
-        params[:first_name],
-        params[:last_name],
-        [],
-        ['Public'],
-        after_insert
-      )
+      # binding.pry
+      # ["RestClient::BadRequest: 400 Bad Request"]
+      Try() do
+        Keycloak::Internal.create_simple_user(
+          values[:username] || values[:email],
+          values[:password],
+          values[:email],
+          values[:first_name],
+          values[:last_name],
+          [],
+          ['Public']
+          # ['Public'],
+          # after_insert
+        )
+      end.to_result do |response|
+        return response if response.failure?
+        Success(response)
+      end
     end
   end
 end

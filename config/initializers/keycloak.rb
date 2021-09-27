@@ -1,3 +1,4 @@
+Keycloak.installation_file = 'config/keycloak.json'
 # Set proxy to connect in keycloak server
 Keycloak.proxy = ''
 # If true, then all request exception will explode in application (this is the default value)
