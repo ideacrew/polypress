@@ -30,9 +30,12 @@ module Accounts
     end
 
     def create(values)
-      # binding.pry
-      # ["RestClient::BadRequest: 400 Bad Request"]
-      Try[RestClient::BadRequest] do
+      Try() do
+        after_insert =
+          lambda do |user, new_user|
+            return { 'user' => user, 'new_user' => new_user }
+          end
+
         Keycloak::Internal.create_simple_user(
           values[:username] || values[:email],
           values[:password],
@@ -43,9 +46,12 @@ module Accounts
           ['Public'],
           after_insert
         )
-      end.to_result do |response|
-        return response if response.failure?
-        Success(response)
+      end.to_result.bind do |response|
+        if response['new_user']
+          Success(response[:user])
+        else
+          Failure(response[:user])
+        end
       end
     end
   end

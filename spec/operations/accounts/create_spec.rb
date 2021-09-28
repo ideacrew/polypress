@@ -21,6 +21,10 @@ RSpec.describe Accounts::Create, type: :request do
         Keycloak::Client.get_token_by_client_credentials
     end
 
+    after do
+      # Delete user
+    end
+
     context 'Given valid parameters for a new user' do
       let(:username) { 'ironman' }
       let(:password) { '$3cr3tP@55w0rd' }
@@ -30,7 +34,7 @@ RSpec.describe Accounts::Create, type: :request do
 
       let(:required_params) do
         {
-          # username: username,
+          username: username,
           password: password,
           email: email,
           first_name: first_name,
