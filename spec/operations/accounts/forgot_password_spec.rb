@@ -14,22 +14,22 @@ RSpec.describe Accounts::ForgotPassword, type: :request do
     end
   end
 
-  context 'Given an invalid account_id' do
-    let(:invalid_account_id) { { account_id: 'abc123xyz' } }
+  context 'Given an invalid username' do
+    let(:invalid_username) { { username: 'abc123xyz' } }
 
     it 'should fail to delete account' do
-      response = subject.call(invalid_account_id)
+      response = subject.call(invalid_username)
 
       expect(response.failure?).to be_truthy
     end
   end
 
-  context 'Given a valid account_id' do
-    let(:username) { 'captain_america' }
+  context 'Given a valid username' do
+    let(:username) { 'thor' }
     let(:password) { '$3cr3tP@55w0rd' }
-    let(:email) { 'steve.rodgersk@avengers.org' }
-    let(:first_name) { 'Steve' }
-    let(:last_name) { 'Rodgers' }
+    let(:email) { 'thor@avengers.org' }
+    let(:first_name) { 'Thor' }
+    let(:last_name) { 'Odinson' }
 
     let(:new_account_params) do
       {
@@ -41,12 +41,9 @@ RSpec.describe Accounts::ForgotPassword, type: :request do
       }
     end
 
-    let(:account_id) do
-      binding.pry
-      Accounts::Create.new.call(new_account_params).success['id']
-    end
+    before { Accounts::Create.new.call(new_account_params) }
 
-    let(:account_params) { { id: account_id } }
+    let(:account_params) { { username: username } }
 
     it 'should delete the account' do
       response = subject.call(account_params)

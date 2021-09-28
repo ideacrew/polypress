@@ -4,17 +4,16 @@ require 'dry/monads'
 require 'dry/monads/do'
 
 module Accounts
-  # Create a new Keycloak Account
-  # a {Sections::SectionItem}
-  class Delete
+  # Change the password for a {AcaEntities::Accounts::Account}
+  class ForgotPassword
     include Dry::Monads[:result, :do, :try]
 
-    # @param [Hash] opts the parameters to delete a {AcaEntities::Accounts::Account}
-    # @option opts [String] :account_id required
+    # @param [Hash] opts the parameters to change an Account password
+    # @option opts [String] :username required
     # @return [Dry::Monad] result
     def call(params)
       values = yield validate(params)
-      result = yield delete(values.to_h)
+      result = yield reset_password(values.to_h)
 
       Success(result)
     end
@@ -22,19 +21,20 @@ module Accounts
     private
 
     def validate(params)
-      if params.keys.include? :id
+      if params.keys.include? :username
         Success(params)
       else
-        Failure('params must include :id')
+        Failure('params must include :username')
       end
     end
 
-    def delete(values)
+    def reset_password(values)
       Try() do
         Keycloak.proc_cookie_token =
           lambda { cookies.permanent[:keycloak_token] }
 
-        Keycloak::Admin.delete_user(values[:id])
+        Keycloak::Internal.forgot_password(values[:username])
+        binding.pry
       end.to_result.bind { |response| Success(response) }
     end
   end

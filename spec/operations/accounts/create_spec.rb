@@ -16,11 +16,6 @@ RSpec.describe Accounts::Create, type: :request do
   end
 
   context 'Creating a Keycloak Account' do
-    before do
-      Keycloak.proc_cookie_token =
-        Keycloak::Client.get_token_by_client_credentials
-    end
-
     after do
       # Delete user
     end

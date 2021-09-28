@@ -1,5 +1,3 @@
-Keycloak::Client.get_token params[:email], params[:password]
-
 # frozen_string_literal: true
 
 require 'dry/monads'
@@ -26,10 +24,17 @@ module Accounts
     private
 
     def validate(params)
+      if params.keys.include? %i[email password]
+
+      else
+
+      end
       Accounts::AccountContract.new.call(params)
     end
 
-    def create(values)
+    def sign_in(values)
+      Keycloak::Client.get_token values[:email], values[:password]
+
       Keycloak::Internal.create_simple_user(
         params[:email],
         params[:password],
