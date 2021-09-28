@@ -31,6 +31,9 @@ module Accounts
 
     def create(values)
       Try() do
+        Keycloak.proc_cookie_token =
+          lambda { cookies.permanent[:keycloak_token] }
+
         after_insert =
           lambda do |user, new_user|
             return { 'user' => user, 'new_user' => new_user }
