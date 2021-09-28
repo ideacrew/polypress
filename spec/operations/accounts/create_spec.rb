@@ -44,6 +44,9 @@ RSpec.describe Accounts::Create, type: :request do
 
       it 'should create the new user' do
         response = subject.call(required_params)
+        binding.pry
+
+        expect(response.success?).to be_truthy
       end
     end
   end

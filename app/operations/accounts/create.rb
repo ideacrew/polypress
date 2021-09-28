@@ -48,9 +48,9 @@ module Accounts
         )
       end.to_result.bind do |response|
         if response['new_user']
-          Success(response[:user])
+          Success(response['user'])
         else
-          Failure(response[:user])
+          Failure(response['user'])
         end
       end
     end
