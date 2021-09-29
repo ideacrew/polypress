@@ -68,11 +68,7 @@ module Accounts
           after_insert
         )
       end.to_result.bind do |response|
-        if response['new_user']
-          Success(response['user'])
-        else
-          Failure(response['user'])
-        end
+        response['new_user'] ? Success(response) : Failure(response)
       end
     end
   end
