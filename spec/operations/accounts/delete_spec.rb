@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Accounts::ForgotPassword, type: :request do
+RSpec.describe Accounts::Delete, type: :request do
   subject { described_class.new }
 
   context 'Given a Keycloak client configuration with credentials and network-accessible Keycloak instance' do
@@ -31,7 +31,7 @@ RSpec.describe Accounts::ForgotPassword, type: :request do
     let(:first_name) { 'Steve' }
     let(:last_name) { 'Rodgers' }
 
-    let(:new_account_params) do
+    let(:account) do
       {
         username: username,
         password: password,
@@ -41,17 +41,13 @@ RSpec.describe Accounts::ForgotPassword, type: :request do
       }
     end
 
-    let(:account_id) do
-      binding.pry
-      Accounts::Create.new.call(new_account_params).success['id']
-    end
-
-    let(:account_params) { { id: account_id } }
+    let(:id) { Accounts::Create.new.call(account: account).success['id'] }
 
     it 'should delete the account' do
-      response = subject.call(account_params)
+      # cookies[:keycloak_token] =
+      #   Keycloak::Client.get_token_by_client_credentials
+      response = subject.call(id: id)
 
-      binding.pry
       expect(response.success?).to be_truthy
     end
   end

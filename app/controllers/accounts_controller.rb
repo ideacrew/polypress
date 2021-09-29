@@ -23,6 +23,11 @@ class AccountsController < ApplicationController
     redirect_to root_path
   end
 
+  def destroy
+    id = params[:id]
+    Accounts::Delete.new.call(id: id, cookies: cookies)
+  end
+
   # Add a new role to existing account
   def add_role; end
 end

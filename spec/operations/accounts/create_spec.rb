@@ -17,7 +17,7 @@ RSpec.describe Accounts::Create, type: :request do
 
   context 'Creating a Keycloak Account' do
     after do
-      # Delete user
+      # Accounts::Delete(id: )
     end
 
     context 'Given valid parameters for a new user' do
@@ -27,7 +27,7 @@ RSpec.describe Accounts::Create, type: :request do
       let(:first_name) { 'Tony' }
       let(:last_name) { 'Stark' }
 
-      let(:required_params) do
+      let(:account) do
         {
           username: username,
           password: password,
@@ -38,10 +38,11 @@ RSpec.describe Accounts::Create, type: :request do
       end
 
       it 'should create the new user' do
-        response = subject.call(required_params)
-        binding.pry
+        response = subject.call(account: account)
 
         expect(response.success?).to be_truthy
+        expect(response.success['username']).to eq account[:username]
+        expect(response.success['email']).to eq account[:email]
       end
     end
   end

@@ -8,16 +8,20 @@ module Accounts
   # a {Sections::SectionItem}
   class Create
     include Dry::Monads[:result, :do, :try]
+    include ActionController::Cookies
 
-    # @param [Hash] opts the parameters to create a {AcaEntities::Accounts::Account}
+    # @param [Hash] opts the parameters wrapped in account: hash to create a
+    # {AcaEntities::Accounts::Account}
     # @option opts [String] :username optional
-    # @option opts [String] :password optional
-    # @option opts [String] :email optional
-    # @option opts [String] :first_name optional
-    # @option opts [String] :last_name optional
+    # @option opts [String] :password required
+    # @option opts [String] :email required
+    # @option opts [String] :first_name required
+    # @option opts [String] :last_name required
+    # @option opts [Hash] :cookies optional
     # @return [Dry::Monad] result
     def call(params)
       values = yield validate(params)
+      _token_proc = yield set_proc_cookie_token(values)
       new_account = yield create(values.to_h)
 
       Success(new_account)
@@ -26,14 +30,28 @@ module Accounts
     private
 
     def validate(params)
-      AcaEntities::Accounts::Contracts::AccountContract.new.call(params)
+      AcaEntities::Accounts::Contracts::AccountContract.new.call(
+        params[:account]
+      )
+    end
+
+    def set_proc_cookie_token(values)
+      cookies =
+        values[:cookies] || {
+          keycloak_token: Keycloak::Client.get_token_by_client_credentials
+        }
+
+      if cookies.nil?
+        Failure('unable to set proc_cookie_token')
+      else
+        Success(
+          Keycloak.proc_cookie_token = lambda { cookies[:keycloak_token] }
+        )
+      end
     end
 
     def create(values)
       Try() do
-        Keycloak.proc_cookie_token =
-          lambda { cookies.permanent[:keycloak_token] }
-
         after_insert =
           lambda do |user, new_user|
             return { 'user' => user, 'new_user' => new_user }
