@@ -4,21 +4,19 @@ require 'dry/monads'
 require 'dry/monads/do'
 
 module Accounts
-  # Create a new Keycloak Account
-  # a {Sections::SectionItem}
-  class Delete
+  # Enable a Keycloak Account
+  class Enable
     include Dry::Monads[:result, :do, :try]
 
-    # include ActionController::Cookies
-
-    # @param [Hash] opts the parameters to delete a {AcaEntities::Accounts::Account}
-    # @option opts [String] :id required
+    # @param [Hash] opts the parameters to enable a {AcaEntities::Accounts::Account}
+    # @option opts [String] :id optional
+    # @option opts [String] :login optional
     # @option opts [Hash] :cookies optional
     # @return [Dry::Monad] result
     def call(params)
       values = yield validate(params)
       _token_proc = yield set_proc_cookie_token(values)
-      result = yield delete(values.to_h)
+      result = yield enable(values.to_h)
 
       Success(result)
     end
@@ -26,7 +24,11 @@ module Accounts
     private
 
     def validate(params)
-      params.key?(:id) ? Success(params) : Failure('params must include :id')
+      if params.key?(:login) || params.key?(:id)
+        Success(params)
+      else
+        Failure('params must include :id or :login')
+      end
     end
 
     def set_proc_cookie_token(values)
@@ -44,15 +46,14 @@ module Accounts
       end
     end
 
-    def delete(values)
-      Try() { Keycloak::Admin.delete_user(values[:id]) }.to_result
-        .bind do |response|
-        if response
-          Success("account_id: #{values[:id]} deleted")
+    def enable(values)
+      Try() do
+        if values[:id]
+          Keycloak::Internal.enable_user(values[:id])
         else
-          Failure("error deleting account_id: #{values[:id]}")
+          Keycloak::Internal.enable_user_by_login(values[:login])
         end
-      end
+      end.to_result.bind { |response| Success(response) }
     end
   end
 end

@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Accounts::DisableUser, type: :request do
+RSpec.describe Accounts::Enable, type: :request do
   subject { described_class.new }
 
   context 'Given a Keycloak client configuration with credentials and network-accessible Keycloak instance' do
@@ -17,7 +17,7 @@ RSpec.describe Accounts::DisableUser, type: :request do
   context 'Given an invalid account_id' do
     let(:invalid_account_id) { { account_id: 'abc123xyz' } }
 
-    it 'should fail to disable account' do
+    it 'should fail to enable account' do
       response = subject.call(invalid_account_id)
 
       expect(response.failure?).to be_truthy
@@ -42,12 +42,40 @@ RSpec.describe Accounts::DisableUser, type: :request do
     end
 
     let!(:account_id) do
-      Accounts::Create.new.call(account_params).failure['user']['id']
+      Accounts::Create.new.call(account: account_params).failure['user']['id']
     end
 
     let(:params) { { id: account_id } }
 
-    it 'should disable the account' do
+    it 'should enable the account' do
+      response = subject.call(params)
+
+      expect(response.success?).to be_truthy
+    end
+  end
+
+  context 'Given a valid login' do
+    let(:username) { 'captain_america' }
+    let(:password) { '$3cr3tP@55w0rd' }
+    let(:email) { 'steve.rodgersk@avengers.org' }
+    let(:first_name) { 'Steve' }
+    let(:last_name) { 'Rodgers' }
+
+    let(:account_params) do
+      {
+        username: username,
+        password: password,
+        email: email,
+        first_name: first_name,
+        last_name: last_name
+      }
+    end
+
+    let!(:user) { Accounts::Create.new.call(account: account_params) }
+
+    let(:params) { { login: username } }
+
+    it 'should enable the account' do
       response = subject.call(params)
 
       expect(response.success?).to be_truthy
