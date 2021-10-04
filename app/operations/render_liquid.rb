@@ -157,7 +157,7 @@ class RenderLiquid
         notice_number: params[:subject],
         day_45_from_now: Date.today + 45.days,
         day_95_from_now: Date.today + 95.days,
-        oe_end_on: Date.new(2021, 12, 15)
+        oe_end_on: Date.new(2022, 1, 15)
       }.merge(site_settings)
     entity_hash.merge(settings_hash)
   end
