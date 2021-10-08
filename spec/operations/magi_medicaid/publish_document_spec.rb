@@ -12,7 +12,7 @@ RSpec.describe MagiMedicaid::PublishDocument do
     include_context 'application response from medicaid gateway'
 
     let(:title) { 'Uqhp Document' }
-    let(:event_key) { 'enroll.iap.applications.determined_uqhp_eligible' }
+    let(:event_key) { 'magi_medicaid.mitc.eligibilities.determined_uqhp_eligible' }
     let(:body) { '<p>Uqhp Eligible Document for {{ hbx_id }}</p>' }
 
     let!(:template) do

@@ -10,7 +10,7 @@ module Subscribers
       logger.info "Polypress invoked on_enroll_individual_enrollments with delivery_info: #{delivery_info}, response: #{response}"
 
       payload = JSON.parse(response, :symbolize_names => true)
-      result = Enrollments::GenerateAndPublishDocuments.new.call({ family_hash: payload, event_key: 'enrollment_submitted' })
+      result = Enrollments::GenerateAndPublishDocuments.new.call({ family_hash: payload, event_key: delivery_info[:routing_key] })
 
       if result.success?
         logger.info "Polypress polypress_individual_enrollment_info Result: #{result.success} for payload: #{payload}"

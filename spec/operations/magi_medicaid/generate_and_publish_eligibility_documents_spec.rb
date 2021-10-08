@@ -8,7 +8,7 @@ RSpec.describe MagiMedicaid::GenerateAndPublishEligibilityDocuments do
     include_context 'application response from medicaid gateway'
 
     let(:title) { 'Uqhp Document' }
-    let(:event_key) { 'enroll.iap.applications.determined_uqhp_eligible' }
+    let(:event_key) { 'magi_medicaid.mitc.eligibilities.determined_uqhp_eligible' }
     let(:body) { '<p>Uqhp Eligible Document for {{ hbx_id }}</p>' }
 
     let!(:template) do
@@ -74,7 +74,7 @@ RSpec.describe MagiMedicaid::GenerateAndPublishEligibilityDocuments do
       end
 
       it 'should eligibilities' do
-        expect(eligibilities.success).to eq ['enroll.iap.applications.determined_aptc_eligible']
+        expect(eligibilities.success).to eq ['magi_medicaid.mitc.eligibilities.determined_aptc_eligible']
       end
     end
 

@@ -50,7 +50,7 @@ module MagiMedicaid
               'determined_uqhp_eligible'
             end
 
-          e_names << "enroll.iap.applications.#{e_name}"
+          e_names << "magi_medicaid.mitc.eligibilities.#{e_name}"
         end
       Success(event_names.uniq.compact)
     end
