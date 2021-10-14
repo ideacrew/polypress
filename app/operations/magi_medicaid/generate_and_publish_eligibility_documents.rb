@@ -6,53 +6,89 @@ module MagiMedicaid
     send(:include, Dry::Monads[:result, :do])
     send(:include, Dry::Monads[:try])
 
-    # @param [Hash] AcaEntities::MagiMedicaid::Application
+    # @param [Hash] AcaEntities::MagiMedicaid::Application to hash
     # @param [String] :event_key
     # @return [Dry::Monads::Result]
     def call(params)
       values = yield validate(params)
-      application_entity = yield init_application_entity(values)
-      eligibilities = yield determine_eligibilities(application_entity, params[:event_key])
-      publish_documents(application_entity, eligibilities)
+      entity = yield init_entity(values)
+      eligibilities = yield determine_eligibilities(entity, params[:event_key])
+      publish_documents(entity, eligibilities)
     end
 
     def validate(params)
-      return Failure("Missing event key for resource_id: #{params[:application][:family_reference][:hbx_id]}") unless params[:event_key]
+      return Failure("Missing event key") unless params[:event_key]
+      return Failure("Missing payload") unless params[:payload]
 
       result =
-        ::AcaEntities::MagiMedicaid::Contracts::ApplicationContract.new.call(
-          params[:application]
-        )
+        if params[:payload][:applicants].present?
+          ::AcaEntities::MagiMedicaid::Contracts::ApplicationContract.new.call(params[:payload])
+        else
+          AcaEntities::Contracts::Families::FamilyContract.new.call(params[:payload])
+        end
       result.success? ? Success(result.to_h) : Failure(result)
     end
 
-    def init_application_entity(params)
-      application_entity = ::AcaEntities::MagiMedicaid::Application.new(params)
-      Success(application_entity)
+    def init_entity(params)
+      entity =
+        if params[:applicants].present?
+          ::AcaEntities::MagiMedicaid::Application.new(params)
+        else
+          ::AcaEntities::Families::Family.new(params)
+        end
+      Success(entity)
     rescue StandardError => e
       Failure(e)
     end
 
-    def determine_eligibilities(application_entity, event_key)
-      return Success([event_key]) unless event_key.to_s.include?('determined_mixed_determination')
+    def determine_eligibilities(entity, event_key)
+      unless event_key.to_s.include?('determined_mixed_determination') || event_key.to_s.include?('mixed_determination_on_reverification')
+        return Success([event_key])
+      end
 
-      peds = application_entity.tax_households.flat_map(&:tax_household_members).map(&:product_eligibility_determination)
+      peds = entity.tax_households.flat_map(&:tax_household_members).map(&:product_eligibility_determination)
       event_names =
         peds.inject([]) do |e_names, ped|
           e_name =
             if ped.is_ia_eligible
-              'determined_aptc_eligible'
+              aqhp_event(event_key)
             elsif ped.is_medicaid_chip_eligible || ped.is_magi_medicaid
-              'determined_magi_medicaid_eligible'
+              medicaid(event_key)
             elsif ped.is_totally_ineligible
-              'determined_totally_ineligible'
+              ineligible_event(event_key)
             elsif ped.is_uqhp_eligible
-              'determined_uqhp_eligible'
+              uqhp_event(event_key)
             end
 
-          e_names << "magi_medicaid.mitc.eligibilities.#{e_name}"
+          e_names << event_name(event_key, e_name)
         end
       Success(event_names.uniq.compact)
+    end
+
+    def source_enroll?(event_key)
+      event_key.include?('enroll')
+    end
+
+    def aqhp_event(event_key)
+      source_enroll?(event_key) ? 'aqhp_eligible_on_reverification' : 'determined_aptc_eligible'
+    end
+
+    def medicaid_event(event_key)
+      source_enroll?(event_key) ? 'medicaid_eligible_on_reverification' : 'determined_magi_medicaid_eligible'
+    end
+
+    def ineligible_event(event_key)
+      source_enroll?(event_key) ? 'totally_ineligible_on_reverification' : 'determined_totally_ineligible'
+    end
+
+    def uqhp_event(event_key)
+      source_enroll?(event_key) ? 'uqhp_eligible_on_reverification' : 'determined_uqhp_eligible'
+    end
+
+    def event_name(event_key, eligibility)
+      event_key_array = event_key.split('.')
+      event_key_array.pop
+      event_key_array.push(eligibility).join('.')
     end
 
     def template_model(event_key)

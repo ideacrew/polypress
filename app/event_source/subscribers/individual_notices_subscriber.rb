@@ -12,18 +12,14 @@ module Subscribers
       logger.info "Subscribers::IndividualNoticesSubscriber invoked
         on_enroll_individual_notices with delivery_info: #{delivery_info}, response: #{response}"
 
-      routing_key = delivery_info[:routing_key]
-      template_model =
-        Templates::TemplateModel.by_subscriber(event_name: routing_key).first
-
       # find notice template by routing key
       # call operation with template and payload to generate notice document
       # publish document to a preconfigured publisher
 
       payload = JSON.parse(response, symbolize_names: true)
       result =
-        Individuals::GenerateNotice.new.call(
-          { template_model: template_model, payload: payload }
+        MagiMedicaid::GenerateAndPublishEligibilityDocuments.new.call(
+          { event_key: delivery_info[:routing_key], payload: payload }
         )
 
       if result.success?

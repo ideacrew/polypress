@@ -32,7 +32,7 @@ RSpec.describe MagiMedicaid::GenerateAndPublishEligibilityDocuments do
 
     subject do
       described_class.new.call(
-        application: application_hash,
+        payload: application_hash,
         event_key: event_key
       )
     end
@@ -54,7 +54,7 @@ RSpec.describe MagiMedicaid::GenerateAndPublishEligibilityDocuments do
       let(:event_key) { nil }
 
       let(:error) do
-        "Missing event key for resource_id: #{application_hash[:family_reference][:hbx_id]}"
+        "Missing event key"
       end
 
       it 'should return failure' do
@@ -67,7 +67,7 @@ RSpec.describe MagiMedicaid::GenerateAndPublishEligibilityDocuments do
     end
 
     context '#determine_eligibilities' do
-      let(:event_key) { 'determined_mixed_determination' }
+      let(:event_key) { 'magi_medicaid.mitc.eligibilities.determined_mixed_determination' }
       let(:eligibilities) do
         MagiMedicaid::GenerateAndPublishEligibilityDocuments.new
                                                             .determine_eligibilities(application_entity, event_key)

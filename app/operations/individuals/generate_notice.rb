@@ -11,7 +11,7 @@ module Individuals
     # @return [Dry::Monads::Result]
     def call(params)
       values = yield validate(params)
-      entity = yield init_entity_entity(values)
+      entity = yield init_entity(values)
       publish_documents(entity, params[:template_model])
     end
 
@@ -28,7 +28,7 @@ module Individuals
       result.success? ? Success(result.to_h) : Failure(result.errors.to_h)
     end
 
-    def init_entity_entity(params)
+    def init_entity(params)
       entity =
         if params[:applicants].present?
           ::AcaEntities::MagiMedicaid::Application.new(params)

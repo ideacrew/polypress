@@ -15,7 +15,7 @@ module Subscribers
       # event_key = routing_key.split('.').last
       results =
         MagiMedicaid::GenerateAndPublishEligibilityDocuments.new.call(
-          { application: payload, event_key: routing_key }
+          { payload: payload, event_key: routing_key }
         )
       if results.all?(&:success)
         ack(delivery_info.delivery_tag)
