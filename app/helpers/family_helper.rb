@@ -70,7 +70,7 @@ module FamilyHelper
     {
       is_applying_coverage: indicator,
       five_year_bar: false,
-      requested_coverage_start_date: Date.new(2021,1,1),
+      requested_coverage_start_date: Date.new(2021, 1, 1),
       aasm_state: 'fully_verified',
       is_applicant: true,
       is_state_resident: true,
