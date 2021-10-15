@@ -34,6 +34,7 @@ module FamilyHelper
           :dob => Date.new(1972, 4, 4),
           :is_incarcerated => false
         },
+        :consumer_role => consumer_role(true),
         :person_health => { :is_tobacco_user => "unknown" },
         :is_active => true,
         :is_disabled => false,
@@ -55,12 +56,31 @@ module FamilyHelper
           :dob => Date.new(1978, 4, 4),
           :is_incarcerated => false
         },
+        :consumer_role => consumer_role(false),
         :person_health => { :is_tobacco_user => "unknown" },
         :is_active => true,
         :is_disabled => false,
         :addresses => [{ :kind => 'mailing', :address_1 => 'H st', :state => "ME", :city => 'Augusta', :zip => '67662' }],
         :verification_types => verification_types('American Indian Status', Date.today)
       }
+    }
+  end
+
+  def consumer_role(indicator)
+    {
+      is_applying_coverage: indicator,
+      five_year_bar: false,
+      requested_coverage_start_date: Date.new(2021,1,1),
+      aasm_state: 'fully_verified',
+      is_applicant: true,
+      is_state_resident: true,
+      identity_validation: 'na',
+      identity_update_reason: 'na',
+      application_validation: 'na',
+      application_update_reason: 'na',
+      identity_rejected: false,
+      application_rejected: false,
+      lawful_presence_determination: {}
     }
   end
 
