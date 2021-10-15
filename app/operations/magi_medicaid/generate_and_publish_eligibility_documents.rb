@@ -53,7 +53,7 @@ module MagiMedicaid
             if ped.is_ia_eligible
               aqhp_event(event_key)
             elsif ped.is_medicaid_chip_eligible || ped.is_magi_medicaid
-              medicaid(event_key)
+              medicaid_event(event_key)
             elsif ped.is_totally_ineligible
               ineligible_event(event_key)
             elsif ped.is_uqhp_eligible
