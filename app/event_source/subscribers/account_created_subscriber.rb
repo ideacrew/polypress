@@ -15,14 +15,13 @@ module Subscribers
 
       if result.success?
         logger.info "Subscribers::AccountCreatedSubscriber Result: #{result.success} for payload: #{payload}"
-        ack(delivery_info.delivery_tag)
       else
         logger.error "Subscribers::AccountCreatedSubscriber Error: #{result.failure} for payload: #{payload}"
-        nack(delivery_info.delivery_tag)
       end
-    rescue StandardError => e
-      nack(delivery_info.delivery_tag)
+      ack(delivery_info.delivery_tag)
+    rescue StandardError, SystemStackError => e
       logger.error "Subscribers::AccountCreatedSubscriber Error: #{e.backtrace} for payload: #{payload}"
+      ack(delivery_info.delivery_tag)
     end
   end
 end

@@ -18,7 +18,6 @@ module Subscribers
           { payload: payload, event_key: routing_key }
         )
       if results.all?(&:success)
-        ack(delivery_info.delivery_tag)
         logger.info "Polypress: polypress_eligibility_determination_subscriber_message; acked for #{routing_key}"
       else
         results
@@ -38,14 +37,14 @@ module Subscribers
             nacked due to:#{errors}; for routing_key: #{routing_key}, payload: #{payload}"
             )
           end
-        nack(delivery_info.delivery_tag)
       end
-    rescue StandardError => e
-      nack(delivery_info.delivery_tag)
+      ack(delivery_info.delivery_tag)
+    rescue StandardError, SystemStackError => e
       logger.error(
         "Polypress: polypress_eligibility_determination_subscriber_error: nacked due to backtrace:
         #{e.backtrace}; for routing_key: #{routing_key}, response: #{response}"
       )
+      ack(delivery_info.delivery_tag)
     end
   end
 end
