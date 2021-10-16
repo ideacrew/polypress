@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/ideacrew/aca_entities.git
-  revision: 40079a23ffd4acbb9433ce134ff0b7e9e0125c39
+  revision: 413aeb93ddd9ace6ad581ed1c41b822270542be9
   branch: release_0.9.0
   specs:
     aca_entities (0.9.0)
@@ -391,12 +391,12 @@ GEM
     mustermann (1.1.1)
       ruby2_keywords (~> 0.0.1)
     nio4r (2.5.8)
-    nokogiri (1.12.4)
+    nokogiri (1.12.5)
       mini_portile2 (~> 2.6.1)
       racc (~> 1.4)
     nokogiri-happymapper (0.8.1)
       nokogiri (~> 1.5)
-    oj (3.13.7)
+    oj (3.13.9)
     orm_adapter (0.5.0)
     ox (2.14.5)
     parallel (1.21.0)
