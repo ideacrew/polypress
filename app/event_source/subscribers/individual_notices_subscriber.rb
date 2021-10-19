@@ -17,16 +17,19 @@ module Subscribers
       # publish document to a preconfigured publisher
 
       payload = JSON.parse(response, symbolize_names: true)
-      result =
+      output =
         MagiMedicaid::GenerateAndPublishEligibilityDocuments.new.call(
           { event_key: delivery_info[:routing_key], payload: payload }
         )
 
-      if result.success?
-        logger.info "Subscribers::IndividualNoticesSubscriber Result: #{result.success} for payload: #{payload}"
-      else
-        logger.error "Subscribers::IndividualNoticesSubscriber Error: #{result.failure} for payload: #{payload}"
+      output.each do |result|
+        if result.success?
+          logger.info "Subscribers::IndividualNoticesSubscriber Result: #{result.success} for payload: #{payload}"
+        else
+          logger.info "Subscribers::IndividualNoticesSubscriber Error: #{result.failure} for payload: #{payload}"
+        end
       end
+
       ack(delivery_info.delivery_tag)
     rescue StandardError, SystemStackError => e
       logger.error "Subscribers::IndividualNoticesSubscriber Error: #{e.backtrace} for payload: #{payload}"
