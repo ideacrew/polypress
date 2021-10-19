@@ -1,0 +1,48 @@
+name: quality-workbench
+on: push
+
+env:
+  POLYPRESS_DB_URL: 'localhost:27017'
+
+jobs:
+  rubocop:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ruby/setup-ruby@v1
+      - uses: actions/cache@v2
+        with:
+          path: vendor/bundle
+          key: v2-${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}-${{ hashFiles('**/Gemfile') }}
+          restore-keys: |
+            v2-${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}-${{ hashFiles('**/Gemfile') }}
+      - name: bundle install
+        run: |
+          bundle config path vendor/bundle
+          bundle install
+      - run: bundle exec rubocop
+  rspec:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ruby/setup-ruby@v1
+      - uses: wbari/start-mongoDB@v0.2
+        with:
+          mongoDBVersion: '4.2'
+      - name: Boot RabbitMQ
+        run: |
+          sudo apt-get update
+          sudo apt-get install rabbitmq-server
+          sudo rabbitmqctl add_vhost event_source
+          sudo rabbitmqctl set_permissions -p event_source guest ".*" ".*" ".*"
+      - uses: actions/cache@v2
+        with:
+          path: vendor/bundle
+          key: v2-${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}-${{ hashFiles('**/Gemfile') }}
+          restore-keys: |
+            v2-${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}-${{ hashFiles('**/Gemfile') }}
+      - name: bundle install
+        run: |
+          bundle config path vendor/bundle
+          bundle install
+      - run: bundle exec rspec
