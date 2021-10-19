@@ -1,6 +1,10 @@
 name: quality-workbench
 on: push
 
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   POLYPRESS_DB_URL: 'localhost:27017'
 
