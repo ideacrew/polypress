@@ -1,12 +1,3 @@
-<div class="row flash module container">
-  <div class="alert alert-<%= type %>">
-    <div class="row">
-      <div class="col-md-12">
-        <div class="row">
-          <a class="close" data-dismiss="alert" href="#">×</a>
-          <%= raw message %>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+<% flash.each do |name, msg| %>
+  <%= format_flash(name, msg) %>
+<% end %>

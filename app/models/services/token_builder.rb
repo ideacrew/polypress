@@ -37,6 +37,12 @@ module Services
     #   placeholders
     # end
 
+    def sections
+      ::Sections::SectionModel.all.collect do |section|
+        { title: section.title, target: "render_section '#{section.key}'", type: 'section' }
+      end
+    end
+
     def placeholders
       placeholders = []
 

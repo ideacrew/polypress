@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-# rubocop:disable Metrics/ModuleLength
 # FamilyHelper
 module FamilyHelper
   # TODO: dynamically load data using contracts/entities
@@ -27,7 +26,7 @@ module FamilyHelper
     {
       :is_primary_applicant => true,
       :person => {
-        :hbx_id => "475",
+        :hbx_id => "1009522",
         :person_name => { :first_name => "John", :last_name => "Smith1" },
         :person_demographics => {
           :ssn => "784796992",
@@ -35,6 +34,7 @@ module FamilyHelper
           :dob => Date.new(1972, 4, 4),
           :is_incarcerated => false
         },
+        :consumer_role => consumer_role(true),
         :person_health => { :is_tobacco_user => "unknown" },
         :is_active => true,
         :is_disabled => false,
@@ -48,7 +48,7 @@ module FamilyHelper
     {
       :is_primary_applicant => false,
       :person => {
-        :hbx_id => "476",
+        :hbx_id => "1009523",
         :person_name => { :first_name => "John", :last_name => "Smith2" },
         :person_demographics => {
           :ssn => "784796993",
@@ -56,12 +56,31 @@ module FamilyHelper
           :dob => Date.new(1978, 4, 4),
           :is_incarcerated => false
         },
+        :consumer_role => consumer_role(false),
         :person_health => { :is_tobacco_user => "unknown" },
         :is_active => true,
         :is_disabled => false,
         :addresses => [{ :kind => 'mailing', :address_1 => 'H st', :state => "ME", :city => 'Augusta', :zip => '67662' }],
         :verification_types => verification_types('American Indian Status', Date.today)
       }
+    }
+  end
+
+  def consumer_role(indicator)
+    {
+      is_applying_coverage: indicator,
+      five_year_bar: false,
+      requested_coverage_start_date: Date.new(2021, 1, 1),
+      aasm_state: 'fully_verified',
+      is_applicant: true,
+      is_state_resident: true,
+      identity_validation: 'na',
+      identity_update_reason: 'na',
+      application_validation: 'na',
+      application_update_reason: 'na',
+      identity_rejected: false,
+      application_rejected: false,
+      lawful_presence_determination: {}
     }
   end
 
@@ -98,8 +117,8 @@ module FamilyHelper
         :enrollment_period_kind => "open_enrollment",
         :product_kind => "health",
         :hbx_enrollment_members => [
-          hbx_enrollment_member('1', 'Smith1', "475", 45, true),
-          hbx_enrollment_member('2', 'Smith2', "476", 46, false)
+          hbx_enrollment_member('1', 'Smith1', "1009522", 45, true),
+          hbx_enrollment_member('2', 'Smith2', "1009523", 46, false)
         ],
         :product_reference => product_reference,
         :issuer_profile_reference => issuer_profile_reference,
@@ -159,4 +178,3 @@ module FamilyHelper
     }
   end
 end
-# rubocop:enable Metrics/ModuleLength

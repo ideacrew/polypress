@@ -1,0 +1,21 @@
+<div class="modal-header">
+  <h5 class="modal-title" id="instantPreviewLabel">Document Preview</h5>
+  <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+<% if @errors.present? %>
+<div class="alert alert-block alert-danger">
+    <ul>
+      <% @errors.each do |error| %>
+        <li><%= error %></li>
+      <% end %>
+    </ul>
+</div>
+<% end %>
+<div class="modal-body">
+  <%= @rendered_template&.html_safe %>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+</div>

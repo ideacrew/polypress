@@ -10,6 +10,9 @@ RSpec.shared_context 'application response from medicaid gateway', :shared_conte
       { :category => "CHIP Citizen Or Immigrant", :indicator_code => true, :ineligibility_code => nil, :ineligibility_reason => nil }
     ]
   end
+
+  let(:primary_applicant_hbx_id) { "95" }
+
   let(:application_hash) do
     {
       :notice_options => { send_eligibility_notices: true, send_open_enrollment_notices: false },
@@ -32,9 +35,9 @@ RSpec.shared_context 'application response from medicaid gateway', :shared_conte
                         :family_member_reference => { :family_member_hbx_id => "1000",
                                                       :first_name => "Gerald",
                                                       :last_name => "Rivers",
-                                                      :person_hbx_id => "95",
+                                                      :person_hbx_id => primary_applicant_hbx_id,
                                                       :is_primary_family_member => true },
-                        :person_hbx_id => "95",
+                        :person_hbx_id => primary_applicant_hbx_id,
                         :is_required_to_file_taxes => true,
                         :tax_filer_kind => "tax_filer",
                         :is_joint_tax_filing => true,
@@ -85,8 +88,8 @@ RSpec.shared_context 'application response from medicaid gateway', :shared_conte
                         :is_temporarily_out_of_state => false,
                         :is_claimed_as_dependent_by_non_applicant => false,
                         :benchmark_premium =>
-                          { :health_only_lcsp_premiums => [{ :member_identifier => "95", :monthly_premium => 430.48 }],
-                            :health_only_slcsp_premiums => [{ :member_identifier => "95", :monthly_premium => 496.23 }] },
+                          { :health_only_lcsp_premiums => [{ :member_identifier => primary_applicant_hbx_id, :monthly_premium => 430.48 }],
+                            :health_only_slcsp_premiums => [{ :member_identifier => primary_applicant_hbx_id, :monthly_premium => 496.23 }] },
                         :is_homeless => false,
                         :mitc_income =>
                           { :amount => 14_976,
@@ -129,7 +132,7 @@ RSpec.shared_context 'application response from medicaid gateway', :shared_conte
                               :applicant_reference => { :first_name => "Gerald",
                                                         :last_name => "Rivers",
                                                         :dob => member_dob,
-                                                        :person_hbx_id => "95" }
+                                                        :person_hbx_id => primary_applicant_hbx_id }
                             }] }],
       :relationships => [],
       :us_state => "DC",

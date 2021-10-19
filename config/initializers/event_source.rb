@@ -2,9 +2,9 @@
 
 EventSource.configure do |config|
   config.protocols = %w[amqp http]
-  config.app_name = :polypress
   config.pub_sub_root = Pathname.pwd.join('app', 'event_source')
   config.server_key = ENV['RAILS_ENV'] || Rails.env.to_sym
+  config.app_name = :polypress
 
   config.servers do |server|
     server.amqp do |rabbitmq|
@@ -15,14 +15,15 @@ EventSource.configure do |config|
       warn rabbitmq.vhost
       rabbitmq.port = ENV['RABBITMQ_PORT'] || '5672'
       warn rabbitmq.port
-      rabbitmq.url = ENV['RABBITMQ_URL_EVENT_SOURCE'] || 'amqp://localhost:5672/'
+      rabbitmq.url =
+        ENV['RABBITMQ_URL_EVENT_SOURCE'] || 'amqp://localhost:5672/'
       warn rabbitmq.url
       rabbitmq.user_name = ENV['RABBITMQ_USERNAME'] || 'guest'
       warn rabbitmq.user_name
       rabbitmq.password = ENV['RABBITMQ_PASSWORD'] || 'guest'
       warn rabbitmq.password
-      # rabbitmq.default_content_type =
-      #   ENV['RABBITMQ_CONTENT_TYPE'] || 'application/json'
+      rabbitmq.default_content_type =
+        ENV['RABBITMQ_CONTENT_TYPE'] || 'application/json'
     end
   end
 

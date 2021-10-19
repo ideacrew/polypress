@@ -475,13 +475,11 @@ module NoticeBuilder
   end
 
   def recipient_target
-    @recipient_target ||= begin
-      if employer?
-        resource.staff_roles.first
-      elsif employee? || consumer?
-        resource.person
-      end
-    end
+    @recipient_target ||= if employer?
+                            resource.staff_roles.first
+                          elsif employee? || consumer?
+                            resource.person
+                          end
   end
 end
 # rubocop:enable Metrics/ModuleLength

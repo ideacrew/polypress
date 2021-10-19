@@ -12,6 +12,10 @@
 
 CKEDITOR.plugins.add("placeholder_select", {
   requires: ["richcombo"],
+  onLoad: function () {
+    // Register styles for token widget frame.
+    CKEDITOR.addCss(".cke_placeholder{background-color:#7fbf7f}");
+  },
   init: function (editor) {
     for (var p = 0; p < editor.config.placeholder_selects.length; p++) {
       //  array of placeholders to choose from that'll be inserted into the editor
@@ -55,6 +59,10 @@ CKEDITOR.plugins.add("placeholder_select", {
 
         if (config.placeholders[i].type == "comment") {
           format = "{% comment %} <br /> {% endcomment %}";
+        }
+
+        if (config.placeholders[i].type == "section") {
+          format = "{% " + config.placeholders[i].target + " %}";
         }
 
         var placeholder = format.replace(

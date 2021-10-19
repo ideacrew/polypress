@@ -1,0 +1,55 @@
+<% if @errors.any? %>
+  <div class="alert alert-error">
+    <h4><%= pluralize(@errors.count, "notice error") %> found:</h4>
+    <ul>
+      <% @errors.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>
+
+<nav>
+  <div class="nav nav-tabs" id="nav-tab" role="tablist">
+    <button class="nav-link active" id="nav-templates-tab" data-bs-toggle="tab" data-bs-target="#nav-templates" type="button" role="tab" aria-controls="nav-templates" aria-selected="true">Templates</button>
+    <button class="nav-link" id="nav-sections-tab" data-bs-toggle="tab" data-bs-target="#nav-sections" type="button" role="tab" aria-controls="nav-sections" aria-selected="false">Sections</button>
+  </div>
+</nav>
+<div class="tab-content" id="nav-tabContent">
+  <div class="tab-pane fade show active" id="nav-templates" role="tabpanel" aria-labelledby="nav-templates-tab">
+    <%= render partial: 'templates' %>
+  </div>
+  <div class="tab-pane fade" id="nav-sections" role="tabpanel" aria-labelledby="nav-sections-tab">
+    <%= render partial: 'sections' %>
+  </div>
+</div>
+
+<script>
+    var CKEDITOR_BASEPATH = '/assets/ckeditor/';
+</script>
+
+<%= javascript_include_tag 'ckeditor/ckeditor' %>
+ 
+<style>
+.template-table td {
+  padding: 1rem 0;
+}
+</style>
+
+<script type="text/javascript" charset="utf-8">
+
+  $(function () {
+    $("#nav-<%= @tab %>-tab").tab('show');
+  })
+
+  // initializeDataTables();
+
+  $('a.download-notices').click(function(e) {
+    e.preventDefault();
+    var selected_notices = new Array();
+    $("input:checkbox[name='template_ids[]']:checked").each(function(){
+        selected_notices.push($(this).val());
+    });
+    window.location=$(this).attr('href') + "?ids=" + selected_notices.toString();
+  });
+</script>

@@ -1,20 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <%= favicon_link_tag Settings.site.tab_icon, :rel => 'shortcut icon', :type => 'image/vnd.microsoft.icon' %>
-    <title>Notifier</title>
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <%= favicon_link_tag Settings.site.tab_icon, :rel => 'shortcut icon', :type => 'image/vnd.microsoft.icon' %>
+    <title>Polypress</title>
     <%= csrf_meta_tags %>
-    <%= csp_meta_tag %>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <%= stylesheet_link_tag 'application', media: 'all', 'data-turbolinks-track': 'reload' %>
-    <%= javascript_pack_tag 'application', 'data-turbolinks-track': 'reload' %>
-  </head>
-  <body>
-  <%= render 'shared/nav_bar'%>
-  <%= render_flash %>
-  <%= yield %>
-  </body>
+      <%= csp_meta_tag %>
+        <%= stylesheet_pack_tag 'application', media: 'all', 'data-turbolinks-track': 'reload' %>
+          <%= javascript_pack_tag 'application', 'data-turbolinks-track': 'reload' %>
+</head>
+
+<body>
+  <div class="row">
+    <%= render 'shared/nav_bar'%>
+  </div>
+
+  <main>
+    <div class="container">
+      <div class="pt-5">
+        <div class="row ">
+          <%= render 'layouts/flash' %>
+        </div>
+        <div class="row">
+          <%= yield %>
+        </div>
+      </div>
+    </div>
+    <!-- container -->
+  </main>
+
 </html>

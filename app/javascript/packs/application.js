@@ -5,17 +5,27 @@
 
 import Rails from "rails-ujs";
 import Turbolinks from "turbolinks";
-import "css/polypress";
-import "css/datatable_custom_filter";
-import "css/effective_datatable";
-import "datatables/datatable_custom_filter.js";
-import "popper.js";
+import "channels";
+
+// JS
+import "../js/bootstrap_js_files";
+
+// Images
+const images = require.context("../images", true);
+const imagePath = (name) => images(name, true);
+
 import "jquery";
 import "jquery-ui";
-import "bootstrap";
-import "@fortawesome/fontawesome-free/css/all";
-import "channels";
+import "popper.js";
+
 window.jQuery = $;
 window.$ = $;
 Rails.start();
 Turbolinks.start();
+
+// import "css/polypress";
+// import "css/datatable_custom_filter";
+// import "css/effective_datatable";
+// import "datatables/datatable_custom_filter.js";
+// import "bootstrap";
+import "@fortawesome/fontawesome-free/css/all";

@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-# rubocop:disable Metrics/ModuleLength
 module Config
   # Site wide helpers
   module SiteHelper
@@ -43,6 +42,14 @@ module Config
 
     def marketplace_phone
       PolypressRegistry[:enroll_app].setting(:contact_center_short_number).item
+    end
+
+    def contact_center_short_number
+      PolypressRegistry[:enroll_app].setting(:contact_center_short_number).item
+    end
+
+    def contact_center_tty_number
+      PolypressRegistry[:enroll_app].setting(:contact_center_tty_number).item
     end
 
     def health_benefit_exchange_authority_phone_number
@@ -262,5 +269,3 @@ module Config
     end
   end
 end
-# rubocop:enable Metrics/ModuleLength
-

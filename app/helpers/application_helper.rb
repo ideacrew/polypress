@@ -2,17 +2,38 @@
 
 # Application Helper
 module ApplicationHelper
+  def format_flash(name, msg)
+    return unless msg.is_a?(String)
+    alert_type = name.to_s == 'notice' ? 'alert-success' : 'alert-danger'
+    content_tag(
+      :div,
+      "#{msg} \n" +
+        tag.button(
+          nil,
+          type: 'button',
+          class: 'btn-close',
+          'data-bs-dismiss': 'alert',
+          'aria-label': 'Close'
+        ),
+      class: %W[alert #{alert_type} alert-dismissible fade show],
+      role: 'alert'
+    )
+  end
 
   def prepend_glyph_to_text(template)
     if template.key
-      "<i class='fa fa-link' data-toggle='tooltip' title='#{template.key}'></i>&nbsp;&nbsp;&nbsp;&nbsp;#{path_for_notice_preview(template)}".html_safe
+      "<i class='fa fa-link' data-toggle='tooltip' title='#{template.key}'></i>&nbsp;&nbsp;&nbsp;&nbsp;#{path_for_notice_preview(template)}"
+        .html_safe
     else
-      "<i class='fa fa-link' data-toggle='tooltip' style='color: silver'></i>&nbsp;&nbsp;&nbsp;&nbsp;#{path_for_notice_preview(template)}".html_safe
+      "<i class='fa fa-link' data-toggle='tooltip' style='color: silver'></i>&nbsp;&nbsp;&nbsp;&nbsp;#{path_for_notice_preview(template)}"
+        .html_safe
     end
   end
 
   def path_for_notice_preview(template)
-    link_to template.subject, preview_template_path(template), target: '_blank'
+    link_to template.subject,
+            preview_new_template_path(template),
+            target: '_blank'
   end
 
   def individual_market(_recipient)
@@ -26,9 +47,10 @@ module ApplicationHelper
   end
 
   def asset_data_base64(path)
-    asset = ::Sprockets::Railtie.build_environment(Rails.application).find_asset(path)
+    asset =
+      ::Sprockets::Railtie.build_environment(Rails.application).find_asset(path)
     throw "Could not find asset '#{path}'" if asset.nil?
-    base64 = Base64.encode64(asset.to_s).gsub(/\s+/, "")
+    base64 = Base64.encode64(asset.to_s).gsub(/\s+/, '')
     "data:#{asset.content_type};base64,#{Rack::Utils.escape(base64)}"
   end
 
@@ -41,21 +63,41 @@ module ApplicationHelper
     flash.each do |type, messages|
       if messages.respond_to?(:each)
         messages.each do |m|
-          rendered << render(:partial => 'layouts/flash', :locals => { :type => type, :message => m }) unless m.blank?
+          next if m.blank?
+          rendered <<
+            render(
+              partial: 'layouts/flash',
+              locals: { type: type, message: m }
+            )
         end
       else
-        rendered << render(:partial => 'layouts/flash', :locals => { :type => type, :message => messages }) unless messages.blank?
+        unless messages.blank?
+          rendered <<
+            render(
+              partial: 'layouts/flash',
+              locals: { type: type, message: messages }
+            )
+        end
       end
     end
     rendered.join.html_safe
   end
 
   def path_for_broker_agencies
-    broker_agencies_profile_path(id: current_user.person.broker_role.broker_agency_profile_id)
+    broker_agencies_profile_path(
+      id: current_user.person.broker_role.broker_agency_profile_id
+    )
   end
 
   def path_for_employer_profile
-    employers_employer_profile_path(id: current_user.person.active_employer_staff_roles.first.employer_profile_id)
+    employers_employer_profile_path(
+      id:
+        current_user
+          .person
+          .active_employer_staff_roles
+          .first
+          .employer_profile_id
+    )
   end
 
   def get_header_text(_controller_name)
@@ -106,6 +148,14 @@ module ApplicationHelper
 
   def calculate_age_by_dob(dob)
     now = TimeKeeper.date_of_record
-    now.year - dob.year - (now.month > dob.month || (now.month == dob.month && now.day >= dob.day) ? 0 : 1)
+    now.year - dob.year -
+      (
+        if now.month > dob.month ||
+             (now.month == dob.month && now.day >= dob.day)
+          0
+        else
+          1
+        end
+      )
   end
 end

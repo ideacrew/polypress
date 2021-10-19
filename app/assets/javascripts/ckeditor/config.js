@@ -29,6 +29,9 @@ CKEDITOR.editorConfig = function (config) {
     "Trebuchet MS;" +
     "Verdana;";
   config.language = "en";
+  config.height = "600px";
+  config.entities = false;
+  config.basicEntities = false;
 
   config.tokenStart = "{{ ";
   config.tokenEnd = " }}";

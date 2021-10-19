@@ -9,28 +9,34 @@ module Documents
     # @param [Dry::Struct] AcaEntities::Entity to proccess
     # @return [Dry:Monad] passed params into pdf
     def call(params)
-      template           = yield fetch_template(params)
-      rendered_template  = yield render_liquid_template(template, params)
-      output             = yield create_document(template, rendered_template, params)
+      template_entity = yield fetch_template(params)
+      rendered_template = yield render_liquid_template(template_entity, params)
+      output = yield create_document(template_entity, rendered_template, params)
       Success(output)
     end
 
     private
 
     def fetch_template(params)
-      template = Template.where(key: params[:key]).first
-
-      if template
-        Success(template)
+      record = params[:template_model]
+      if record
+        result = Templates::TemplateContract.new.call(record.to_entity)
+        if result.success?
+          template = Templates::Template.new(result.to_h)
+          Success(template)
+        else
+          Failure(result)
+        end
       else
-        Failure("Unable to find template with #{params[:key]}")
+        Failure('Missing template model')
       end
     end
 
     def render_liquid_template(template, params)
       RenderLiquid.new.call(
         body: template.body,
-        subject: template.subject,
+        template: template,
+        subject: template.print_code,
         key: params[:key],
         cover_page: params[:cover_page],
         entity: params[:entity],
@@ -39,7 +45,14 @@ module Documents
     end
 
     def create_document(template, rendered_template, params)
-      doc_params = params.merge({ rendered_template: rendered_template[:rendered_template], template: template, entity: rendered_template[:entity] })
+      doc_params =
+        params.merge(
+          {
+            rendered_template: rendered_template[:rendered_template],
+            template: template,
+            entity: rendered_template[:entity]
+          }
+        )
 
       case template.content_type
       when 'application/pdf'

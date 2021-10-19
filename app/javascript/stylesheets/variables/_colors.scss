@@ -1,0 +1,85 @@
+// Bootstrap default Named colors
+$blue: #0d6efd;
+$indigo: #6610f2;
+$purple: #6f42c1;
+$pink: #d63384;
+$red: #dc3545;
+$orange: #fd7e14;
+$yellow: #ffc107;
+$green: #198754;
+$teal: #20c997;
+$cyan: #0dcaf0;
+//
+// Code Pen ACA Compliant styles
+//
+$blue: #1b6ec2;
+$green: #396f3a;
+$yellow: #b24d04;
+$red: #c92a2a;
+$cyan: #0b7285;
+// Grays
+$white: #fff;
+$gray-100: #f8f9fa;
+$gray-200: #e9ecef;
+$gray-300: #dee2e6;
+$gray-400: #ced4da;
+$gray-500: #adb5bd;
+$gray-600: #6c757d;
+$gray-700: #495057;
+$gray-800: #343a40;
+$gray-900: #212529;
+$black: #000;
+// Sementic color assignments
+$primary: $blue;
+$secondary: $gray-600;
+$success: $green;
+$info: $cyan;
+$warning: $yellow;
+$danger: $red;
+//
+$light: $gray-100;
+$dark: $gray-900;
+$gray-dark: #212529;
+$gray: #495057;
+$gray-light: #adb5bd;
+$link-color: $primary;
+$link-hover-color: darken($link-color, 15%);
+$btn-link-disabled-color: $gray-light;
+// BUTTON VARIANT VARIABLES
+// $btn-default-color: #fff;
+// $btn-default-bg: $gray;
+// $btn-default-color-hover: #fff;
+// $btn-default-bg-start: $btn-default-bg;
+// $btn-default-bg-end: darken($btn-default-bg, 10%);
+// $btn-default-border: darken($btn-default-bg, 5%);
+// $btn-primary-color: #fff;
+// $btn-primary-bg: $brand-primary;
+// $btn-primary-bg-start: $btn-primary-bg;
+// $btn-primary-bg-end: darken($btn-primary-bg, 10%);
+// $btn-primary-border: darken($btn-primary-bg, 5%);
+// $btn-primary-inverse-color: $btn-primary-bg;
+// $btn-primary-inverse-bg: $btn-primary-color;
+// $btn-success-color: #fff;
+// $btn-success-bg: $brand-success;
+// $btn-success-bg-start: $btn-success-bg;
+// $btn-success-bg-end: darken($btn-success-bg, 10%);
+// $btn-success-border: darken($btn-success-bg, 5%);
+// $btn-warning-color: #fff;
+// $btn-warning-bg: $brand-warning;
+// $btn-warning-bg-start: $btn-warning-bg;
+// $btn-warning-bg-end: darken($btn-warning-bg, 10%);
+// $btn-warning-border: darken($btn-warning-bg, 5%);
+// $btn-danger-color: #fff;
+// $btn-danger-bg: $brand-danger;
+// $btn-danger-bg-start: $btn-danger-bg;
+// $btn-danger-bg-end: darken($btn-danger-bg, 10%);
+// $btn-danger-border: darken($btn-danger-bg, 5%);
+// $btn-info-color: #fff;
+// $btn-info-bg: $brand-info;
+// $btn-info-bg-start: $btn-info-bg;
+// $btn-info-bg-end: darken($btn-info-bg, 10%);
+// $btn-info-border: darken($btn-info-bg, 5%);
+// $btn-disabled-color: $gray-dark;
+// $btn-disabled-bg-color: $gray-light;
+// Add or override default color names here
+//

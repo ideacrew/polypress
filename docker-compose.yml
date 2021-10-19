@@ -1,16 +1,11 @@
-version: "3.5"
+version: "3.9"
 
 services:
-  app:
+  polypress:
+    image: polypress:release_0.7.0
     build:
       context: .
       dockerfile: ./.docker/development/Dockerfile
-      args:
-        RUBY_VERSION: "2.7.2"
-        BUNDLER_VERSION_OVERRIDE: "2.2.14"
-    image: polypress_dev:0.3.0
-    links:
-      - db
     ports:
       - "3000:3000"
     volumes:
@@ -19,77 +14,47 @@ services:
       - bundle:/bundle
       - node_modules:/polypress/node_modules
       - packs:/polypress/public/packs
+    env_file:
+      - ./.env
     environment:
-      - ACTION_MAILER_HOST=${ACTION_MAILER_HOST:-localhost}
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-AKIA123456789}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-AbcD987654321}
-      - AWS_REGION=${AWS_REGION:-us-east-1}
-      - AWS_S3_ROOT_NAMESPACE=${AWS_S3_ROOT_NAMESPACE:-root_bucket}
-      - AWS_BUCKET_ROOT_NAMESPACE=${AWS_BUCKET_ROOT_NAMESPACE:-root_bucket}
-      - AWS_CONNECT_INSTANCE_ID=${AWS_CONNECT_INSTANCE_ID:-123456789}
-      - AWS_CONNECT_INSTANCE_URL=${AWS_CONNECT_INSTANCE_URL:-http://localhost}
-      - BLIND_INDEX_MASTER_KEY=ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-      - DB_DATABASE=dcas_journal_development
-      - DB_HOST=db
-      - DB_PORT=27017
-      - DB_USERNAME=postgres
-      - DB_PASSWORD=postgres_local
-      - FIN_SVC_PRIVATE_KEY=""
-      - FIN_SVC_API_SECRET=""
-      - INTERFACE="0.0.0.0"
-      - MITC_HOST=${MITC_HOST:-http://mitc}
-      - MITC_PORT=${MITC_PORT:-3001}
-      - MITC_URL=${MITC_URL:-http://mitc:3001}
-      - QB_CLIENT_ID=${QB_CLIENT_ID:-1234567890}
-      - QB_CLIENT_SECRET=${QB_CLIENT_SECRET:-1234567890}
-      - QB_REALM_ID=${QB_REALM_ID:-1234567890}
-      - RABBITMQ_HOST=${RABBITMQ_HOST:-amqp://rabbitmq}
-      - RABBITMQ_VHOST=${RABBITMQ_VHOST:-event_source}
-      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-guest}
-      - RABBITMQ_PORT=${RABBITMQ_PORT:-5672}
-      - RABBITMQ_URL_EVENT_SOURCE=${RABBITMQ_URL_EVENT_SOURCE:-amqp://guest:guest@amqp:5672}
-      - RABBITMQ_USERNAME=${AMQP_USERNAME:-guest}
-      - RAILS_ENV=${RAILS_ENV:-development}
-      - SFTP_HOST=""
-      - SFTP_PORT=""
-      - SMTP_DOMAIN=${SMTP_DOMAIN:-ideacrew.com}
-      - SMTP_HOST=${SMTP_HOST:-localhost}
-      - SMTP_PASSWORD=${SMTP_PASSWORD:-password}
-      - SMTP_PORT=${SMTP_PORT:-587}
-      - SMTP_USERNAME=${SMTP_USERNAME:-username}
-      - SNS_HOST=""
-      - SNS_PORT=""
-      - WF_BILLER_KEY=${WF_API_KEY:-1234567890}
-      - WF_API_SECRET=${WF_API_KEY:-1234567890}
-      - WF_PRIVATE_KEY=${WF_API_KEY:-1234567890}
+      BLIND_INDEX_MASTER_KEY: ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+      # INTERFACE: "0.0.0.0"
+      RABBITMQ_HOST: amqp://rabbitmq
+      RABBITMQ_VHOST: event_source
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-guest}
+      RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
+      RABBITMQ_URL_EVENT_SOURCE: ${RABBITMQ_URL_EVENT_SOURCE:-amqp://guest:guest@amqp:5672}
+      RABBITMQ_USERNAME: ${AMQP_USERNAME:-guest}
+      RAILS_ENV: ${RAILS_ENV:-development}
+    depends_on:
+      - mongodb
+      # - rabbitmq
     tmpfs:
       - /tmp
-    command: bash -c "rm -f tmp/pids/server.pid && mkdir -p tmp/pids && yarn install --check-files && bundle install && bundle exec puma -C config/puma.rb"
-    depends_on:
-      - db
-      - rabbitmq
-  db:
-    image: mongo:4.2
+    command: bash -c "rm -rf tmp/pids/server.pid && mkdir -p tmp/pids && bundle exec bundle install &&  bin/rails server --port 3000 --binding 0.0.0.0"
+
+  mongodb:
+    image: mongo:4.4
     volumes:
       - mongodb:/data/db
-      - mongodb_config:/data/configdb
+      - mongodb:/data/var/log/mongodb/
+      # - mongodb_config:/data/configdb
     ports:
       - 27017:27017
+
   rabbitmq:
-    image: rabbitmq:3.8-management
-    container_name: rabbitmq
+    build: .docker/rabbitmq
+    hostname: rabbitmq
+    env_file:
+      - .docker/rabbitmq/rabbitmq.env
     volumes:
       - rabbitmq_etc:/etc/rabbitmq/
       - rabbitmq_data:/var/lib/rabbitmq/
       - rabbitmq_logs:/var/log/rabbitmq/
-    environment:
-      - RABBITMQ_ERLANG_COOKIE=${RABBITMQ_ERLANG_COOKIE:-123456789}
-      - RABBITMQ_USER=${RABBITMQ_DEFAULT_USER:-guest}
-      - RABBITMQ_PASSWORD=${RABBITMQ_DEFAULT_PASS:-guest}
+      - ./.docker/rabbitmq/rabbitmq.config:/etc/rabbitmq/rabbitmq.config:ro
+      - ./.docker/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
     ports:
-      - 4369
       - 5672:5672
-      - 25672:25672
       - 15672:15672
 
 volumes:
@@ -98,7 +63,7 @@ volumes:
   node_modules:
   packs:
   mongodb:
-  mongodb_config:
+  # mongodb_config:
   rabbitmq_etc:
   rabbitmq_data:
   rabbitmq_logs:

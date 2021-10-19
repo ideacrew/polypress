@@ -8,39 +8,54 @@ RSpec.describe MagiMedicaid::GenerateAndPublishEligibilityDocuments do
     include_context 'application response from medicaid gateway'
 
     let(:title) { 'Uqhp Document' }
-    let(:event_key) { 'determined_uqhp_eligible' }
+    let(:event_key) { 'magi_medicaid.mitc.eligibilities.determined_uqhp_eligible' }
     let(:body) { '<p>Uqhp Eligible Document for {{ hbx_id }}</p>' }
-    let(:template_subject) { 'Uqhp Subject' }
 
     let!(:template) do
       FactoryBot.create(
         :template,
         key: event_key,
-        body: body,
+        body: {
+          markup: body
+        },
         title: title,
-        subject: template_subject,
-        category: 'aca_individual',
+        marketplace: 'aca_individual',
         recipient: 'AcaEntities::Families::Family',
         content_type: 'application/pdf',
-        description: 'Uqhp Descriptoin'
+        description: 'Uqhp Description',
+        subscriber: EventRoutes::EventRouteModel.new(event_name: event_key)
       )
     end
-    let(:application_entity) { ::AcaEntities::MagiMedicaid::Application.new(application_hash) }
-
-    subject do
-      described_class.new.call(application: application_hash, event_key: event_key)
+    let(:application_entity) do
+      ::AcaEntities::MagiMedicaid::Application.new(application_hash)
     end
 
-    context "when payload has all the required params" do
+    subject do
+      described_class.new.call(
+        payload: application_hash,
+        event_key: event_key
+      )
+    end
+
+    context 'when payload has all the required params' do
+      before do
+        Events::Documents::DocumentCreated
+          .any_instance
+          .stub(:publish)
+          .and_return(true)
+      end
+
       it 'should return success' do
         expect(subject[0].success?).to be_truthy
       end
     end
 
-    context "when event key is missing" do
+    context 'when event key is missing' do
       let(:event_key) { nil }
 
-      let(:error) { "Missing event key for resource_id: #{application_hash[:family_reference][:hbx_id]}" }
+      let(:error) do
+        "Missing event key"
+      end
 
       it 'should return failure' do
         expect(subject.failure?).to be_truthy
@@ -51,17 +66,22 @@ RSpec.describe MagiMedicaid::GenerateAndPublishEligibilityDocuments do
       end
     end
 
-    context "#determine_eligibilities" do
-      let(:event_key) { 'determined_mixed_determination' }
-      let(:eligibilities) { MagiMedicaid::GenerateAndPublishEligibilityDocuments.new.determine_eligibilities(application_entity, event_key) }
+    context '#determine_eligibilities' do
+      let(:event_key) { 'magi_medicaid.mitc.eligibilities.determined_mixed_determination' }
+      let(:eligibilities) do
+        MagiMedicaid::GenerateAndPublishEligibilityDocuments.new
+                                                            .determine_eligibilities(application_entity, event_key)
+      end
 
       it 'should eligibilities' do
-        expect(eligibilities.success).to eq ["determined_aptc_eligible"]
+        expect(eligibilities.success).to eq ['magi_medicaid.mitc.eligibilities.determined_aptc_eligible']
       end
     end
 
-    context "when input application hash is invalid" do
-      let(:error) { '[#<Dry::Schema::Message text="is missing" path=[:family_reference, :hbx_id] predicate=:key? input={}>]' }
+    context 'when input application hash is invalid' do
+      let(:error) do
+        '[#<Dry::Schema::Message text="is missing" path=[:family_reference, :hbx_id] predicate=:key? input={}>]'
+      end
 
       before { application_hash[:family_reference].delete(:hbx_id) }
 
