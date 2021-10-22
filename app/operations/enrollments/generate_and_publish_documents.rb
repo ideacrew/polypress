@@ -46,7 +46,7 @@ module Enrollments
       if result.success?
         Success(result.success)
       else
-        Failure("Failed to generate #{event_key} for family id: #{family_entity.hbx_id} due to #{result.failure}")
+        Failure("Failed to generate #{template_model.subscriber&.event_name} for family id: #{family_entity.hbx_id} due to #{result.failure}")
       end
     end
   end
