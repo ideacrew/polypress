@@ -38,17 +38,11 @@ module MagiMedicaid
     def get_recipient_hbx_id(entity)
       hbx_id =
         if entity.respond_to?(:applicants)
-          entity[:applicants].detect { |a| a[:is_primary_applicant] == true }[
-            :person_hbx_id
-          ]
+          primary_app = entity[:applicants].detect { |a| a[:is_primary_applicant] == true } || entity[:applicants][0]
+          primary_app[:person_hbx_id]
         elsif entity[:family_members]
-          entity[:family_members].detect do |a|
-            a[:is_primary_applicant] == true
-          end[
-            :person
-          ][
-            :hbx_id
-          ]
+          primary_member = entity[:family_members].detect { |a| a[:is_primary_applicant] == true } || entity[:family_members][0]
+          primary_member[:person][:hbx_id]
         end
 
       return Failure('unable to find recipient hbx id') unless hbx_id

@@ -54,6 +54,20 @@ RSpec.describe MagiMedicaid::PublishDocument do
       it 'should return success' do
         expect(subject.success?).to be_truthy
       end
+
+      context 'when payload does not have primary member' do
+        let(:non_primary_application_hash) do
+          application_hash[:applicants][0].merge!(:is_primary_applicant => false)
+          application_hash
+        end
+        let(:application_entity) do
+          ::AcaEntities::MagiMedicaid::Application.new(non_primary_application_hash)
+        end
+
+        it 'should return success' do
+          expect(subject.success?).to be_truthy
+        end
+      end
     end
 
     context 'when event key is invalid' do
