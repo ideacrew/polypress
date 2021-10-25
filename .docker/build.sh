@@ -9,7 +9,7 @@ cp .docker/config/credentials.yml.enc config/
 cp .docker/config/master.key config/
 #cp .docker/config/secrets.yml config/
 
-docker build --build-arg BUNDLER_VERSION_OVERRIDE='2.2.10' \
+docker build --build-arg BUNDLER_VERSION_OVERRIDE='2.2.24' \
              --build-arg NODE_MAJOR='12' \
              --build-arg YARN_VERSION='1.22.4' \
              --build-arg POLYPRESS_DB_HOST='host.docker.internal' \
