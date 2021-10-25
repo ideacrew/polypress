@@ -60,6 +60,9 @@ COPY Gemfile Gemfile
 COPY Gemfile.lock Gemfile.lock
 
 RUN bundle install --jobs 20 --retry 5 --without development test 
+RUN yarn add @rails/webpacker@5.4.0
+RUN rails webpacker:install:erb
+RUN yarn add bootstrap && yarn add @popperjs/core && yarn add @fortawesome/fontawesome
 RUN bundle exec rake assets:precompile
 #RUN rm -f /polypress/config/master.key && rm -f /polypress/config/credentials.yml.enc
 
