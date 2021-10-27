@@ -9,11 +9,11 @@ module Subscribers
       # rubocop:disable Lint/RescueException
       # rubocop:disable Style/LineEndConcatenation
       # rubocop:disable Style/StringConcatenation
-      subscribe(:on_generate_recon_preaudit_report) do |delivery_info, properties, payload|
+      subscribe(:on_generate_recon_preaudit_report) do |delivery_info, _properties, _payload|
         # Sequence of steps that are executed as single operation
         event_key = "preaudit_generation_report"
 
-        result = Reports::ReconPreAuditProcessor.new.call({event_key: event_key})
+        result = Reports::ReconPreAuditProcessor.new.call({ event_key: event_key })
 
         if result.success?
           logger.info(

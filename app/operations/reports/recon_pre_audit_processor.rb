@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module Reports
+  # received an event from enroll to start the pre audit processor
   class ReconPreAuditProcessor
     send(:include, Dry::Monads[:result, :do])
     send(:include, Dry::Monads[:try])
@@ -31,7 +32,7 @@ module Reports
 
     def build_event_and_publish(carrier_ids)
       carrier_ids.each do |carrier_hbx_id|
-        audit_report_execution = AuditReportExecution.new(correlation_id: SecureRandom.uuid.gsub("-",""),
+        audit_report_execution = AuditReportExecution.new(correlation_id: SecureRandom.uuid.gsub("-", ""),
                                                           report_kind: "pre_audit",
                                                           status: "pending",
                                                           audit_year: Date.today.year,

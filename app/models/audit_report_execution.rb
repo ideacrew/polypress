@@ -15,7 +15,7 @@ class AuditReportExecution
 
   has_many :audit_report_datum
 
-  index({status: 1}, )
-  index({correlation_id: 1} )
-  index({hios_id: 1, audit_year: 1})
+  index({ status: 1 })
+  index({ correlation_id: 1 })
+  index({ hios_id: 1, audit_year: 1 })
 end

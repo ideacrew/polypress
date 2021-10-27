@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module Reports
+  # request edi gateway to get coverage history for subscriber
   class RequestCoverageHistoryForSubscriber
     send(:include, Dry::Monads[:result, :do])
     send(:include, Dry::Monads[:try])

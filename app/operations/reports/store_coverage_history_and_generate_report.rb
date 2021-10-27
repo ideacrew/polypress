@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Reports
-  #Store coverage history for a subscriber and publish event to generate report
+  # Store coverage history for a subscriber and publish event to generate report
   class StoreCoverageHistoryAndGenerateReport
     send(:include, Dry::Monads[:result, :do])
     send(:include, Dry::Monads[:try])
@@ -10,7 +10,7 @@ module Reports
 
     def call(params)
       valid_params = validate(params)
-      status = yield fetch_and_update_subscriber(valid_params)
+      _status = yield fetch_and_update_subscriber(valid_params)
       build_event_and_publish
       Success(true)
     end
