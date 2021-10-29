@@ -62,7 +62,7 @@ module MagiMedicaid
 
           e_names << event_name(event_key, e_name)
         end
-      Success(event_names.uniq.compact)
+      Success(event_names.compact.uniq)
     end
 
     def source_enroll?(event_key)
@@ -86,6 +86,8 @@ module MagiMedicaid
     end
 
     def event_name(event_key, eligibility)
+      return unless eligibility.present?
+
       event_key_array = event_key.split('.')
       event_key_array.pop
       event_key_array.push(eligibility).join('.')
@@ -96,6 +98,10 @@ module MagiMedicaid
     end
 
     def publish_documents(application_entity, event_keys)
+      unless event_keys.present?
+        return [Failure("Failed to generate notices for family id: #{application_entity.family_reference.hbx_id} due to missing events")]
+      end
+
       event_keys.collect do |event_key|
         result = MagiMedicaid::PublishDocument.new.call(entity: application_entity, template_model: template_model(event_key))
         if result.success?

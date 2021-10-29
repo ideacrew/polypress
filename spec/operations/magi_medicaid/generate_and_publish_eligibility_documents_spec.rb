@@ -73,8 +73,50 @@ RSpec.describe MagiMedicaid::GenerateAndPublishEligibilityDocuments do
                                                             .determine_eligibilities(application_entity, event_key)
       end
 
-      it 'should eligibilities' do
+      it 'should return eligibilities' do
         expect(eligibilities.success).to eq ['magi_medicaid.mitc.eligibilities.determined_aptc_eligible']
+      end
+
+      context 'when there is no eligibility' do
+        let!(:modified_application_hash) do
+          application_hash[:tax_households][0][:tax_household_members][0][:product_eligibility_determination].merge!(
+            is_ia_eligible: false,
+            is_medicaid_chip_eligible: false,
+            is_magi_medicaid: false,
+            is_totally_ineligible: false,
+            is_uqhp_eligible: false
+          )
+          application_hash
+        end
+
+        let(:entity) { ::AcaEntities::MagiMedicaid::Application.new(modified_application_hash) }
+        let(:eligibilities) do
+          MagiMedicaid::GenerateAndPublishEligibilityDocuments.new
+                                                              .determine_eligibilities(application_entity, event_key)
+        end
+
+        it 'should return nil' do
+          expect(eligibilities.success).to eq []
+        end
+      end
+    end
+
+    context '#publish_documents' do
+      let(:publish_document) do
+        MagiMedicaid::GenerateAndPublishEligibilityDocuments.new
+                                                            .publish_documents(application_entity, [])
+      end
+
+      context 'when event keys are missing' do
+        let(:error) { "Failed to generate notices for family id: #{application_entity.family_reference.hbx_id} due to missing events" }
+
+        it 'should return failure' do
+          expect(publish_document[0].failure?).to be_truthy
+        end
+
+        it 'should return error' do
+          expect(publish_document[0].failure).to eq error
+        end
       end
     end
 
