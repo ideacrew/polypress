@@ -14,7 +14,7 @@ module FinancialApplicationHelper
   end
 
   def aptc_effective_date
-    Date.today.next_month.beginning_of_month
+    current_date.next_month.beginning_of_month
   end
 
   def addresses
@@ -75,7 +75,7 @@ module FinancialApplicationHelper
     [{ :kind => "wages_and_salaries",
        :amount => 16_500.00,
        :frequency_kind => "Annually",
-       :start_on => Date.today.beginning_of_year }]
+       :start_on => current_date.beginning_of_year }]
   end
 
   def benchmark_premium
@@ -117,7 +117,7 @@ module FinancialApplicationHelper
   def medicaid_and_chip
     {
       :not_eligible_in_last_90_days => true,
-      :denied_on => Date.today
+      :denied_on => current_date
     }
   end
 
@@ -196,8 +196,8 @@ module FinancialApplicationHelper
     [
       {
         :max_aptc => 496.0,
-        effective_on: Date.today.next_month.beginning_of_month,
-        determined_on: Date.today,
+        effective_on: current_date.next_month.beginning_of_month,
+        determined_on: current_date,
         annual_tax_household_income: 16_000.0,
         csr_annual_income_limit: 142_912_000.0,
         :hbx_id => "12345",

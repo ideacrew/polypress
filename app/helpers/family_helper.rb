@@ -2,6 +2,8 @@
 
 # FamilyHelper
 module FamilyHelper
+  include FinancialApplicationHelper
+
   # TODO: dynamically load data using contracts/entities
   def verification_types(type, date)
     [
@@ -18,7 +20,9 @@ module FamilyHelper
       :documents_needed => true,
       :hbx_id => '43456',
       :family_members => [family_member_2, family_member_1],
-      :households => households
+      :households => households,
+      :min_verification_due_date => current_date,
+      :magi_medicaid_applications => [application_hash]
     }
   end
 
@@ -39,7 +43,7 @@ module FamilyHelper
         :is_active => true,
         :is_disabled => false,
         :addresses => [{ :kind => 'mailing', :address_1 => 'H st', :state => "ME", :city => 'Augusta', :zip => '67662' }],
-        :verification_types => verification_types('Social Security Number', Date.today + 40.days)
+        :verification_types => verification_types('Social Security Number', current_date + 40.days)
       }
     }
   end
@@ -61,7 +65,7 @@ module FamilyHelper
         :is_active => true,
         :is_disabled => false,
         :addresses => [{ :kind => 'mailing', :address_1 => 'H st', :state => "ME", :city => 'Augusta', :zip => '67662' }],
-        :verification_types => verification_types('American Indian Status', Date.today)
+        :verification_types => verification_types('American Indian Status', current_date)
       }
     }
   end
@@ -87,7 +91,7 @@ module FamilyHelper
   def households
     [
       {
-        :start_date => Date.today,
+        :start_date => current_date,
         :is_active => true,
         :irs_group_reference => {},
         :coverage_households => [
@@ -109,7 +113,7 @@ module FamilyHelper
     [
       {
         :is_receiving_assistance => true,
-        :effective_on => Date.today,
+        :effective_on => current_date,
         :aasm_state => "coverage_selected",
         :applied_aptc_amount => { cents: BigDecimal(44_500), currency_iso: 'USD' },
         :market_place_kind => "individual",
@@ -137,8 +141,8 @@ module FamilyHelper
         :age => age
       },
       :is_subscriber => subs,
-      :eligibility_date => Date.today,
-      :coverage_start_on => Date.today
+      :eligibility_date => current_date,
+      :coverage_start_on => current_date
     }
   end
 
