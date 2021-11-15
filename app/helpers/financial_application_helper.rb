@@ -169,11 +169,32 @@ module FinancialApplicationHelper
         :benchmark_premium => benchmark_premium,
         :is_homeless => false,
         :mitc_income => mitc_income,
-        :mitc_relationships => []
+        :mitc_relationships => [],
+        :evidences => evidences
       }
     ]
   end
   # rubocop:enable Metrics/MethodLength
+
+  def evidences
+    {
+      :key => :aces_mec,
+      :title => "ACES MEC",
+      :description => nil,
+      :eligibility_status => "outstanding",
+      :due_on => current_date,
+      :updated_by => nil,
+      :eligibility_results => [
+        {
+          :result => :eligible,
+          :source => "MEDC",
+          :source_transaction_id => nil,
+          :code => "8888",
+          :code_description => nil
+        }
+      ]
+    }
+  end
 
   def application_hash
     {

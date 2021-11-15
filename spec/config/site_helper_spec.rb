@@ -35,5 +35,17 @@ RSpec.describe Config::SiteHelper, type: :helper, dbclean: :after_each do
         expect(helper.marketplace_shopping_name).to eq 'Plan Compare'
       end
     end
+
+    context '.contact_center_po_box' do
+      it 'should return PO Box' do
+        expect(helper.contact_center_po_box).to eq 'POB 616'
+      end
+    end
+
+    context '.contact_center_zip_code' do
+      it 'should return zip code' do
+        expect(helper.contact_center_zip_code).to eq '04332-6626'
+      end
+    end
   end
 end

@@ -185,7 +185,7 @@ registry:
           - key: :state_dmv_link
             item: "https://www.maine.gov/sos/bmv/"
           - key: :contact_center_po_box
-            item: "PO Box 97022"
+            item: "POB 616"
           - key: :contact_center_city
             item: "Augusta"
           - key: :contact_center_county
@@ -193,7 +193,7 @@ registry:
           - key: :contact_center_state_and_city
             item: "Augusta, ME"
           - key: :contact_center_zip_code
-            item: "04330"
+            item: "04332-6626"
           - key: :contact_center_email_address
             item: "smallbusiness@coverme.gov"
           - key: :social_media
