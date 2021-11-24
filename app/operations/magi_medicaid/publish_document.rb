@@ -27,7 +27,7 @@ module MagiMedicaid
           recipient_hbx_id
         )
       resource_id = yield fetch_resource_id(params)
-      uploaded_document = yield upload_document(documents_hash, resource_id)
+      uploaded_document = yield upload_document(params[:entity], documents_hash, resource_id)
       event = yield build_event(uploaded_document)
       result = yield publish_response(event)
       Success(result)
@@ -89,7 +89,17 @@ module MagiMedicaid
       Success(resource_id)
     end
 
-    def upload_document(document_payload, resource_id)
+    def requires_paper_communication?(entity)
+      if entity.respond_to?(:family_members)
+        primary_member = entity.family_members.detect(&:is_primary_applicant)
+        primary_member.present? && primary_member.person.consumer_role.contact_method.present? &&
+          primary_member.person.consumer_role.contact_method.include?('Paper')
+      else
+        true # for application hash
+      end
+    end
+
+    def upload_document(entity, document_payload, resource_id)
       upload =
         Documents::Upload.new.call(
           resource_id: resource_id,
@@ -103,6 +113,7 @@ module MagiMedicaid
         upload.success? ? DOCUMENT_LOCAL_PATH : DOCUMENT_LOCAL_ERROR_PATH
 
       move_document_to_local(
+        entity,
         document_payload[:document].path,
         destination_folder
       )
@@ -112,7 +123,9 @@ module MagiMedicaid
       Success(upload.success)
     end
 
-    def move_document_to_local(document_path, destination_folder)
+    def move_document_to_local(entity, document_path, destination_folder)
+      return unless requires_paper_communication?(entity)
+
       destination_path = Rails.root.join('..', destination_folder)
       FileUtils.mkdir_p destination_path
       FileUtils.mv document_path, destination_path

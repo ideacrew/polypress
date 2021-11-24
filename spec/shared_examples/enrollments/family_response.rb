@@ -20,6 +20,46 @@ RSpec.shared_context 'family response from enroll', :shared_context => :metadata
     }
   end
 
+  let(:consumer_role_2) do
+    {
+      is_applying_coverage: true,
+      contact_method: contact_method,
+      five_year_bar: false,
+      requested_coverage_start_date: Date.today,
+      aasm_state: 'fully_verified',
+      is_applicant: true,
+      is_state_resident: true,
+      identity_validation: 'na',
+      identity_update_reason: 'na',
+      application_validation: 'na',
+      application_update_reason: 'na',
+      identity_rejected: false,
+      application_rejected: false,
+      lawful_presence_determination: {}
+    }
+  end
+
+  let(:consumer_role_1) do
+    {
+      is_applying_coverage: true,
+      contact_method: contact_method,
+      five_year_bar: false,
+      requested_coverage_start_date: Date.today,
+      aasm_state: 'fully_verified',
+      is_applicant: true,
+      is_state_resident: true,
+      identity_validation: 'na',
+      identity_update_reason: 'na',
+      application_validation: 'na',
+      application_update_reason: 'na',
+      identity_rejected: false,
+      application_rejected: false,
+      lawful_presence_determination: {}
+    }
+  end
+
+  let(:contact_method) { 'Paper, Electronic and Text Message communications' }
+
   let(:family_member_1) do
     {
       :is_primary_applicant => true,
@@ -32,6 +72,7 @@ RSpec.shared_context 'family response from enroll', :shared_context => :metadata
           :dob => Date.new(1972, 4, 4),
           :is_incarcerated => false
         },
+        :consumer_role => consumer_role_1,
         :person_health => { :is_tobacco_user => "unknown" },
         :is_active => true,
         :is_disabled => false,
@@ -53,6 +94,7 @@ RSpec.shared_context 'family response from enroll', :shared_context => :metadata
           :dob => Date.new(1978, 4, 4),
           :is_incarcerated => false
         },
+        :consumer_role => consumer_role_2,
         :person_health => { :is_tobacco_user => "unknown" },
         :is_active => true,
         :is_disabled => false,

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
+require "#{Rails.root}/spec/shared_examples/enrollments/family_response"
 require "#{Rails.root}/spec/shared_examples/eligibilities/application_response"
 require 'dry/monads'
 require 'dry/monads/do'
@@ -32,13 +33,13 @@ RSpec.describe MagiMedicaid::PublishDocument do
       )
     end
 
-    let(:application_entity) do
+    let(:entity) do
       ::AcaEntities::MagiMedicaid::Application.new(application_hash)
     end
 
     subject do
       described_class.new.call(
-        entity: application_entity,
+        entity: entity,
         template_model: template
       )
     end
@@ -60,7 +61,7 @@ RSpec.describe MagiMedicaid::PublishDocument do
           application_hash[:applicants][0].merge!(:is_primary_applicant => false)
           application_hash
         end
-        let(:application_entity) do
+        let(:entity) do
           ::AcaEntities::MagiMedicaid::Application.new(non_primary_application_hash)
         end
 
@@ -73,7 +74,7 @@ RSpec.describe MagiMedicaid::PublishDocument do
     context 'when event key is invalid' do
       let(:invalid_subject) do
         described_class.new.call(
-          entity: application_entity,
+          entity: entity,
           event_key: invalid_event_key
         )
       end
@@ -144,7 +145,9 @@ RSpec.describe MagiMedicaid::PublishDocument do
           .and_return(document_name)
       end
 
-      after { FileUtils.remove_dir Rails.root.join('..', destination_folder) }
+      after do
+        FileUtils.remove_dir(Rails.root.join('..', destination_folder)) if File.directory?(destination_folder)
+      end
 
       context 'when a document uploaded successfully' do
         let(:destination_folder) do
@@ -160,6 +163,22 @@ RSpec.describe MagiMedicaid::PublishDocument do
             Dir[Rails.root.join('..', destination_folder, '**', '*.pdf')]
             .map { |file| File.basename(file) }
           expect(destination_documents).to include("#{document_name}.pdf")
+        end
+
+        context 'when consumer opted for electronic communication only' do
+          include_context 'family response from enroll'
+
+          let(:primary_applicant_hbx_id) { family_member_1[:person][:hbx_id] }
+          let(:contact_method) { 'Only Electronic communications' }
+          let(:entity) { AcaEntities::Families::Family.new(family_hash.merge(magi_medicaid_applications: [application_hash])) }
+
+          it 'should not move document to local path' do
+            subject
+            destination_documents =
+              Dir[Rails.root.join('..', destination_folder, '**', '*.pdf')]
+              .map { |file| File.basename(file) }
+            expect(destination_documents).not_to include("#{document_name}.pdf")
+          end
         end
       end
 
