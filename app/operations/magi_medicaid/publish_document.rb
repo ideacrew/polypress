@@ -37,7 +37,7 @@ module MagiMedicaid
 
     def get_recipient_hbx_id(entity)
       hbx_id =
-        if entity.respond_to?(:applicants)
+        if entity.is_a?(AcaEntities::MagiMedicaid::Application)
           primary_app = entity[:applicants].detect { |a| a[:is_primary_applicant] == true } || entity[:applicants][0]
           primary_app[:person_hbx_id]
         elsif entity[:family_members]
@@ -90,7 +90,7 @@ module MagiMedicaid
     end
 
     def requires_paper_communication?(entity)
-      if entity.respond_to?(:family_members)
+      if entity.is_a?(::AcaEntities::Families::Family)
         primary_member = entity.family_members.detect(&:is_primary_applicant)
         primary_member.present? && primary_member.person.consumer_role.contact_method.present? &&
           primary_member.person.consumer_role.contact_method.include?('Paper')

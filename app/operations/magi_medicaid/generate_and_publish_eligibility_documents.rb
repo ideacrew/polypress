@@ -97,17 +97,23 @@ module MagiMedicaid
       Templates::TemplateModel.where(:'subscriber.event_name' => event_key).first
     end
 
-    def publish_documents(application_entity, event_keys)
-      unless event_keys.present?
-        return [Failure("Failed to generate notices for family id: #{application_entity.family_reference.hbx_id} due to missing events")]
+    def family_reference_id(entity)
+      if entity.is_a?(::AcaEntities::MagiMedicaid::Application)
+        entity.family_reference.hbx_id
+      else
+        entity.hbx_id
       end
+    end
+
+    def publish_documents(entity, event_keys)
+      return [Failure("Failed to generate notices for family id: #{entity.family_reference.hbx_id} due to missing events")] unless event_keys.present?
 
       event_keys.collect do |event_key|
-        result = MagiMedicaid::PublishDocument.new.call(entity: application_entity, template_model: template_model(event_key))
+        result = MagiMedicaid::PublishDocument.new.call(entity: entity, template_model: template_model(event_key))
         if result.success?
           Success(result.success)
         else
-          Failure("Failed to generate #{event_key} for family id: #{application_entity.family_reference.hbx_id} due to #{result.failure}")
+          Failure("Failed to generate #{event_key} for family id: #{family_reference_id(entity)} due to #{result.failure}")
         end
       end
     end

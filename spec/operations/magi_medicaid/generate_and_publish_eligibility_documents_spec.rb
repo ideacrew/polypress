@@ -2,10 +2,12 @@
 
 require 'rails_helper'
 require "#{Rails.root}/spec/shared_examples/eligibilities/application_response"
+require "#{Rails.root}/spec/shared_examples/enrollments/family_response"
 
 RSpec.describe MagiMedicaid::GenerateAndPublishEligibilityDocuments do
   describe 'with valid arguments' do
     include_context 'application response from medicaid gateway'
+    include_context 'family response from enroll'
 
     let(:title) { 'Uqhp Document' }
     let(:event_key) { 'magi_medicaid.mitc.eligibilities.determined_uqhp_eligible' }
@@ -30,9 +32,11 @@ RSpec.describe MagiMedicaid::GenerateAndPublishEligibilityDocuments do
       ::AcaEntities::MagiMedicaid::Application.new(application_hash)
     end
 
+    let(:payload_hash) { application_hash }
+
     subject do
       described_class.new.call(
-        payload: application_hash,
+        payload: payload_hash,
         event_key: event_key
       )
     end
@@ -47,6 +51,32 @@ RSpec.describe MagiMedicaid::GenerateAndPublishEligibilityDocuments do
 
       it 'should return success' do
         expect(subject[0].success?).to be_truthy
+      end
+    end
+
+    context 'when family has is passed in' do
+      before do
+        Events::Documents::DocumentCreated
+          .any_instance
+          .stub(:publish)
+          .and_return(true)
+      end
+      let(:payload_hash) { family_hash }
+
+      it 'should return success' do
+        expect(subject[0].success?).to be_truthy
+      end
+
+      context 'when generation fails' do
+        let(:body) { '<p>Uqhp Eligible Document for {{ hbx_id }} {{ unknown_key }}</p>' }
+
+        it 'should return failure' do
+          expect(subject[0].success?).to be_falsey
+        end
+
+        it 'should log error' do
+          expect(subject[0].failure).to match(/Failed to generate #{event_key} for family id/)
+        end
       end
     end
 
