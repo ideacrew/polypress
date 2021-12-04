@@ -177,7 +177,7 @@ module FinancialApplicationHelper
   # rubocop:enable Metrics/MethodLength
 
   def evidences
-    {
+    [{
       :key => :aces_mec,
       :title => "ACES MEC",
       :description => nil,
@@ -193,7 +193,7 @@ module FinancialApplicationHelper
           :code_description => nil
         }
       ]
-    }
+    }]
   end
 
   def application_hash
