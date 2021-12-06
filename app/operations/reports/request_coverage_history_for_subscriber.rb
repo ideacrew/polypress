@@ -1,75 +1,64 @@
 # frozen_string_literal: true
 
+require 'faraday'
+
 module Reports
-  # request edi gateway to get coverage history for subscriber
+  # request glue to get coverage history for subscriber
   class RequestCoverageHistoryForSubscriber
     send(:include, Dry::Monads[:result, :do])
     send(:include, Dry::Monads[:try])
-    send(:include, ::EventSource::Command)
-    send(:include, ::EventSource::Logging)
 
     def call(params)
-      valid_params = validate(params)
-      _enabled = yield pre_audit_feature_enabled?
-      _status = yield update_subscribers_count(valid_params)
-      request_policies_for_subscriber(valid_params[:payload], valid_params[:correlation_id])
-      Success(true)
+      valid_params = yield validate(params)
+      service_uri = yield fetch_coverage_history_end_point
+      user_token = yield fetch_user_token
+      coverage_history_response = yield fetch_coverage_history(service_uri, user_token, valid_params)
+      status = yield store_coverage_history(coverage_history_response, valid_params[:audit_report_datum])
+      Success(status)
     end
 
     private
 
     def validate(params)
-      return Failure("No subscribers present") if params[:payload].blank?
-      return Failure("No correlation id exists in headers") if params[:correlation_id].blank?
+      return Failure("No audit datum record") if params[:audit_report_datum].blank?
+      return Failure("No audit report execution record") if params[:audit_report_execution].blank?
 
-      Success(true)
+      Success(params)
     end
 
-    def update_subscribers_count(valid_params)
-      audit_report = AuditReportExecution.where(correlation_id: valid_params[:correaltion_id]).first
-      audit_report.update_attributes(record_count: valid_params[:payload].count)
-
-      Success(true)
-    end
-
-    def pre_audit_feature_enabled?
-      if PolypressRegistry.feature_enabled?(:pre_audit_report)
-        Success(true)
-      else
-        Failure("Pre audit report should not be run")
+    def fetch_coverage_history_end_point
+      result = Try do
+        PolypressRegistry[:gluedb_integration].setting(:gluedb_enrolled_subjects_coverage_history_uri).item
       end
+
+      return Failure("Failed to find setting: :gluedb_integration, :gluedb_enrolled_subjects_coverage_history_uri") if result.failure?
+      result.nil? ? Failure(":gluedb_enrolled_subjects_coverage_history_uri cannot be nil") : result
     end
 
-    def request_policies_for_subscriber(subscribers_list, correlation_id)
-      subscribers_list.each do |subscriber_id|
-        audit_datum = create_audit_report_datum(subscriber_id, correlation_id)
-        payload = { subscriber_hbx_id: subscriber_id }
-        build_event_and_publish(payload, audit_datum.correlation_id)
+    def fetch_user_token
+      result = Try do
+        PolypressRegistry[:gluedb_integration].setting(:gluedb_user_access_token).item
       end
+
+      return Failure("Failed to find setting: :gluedb_integration, :gluedb_user_access_token") if result.failure?
+      result.nil? ? Failure(":gluedb_user_access_token cannot be nil") : result
     end
 
-    def create_audit_report_datum(subscriber_id, correlation_id)
-      audit_datum = AuditReportDatum.new(subscriber_id: subscriber_id,
-                                         status: "pending",
-                                         correlation_id: correlation_id)
+    def fetch_coverage_history(service_uri, user_token, valid_params)
+      audit_report_execution = valid_params[:audit_report_execution]
+      audit_datum = valid_params[:audit_report_datum]
+      params = { id: audit_datum.subscriber_id,
+                 year: audit_report_execution.audit_year,
+                 hios_id: audit_report_execution.hios_id,
+                 user_token: user_token }
 
-      audit_datum.save!
-      audit_datum
+      response = Faraday.get(service_uri, params)
+
+      response.status == 200 ? Success(response.body) : Failure("Unable to fetch coverage history due to #{response.body}")
     end
 
-    def build_event_and_publish(payload, correlation_id)
-      event =   event("events.reports.coverage_history_for_subscriber_requested",
-                      attributes: { payload: payload }, headers: { correlation_id: correlation_id }).success
-      unless Rails.env.test?
-        logger.info('-' * 100)
-        logger.info(
-          "Polypress sends request to edi gateway to get coverage history for a subscriber,
-          event_key: events.polypress.reports.coverage_history_for_subscriber_requested, attributes: #{payload.to_h}"
-        )
-        logger.info('-' * 100)
-      end
-      event.publish
-      Success("Successfully published event to edi gateway to get coverage history for a subscriber")
+    def store_coverage_history(coverage_history_response, audit_datum)
+      Success(audit_datum.update_attributes(payload: coverage_history_response, status: "completed"))
     end
   end
 end

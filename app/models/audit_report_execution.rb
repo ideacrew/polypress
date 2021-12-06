@@ -6,14 +6,13 @@ class AuditReportExecution
   include Mongoid::Document
   include Mongoid::Timestamps
 
-  field :correlation_id, type: String
+  embeds_many :audit_report_datum
+
   field :report_kind, type: String
   field :status, type: String
   field :record_count, type: String
   field :audit_year, type: String
   field :hios_id, type: String
-
-  has_many :audit_report_datum
 
   index({ status: 1 })
   index({ correlation_id: 1 })

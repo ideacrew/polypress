@@ -12,11 +12,9 @@ module Subscribers
       subscribe(:on_receive_pre_audit_generation_event) do |delivery_info, _properties, _payload|
         # Sequence of steps that are executed as single operation
         _event_key = "generate_pre_audit_report"
-        _correlation_id = properties.correlation_id
 
-        # result = Reports::StoreCoverageHistoryAndGenerateReport.new.call({ event_key: event_key,
-        #                                                                    payload: payload,
-        #                                                                    correlation_id: correlation_id })
+        result = Reports::GeneratePreAuditReport.new.call({ event_key: event_key,
+                                                            payload: payload })
 
         if result.success?
           logger.info(

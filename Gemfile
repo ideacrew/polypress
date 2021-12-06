@@ -5,7 +5,7 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
 ruby '2.7.3'
 
-gem 'aca_entities', git: 'https://github.com/ideacrew/aca_entities.git', branch: 'recon_pre_audit_reports'
+gem 'aca_entities', git: 'https://github.com/ideacrew/aca_entities.git', branch: 'policy_entity'
 # Reduces boot times through caching; required in config/boot.rb
 gem 'bootsnap', '>= 1.4.4', require: false
 
@@ -86,6 +86,10 @@ group :development, :test do
   gem 'rspec-rails', '~> 5.0'
   gem 'shoulda-matchers', '~> 3'
   gem 'yard'
+end
+
+group :test do
+  gem "webmock"
 end
 
 group :development do

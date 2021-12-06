@@ -6,8 +6,9 @@ class AuditReportDatum
   include Mongoid::Document
   include Mongoid::Timestamps
 
+  embedded_in :audit_report_execution
+
   field :subscriber_id, type: String
   field :status, type: String
-  field :correlation_id, type: String
   field :payload, type: String
 end
