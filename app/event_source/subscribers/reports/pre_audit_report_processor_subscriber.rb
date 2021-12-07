@@ -3,7 +3,7 @@
 module Subscribers
   module Reports
     # Subscribe events for report generations
-    class ReconPreauditReportGenerationSubscriber
+    class PreAuditReportProcessorSubscriber
       include ::EventSource::Subscriber[amqp: 'enroll.reports.recon_preaudit']
 
       # rubocop:disable Lint/RescueException
