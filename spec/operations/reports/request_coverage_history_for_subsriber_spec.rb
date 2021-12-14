@@ -27,14 +27,15 @@ RSpec.describe Reports::RequestCoverageHistoryForSubscriber do
 
     context 'fetch coverage history for subscriber and update audit report datum' do
       before do
-        stub_request(:get, "http://localhost:3004/api/event_source/enrolled_subjects/12345?hios_id=12345&user_token=some%20token&year=2022").
-          with(
+        stub_request(:get, "http://localhost:3004/api/event_source/enrolled_subjects/12345?hios_id=12345&user_token=some%20token&year=2022")
+          .with(
             headers: {
-              'Accept'=>'*/*',
-              'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
-              'User-Agent'=>'Faraday v1.4.3'
-            }).
-          to_return(status: 200, body: "test".to_json, headers: {})
+              'Accept' => '*/*',
+              'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+              'User-Agent' => 'Faraday v1.4.3'
+            }
+          )
+          .to_return(status: 200, body: "test".to_json, headers: {})
       end
 
       it 'should return success' do
