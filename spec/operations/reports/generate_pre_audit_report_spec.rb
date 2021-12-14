@@ -42,7 +42,7 @@ RSpec.describe Reports::GeneratePreAuditReport, dbclean: :before_each do
   let(:segments) do
     [
       {
-        id: "12345",
+        id: "1100500-45009-1100500-20220101-20221231",
         effective_start_date: "2021-10-12",
         effective_end_date: "2021-10-12",
         individual_premium_amount: "21.0",
