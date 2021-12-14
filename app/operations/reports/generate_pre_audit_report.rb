@@ -24,7 +24,7 @@ module Reports
     end
 
     def fetch_audit_report_datum(valid_params)
-      audit_report_execution = AuditReportExecution.where(hios_id: valid_params[:payload][:carrier_hios_id]).first
+      audit_report_execution = AuditReportExecution.where(hios_id: valid_params[:payload][:carrier_hios_id]).last
       Success(audit_report_execution.audit_report_datum)
     end
 
@@ -35,7 +35,7 @@ module Reports
       CSV.open(file_name, "w", col_sep: "|") do |csv|
         csv << field_names
 
-        audit_datum.each do |audit_data|
+        audit_datum.where(status: "completed").each do |audit_data|
           policies = JSON.parse(audit_data.payload)
           policies.each do |policy|
             policy_contract_result = AcaEntities::Contracts::Policies::PolicyContract.new.call(policy)
@@ -44,12 +44,93 @@ module Reports
             policy_entity = AcaEntities::Policies::Policy.new(policy_contract_result.to_h)
             policy_entity.enrollees.each do |enrollee|
               enrollee.segments.each do |segment|
-                csv << insert_data(policy_entity, segment, enrollee)
+                csv << insert_data(carrier_hios_id, policy_entity, segment, enrollee)
               end
             end
           end
+        rescue StandardError => e
+          Rails.logger.error("Unable to generate report due to #{e}")
         end
       end
+    end
+
+    def fetch_relationship_code(code)
+      {
+        "self" => "1:83",
+        "spouse" => "2:01",
+        "ward" => "32:15",
+        "child" => "4:19"
+      }.stringify_keys[code.to_s]
+    end
+
+    def aptc_amount(enrollee, segment)
+      return nil unless enrollee.is_subscriber
+      return nil if [0.0, 0, 0.00].include?(segment.aptc_amount)
+
+      format('%.2f', segment.aptc_amount)
+    end
+
+    def effective_start_date(enrollee, segment)
+      return nil unless enrollee.is_subscriber
+
+      segment.effective_start_date&.strftime("%Y%m%d")
+    end
+
+    def effective_end_date(enrollee, segment)
+      return nil unless enrollee.is_subscriber
+
+      segment.effective_end_date&.strftime("%Y%m%d")
+    end
+
+    def csr_variant(enrollee, segment)
+      return nil unless enrollee.is_subscriber
+
+      segment.csr_variant
+    end
+
+    def total_premium_amount(enrollee, segment)
+      return nil unless enrollee.is_subscriber
+
+      format('%.2f', segment.total_premium_amount)
+    end
+
+    def total_responsible_amount(enrollee, segment)
+      return nil unless enrollee.is_subscriber
+
+      format('%.2f', segment.total_responsible_amount)
+    end
+
+    def phone_number(enrollee)
+      return nil if enrollee.phones.blank?
+
+      enrollee.phones.last.full_phone_number
+    end
+
+    def email_address(enrollee)
+      return nil if enrollee.emails.blank?
+
+      enrollee.emails.last.address
+    end
+
+    def transaction_code_type(aasm_state)
+      if %w[submitted effectuated hbx_terminated hbx_terminated].include?(aasm_state)
+        1
+      else
+        3
+      end
+    end
+
+    def tobacco_use_code(tobacco_code)
+      case tobacco_code
+      when "Y"
+        1
+      when "N"
+        2
+      end
+    end
+
+    def qhp_id(policy_entity)
+      "#{policy_entity.qhp_id}0#{policy_entity.csr_variant}"
     end
 
     def fetch_file_name(carrier_hios_id)
@@ -91,35 +172,40 @@ module Reports
        "Outbound 834 Retransmission Indicator", "Outbound 834 Transaction History"]
     end
 
-    def insert_data(policy_entity, segment, enrollee)
-      [nil, nil, "ME0", nil, policy_entity.qhp_id, nil, nil,
-       policy_entity.last_maintenance_date.strftime("%Y-%m-%d"), policy_entity.last_maintenance_time,
-       policy_entity.primary_subscriber&.hbx_member_id, policy_entity.aasm_state, nil, nil, nil, nil, nil,
-       enrollee.relationship_status_code, enrollee.is_subscriber, policy_entity.primary_subscriber&.hbx_member_id,
+    def insert_data(carrier_hios_id, policy_entity, segment, enrollee)
+      [carrier_hios_id, nil, "ME0", carrier_hios_id, policy_entity.qhp_id[0, 10], Date.today.strftime("%Y%m%d"),
+       DateTime.now.strftime("%H%M%S%L"),
+       policy_entity.last_maintenance_date.strftime("%Y%m%d"), policy_entity.last_maintenance_time,
+       policy_entity.primary_subscriber&.hbx_member_id, transaction_code_type(policy_entity.aasm_state), nil, nil,
+       nil, nil, nil,
+       fetch_relationship_code(enrollee.relationship_status_code), enrollee.is_subscriber ? 'Y' : 'N', nil,
+       policy_entity.primary_subscriber&.hbx_member_id,
        enrollee.hbx_member_id, enrollee.issuer_assigned_member_id,
        policy_entity.primary_subscriber&.issuer_assigned_member_id, enrollee.last_name, enrollee.first_name,
        enrollee.middle_name, nil, enrollee.residential_address&.address_1, enrollee.residential_address&.address_2,
        enrollee.residential_address&.city, enrollee.residential_address&.state, enrollee.residential_address&.zip,
-       enrollee.residential_address&.county, enrollee.enrollee_demographics.ssn,
-       enrollee.enrollee_demographics.dob.strftime("%Y-%m-%d"), enrollee.enrollee_demographics.gender_code,
-       enrollee.enrollee_demographics.tobacco_use_code, nil, nil, nil, nil, enrollee.mailing_address&.address_1,
+       enrollee.residential_address&.county, phone_number(enrollee), enrollee.enrollee_demographics&.ssn,
+       enrollee.enrollee_demographics&.dob&.strftime("%Y%m%d"), enrollee.enrollee_demographics.gender_code,
+       tobacco_use_code(enrollee.enrollee_demographics.tobacco_use_code), nil, nil, nil, nil, email_address(enrollee),
+       enrollee.mailing_address&.address_1,
        enrollee.mailing_address&.address_2, enrollee.mailing_address&.city, enrollee.mailing_address&.state,
-       enrollee.mailing_address&.zip, enrollee.mailing_address&.county, nil, nil, nil, nil, nil, nil, nil,
+       enrollee.mailing_address&.zip, nil, nil, nil, nil, nil, nil, nil,
        policy_entity.responsible_party_subscriber&.last_name, policy_entity.responsible_party_subscriber&.first_name,
        policy_entity.responsible_party_subscriber&.mailing_address&.address_1,
        policy_entity.responsible_party_subscriber&.mailing_address&.address_2,
        policy_entity.responsible_party_subscriber&.mailing_address&.city,
        policy_entity.responsible_party_subscriber&.mailing_address&.state,
        policy_entity.responsible_party_subscriber&.mailing_address&.zip,
-       enrollee.coverage_start.strftime("%Y-%m-%d"), enrollee.coverage_end.strftime("%Y-%m-%d"),
-       enrollee.issuer_assigned_policy_id, policy_entity.qhp_id, policy_entity.effectuation_status,
-       policy_entity.enrollment_group_id, segment.id, segment.aptc_amount,
-       segment.effective_start_date.strftime("%Y-%m-%d"), segment.effective_end_date.strftime("%Y-%m-%d"),
-       segment.csr_variant, segment.effective_start_date.strftime("%Y-%m-%d"),
-       segment.effective_end_date.strftime("%Y-%m-%d"), segment.individual_premium_amount,
-       segment.effective_start_date.strftime("%Y-%m-%d"), segment.effective_end_date.strftime("%Y-%m-%d"),
-       segment.total_responsible_amount, segment.effective_start_date.strftime("%Y-%m-%d"),
-       segment.effective_end_date.strftime("%Y-%m-%d"), nil, nil, policy_entity.term_for_np, nil, nil, nil,
+       enrollee.coverage_start.strftime("%Y%m%d"), enrollee.coverage_end.strftime("%Y%m%d"),
+       enrollee.issuer_assigned_policy_id, qhp_id(policy_entity), policy_entity.effectuation_status,
+       policy_entity.enrollment_group_id, segment.id, aptc_amount(enrollee, segment),
+       effective_start_date(enrollee, segment), effective_end_date(enrollee, segment),
+       nil, effective_start_date(enrollee, segment),
+       effective_end_date(enrollee, segment), total_premium_amount(enrollee, segment),
+       nil, nil, format('%.2f', segment.individual_premium_amount),
+       segment.effective_start_date.strftime("%Y%m%d"), segment.effective_end_date.strftime("%Y%m%d"),
+       total_responsible_amount(enrollee, segment), segment.effective_start_date.strftime("%Y%m%d"),
+       segment.effective_end_date.strftime("%Y%m%d"), nil, nil, nil, nil, nil,  policy_entity.term_for_np ? 6 : nil,
        policy_entity.rating_area, nil, nil, nil, policy_entity.insurance_line_code, nil, nil, nil, nil, nil, nil, nil,
        nil, nil]
     end

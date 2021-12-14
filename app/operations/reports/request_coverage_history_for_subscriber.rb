@@ -47,12 +47,11 @@ module Reports
     def fetch_coverage_history(service_uri, user_token, valid_params)
       audit_report_execution = valid_params[:audit_report_execution]
       audit_datum = valid_params[:audit_report_datum]
-      params = { id: audit_datum.subscriber_id,
-                 year: audit_report_execution.audit_year,
+      params = { year: Date.today.year == 2021 ? "2022" : Date.today.year,
                  hios_id: audit_report_execution.hios_id,
                  user_token: user_token }
 
-      response = Faraday.get(service_uri, params)
+      response = Faraday.get("#{service_uri}/#{audit_datum.subscriber_id}", params)
 
       response.status == 200 ? Success(response.body) : Failure("Unable to fetch coverage history due to #{response.body}")
     end

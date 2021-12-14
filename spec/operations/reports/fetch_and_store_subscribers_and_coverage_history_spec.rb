@@ -8,7 +8,7 @@ RSpec.describe Reports::FetchAndStoreSubscribersAndCoverageHistory, dbclean: :be
   describe 'with valid arguments' do
     let(:feature_ns) { double }
     let(:enrolled_subject_setting) { double(item: "http://localhost:3004/api/event_source/enrolled_subjects") }
-    let(:coverage_history_setting) { double(item: "http://localhost:3004/api/event_source/enrolled_subjects/show") }
+    let(:coverage_history_setting) { double(item: "http://localhost:3004/api/event_source/enrolled_subjects") }
     let(:user_token) { double(item: "some token") }
 
     before :each do
@@ -20,14 +20,14 @@ RSpec.describe Reports::FetchAndStoreSubscribersAndCoverageHistory, dbclean: :be
 
     subject do
       described_class.new.call({
-                                 year: Date.today.year,
+                                 year: 2022,
                                  hios_id: "12345"
                                })
     end
 
     context 'fetch subscriber list and store coverage information of each subscriber' do
       before do
-        stub_request(:get, "http://localhost:3004/api/event_source/enrolled_subjects?hios_id&user_token=some%20token&year=2021")
+        stub_request(:get, "http://localhost:3004/api/event_source/enrolled_subjects?hios_id&user_token=some%20token&year=2022")
           .with(
             headers: {
               'Accept' => '*/*',
@@ -39,7 +39,7 @@ RSpec.describe Reports::FetchAndStoreSubscribersAndCoverageHistory, dbclean: :be
       end
 
       before do
-        stub_request(:get, "http://localhost:3004/api/event_source/enrolled_subjects/show?hios_id&id=12345&user_token=some%20token&year=2021")
+        stub_request(:get, "http://localhost:3004/api/event_source/enrolled_subjects/12345?hios_id&user_token=some%20token&year=2022")
           .with(
             headers: {
               'Accept' => '*/*',

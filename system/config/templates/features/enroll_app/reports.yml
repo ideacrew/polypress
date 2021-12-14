@@ -7,4 +7,4 @@ registry:
         is_enabled: true
         settings:
           - key: :carrier_hbx_ids
-            item: ["30001", "30002", "30004", "30005"]
+            item: ["48396", "50165", "33653", "96667"]

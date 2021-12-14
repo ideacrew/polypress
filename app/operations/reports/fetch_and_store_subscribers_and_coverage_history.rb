@@ -46,28 +46,13 @@ module Reports
     end
 
     def fetch_subscribers_list(service_uri, user_token, audit_report_execution)
-      params = { year: audit_report_execution.audit_year,
+      params = { year: Date.today.year == 2021 ? "2022" : Date.today.year,
                  hios_id: audit_report_execution.hios_id,
                  user_token: user_token }
 
       response = Faraday.get(service_uri, params)
 
       response.status == 200 ? Success(response.body) : Failure("Unable to fetch subscribers list due to #{response.body}")
-    end
-
-    def fetch_and_store_subscribers_list(audit_report_execution)
-      url = fetch_subscriber_list_end_point
-      params = { year: audit_report_execution.audit_year,
-                 hios_id: audit_report_execution.hios_id,
-                 user_token: fetch_user_token }
-      response = Faraday.get(url, params)
-
-      if response.status == 200
-        store_subscribers_list(response.body, audit_report_execution)
-        Success(true)
-      else
-        Failure("Unable to fetch subscribers list due to #{response.body}")
-      end
     end
 
     def store_subscribers_list(subscribers_json, audit_report_execution)
@@ -83,9 +68,16 @@ module Reports
     end
 
     def fetch_and_store_coverage_history(audit_report_execution)
+      puts "Total number of record for carrier #{audit_report_execution.hios_id} is
+            #{audit_report_execution.audit_report_datum.count}"
+      counter = 0
       audit_report_execution.audit_report_datum.each do |audit_datum|
-        Reports::RequestCoverageHistoryForSubscriber.new.call({ audit_report_datum: audit_datum,
-                                                                audit_report_execution: audit_report_execution })
+        status = Reports::RequestCoverageHistoryForSubscriber.new.call({ audit_report_datum: audit_datum,
+                                                                         audit_report_execution: audit_report_execution })
+
+        status.success? ? counter += 1 : counter
+
+        puts "Total number of records updated with coverage information payload #{counter}" if counter % 100 == 0
       end
     end
   end

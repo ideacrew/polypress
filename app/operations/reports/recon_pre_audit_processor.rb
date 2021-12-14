@@ -29,7 +29,7 @@ module Reports
 
     def fetch_and_store_coverage_data(carrier_ids)
       carrier_ids.each do |carrier_hios_id|
-        result = Operations::Reports::FetchAndStoreSubscribersAndCoverageHistory({ carrier_hios_id: carrier_hios_id, year: Date.today.year })
+        result = Reports::FetchAndStoreSubscribersAndCoverageHistory.new.call({ carrier_hios_id: carrier_hios_id, year: Date.today.year })
         result.success? ? publish_event_to_generate_report(carrier_hios_id) : Failure("Unable to generate report for hios_id #{carrier_hios_id}")
       end
     end

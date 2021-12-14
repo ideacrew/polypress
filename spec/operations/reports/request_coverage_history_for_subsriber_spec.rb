@@ -8,7 +8,7 @@ RSpec.describe Reports::RequestCoverageHistoryForSubscriber do
   describe 'with valid arguments' do
     let(:audit_report_execution) { FactoryBot.create(:audit_report_execution)}
     let(:audit_report_datum) { FactoryBot.create(:audit_report_datum, audit_report_execution: audit_report_execution)}
-    let(:coverage_history_setting) { double(item: "http://localhost:3004/api/event_source/enrolled_subjects/show") }
+    let(:coverage_history_setting) { double(item: "http://localhost:3004/api/event_source/enrolled_subjects") }
     let(:user_token) { double(item: "some token") }
     let(:feature_ns) { double }
 
@@ -27,15 +27,14 @@ RSpec.describe Reports::RequestCoverageHistoryForSubscriber do
 
     context 'fetch coverage history for subscriber and update audit report datum' do
       before do
-        stub_request(:get, "http://localhost:3004/api/event_source/enrolled_subjects/show?hios_id=12345&id=12345&user_token=some%20token&year=2021")
-          .with(
+        stub_request(:get, "http://localhost:3004/api/event_source/enrolled_subjects/12345?hios_id=12345&user_token=some%20token&year=2022").
+          with(
             headers: {
-              'Accept' => '*/*',
-              'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
-              'User-Agent' => 'Faraday v1.4.3'
-            }
-          )
-          .to_return(status: 200, body: "test".to_json, headers: {})
+              'Accept'=>'*/*',
+              'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+              'User-Agent'=>'Faraday v1.4.3'
+            }).
+          to_return(status: 200, body: "test".to_json, headers: {})
       end
 
       it 'should return success' do
