@@ -182,6 +182,48 @@ RSpec.describe MagiMedicaid::PublishDocument do
         end
       end
 
+      context '#requires_paper_communication?' do
+        include_context 'family response from enroll'
+
+        let(:destination_folder) do
+          MagiMedicaid::PublishDocument::DOCUMENT_LOCAL_PATH
+        end
+
+        let(:result) { ::MagiMedicaid::PublishDocument.new.send(:requires_paper_communication?, entity) }
+
+        context 'when the entity is AcaEntities::Families::Family' do
+          let(:entity) { AcaEntities::Families::Family.new(family_hash) }
+
+          context 'when the consumer has contact method' do
+            context 'when the contact method is paper' do
+              let(:contact_method) { 'Paper, Electronic and Text Message communications' }
+              it 'should return true' do
+                expect(result).to be_truthy
+              end
+            end
+
+            context 'when the contact method is electronic only' do
+              let(:contact_method) { 'Electronic Only' }
+              it 'should return false' do
+                expect(result).to be_falsey
+              end
+            end
+          end
+
+          context 'when the contact method is not present' do
+            it 'should return true' do
+              expect(result).to be_truthy
+            end
+          end
+        end
+
+        context 'when the entity is AcaEntities::MagiMedicaid::Application' do
+          it 'should return true' do
+            expect(result).to be_truthy
+          end
+        end
+      end
+
       context 'when a document uploaded failed' do
         let(:upload_instance) { Documents::Upload.new }
         let(:destination_folder) do

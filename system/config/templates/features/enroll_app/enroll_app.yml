@@ -265,9 +265,9 @@ registry:
           - key: :medicaid_agency_phone
             item: "(855) 797-4357"
           - key: :medicaid_agency_chip_long_name
-            item: "MaineCare (Medicaid) or CubCare (Children’s Health Insurance Program)"
+            item: "MaineCare (Medicaid) or Cub Care (Children’s Health Insurance Program)"
           - key: :medicaid_agency_chip_short_name
-            item: "MaineCare or CubCare"
+            item: "MaineCare or Cub Care"
           - key: :verifiable_immigration_statuses
             item: true
       - key: :data_seeds_ui
