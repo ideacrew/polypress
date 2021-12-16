@@ -92,7 +92,8 @@ module MagiMedicaid
     def requires_paper_communication?(entity)
       if entity.is_a?(::AcaEntities::Families::Family)
         primary_member = entity.family_members.detect(&:is_primary_applicant)
-        primary_member.present? && primary_member.person.consumer_role.contact_method.present? &&
+        primary_member.present? && primary_member.person.consumer_role.present? &&
+          primary_member.person.consumer_role.contact_method.present? &&
           primary_member.person.consumer_role.contact_method.include?('Paper')
       else
         true # for application hash
