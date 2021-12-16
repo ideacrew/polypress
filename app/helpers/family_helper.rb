@@ -109,26 +109,47 @@ module FamilyHelper
     ]
   end
 
+  def health_enrollment
+    {
+      :is_receiving_assistance => true,
+      :effective_on => current_date,
+      :aasm_state => "auto_renewing",
+      :applied_aptc_amount => { cents: BigDecimal(44_500), currency_iso: 'USD' },
+      :market_place_kind => "individual",
+      :total_premium => 445.09,
+      :enrollment_period_kind => "open_enrollment",
+      :product_kind => "health",
+      :hbx_enrollment_members => [
+        hbx_enrollment_member('1', 'Smith1', "1009522", 45, true),
+        hbx_enrollment_member('2', 'Smith2', "1009523", 46, false)
+      ],
+      :product_reference => product_reference(false),
+      :issuer_profile_reference => issuer_profile_reference,
+      :consumer_role_reference => consumer_role_preference
+    }
+  end
+
+  def dental_enrollment
+    {
+      :effective_on => current_date,
+      :aasm_state => "auto_renewing",
+      :applied_aptc_amount => { cents: BigDecimal(0), currency_iso: 'USD' },
+      :market_place_kind => "individual",
+      :total_premium => 645.09,
+      :enrollment_period_kind => "open_enrollment",
+      :product_kind => "dental",
+      :hbx_enrollment_members => [
+        hbx_enrollment_member('1', 'Smith1', "1009522", 45, true),
+        hbx_enrollment_member('2', 'Smith2', "1009523", 46, false)
+      ],
+      :product_reference => product_reference(false),
+      :issuer_profile_reference => issuer_profile_reference,
+      :consumer_role_reference => consumer_role_preference
+    }
+  end
+
   def hbx_enrollments
-    [
-      {
-        :is_receiving_assistance => true,
-        :effective_on => current_date,
-        :aasm_state => "coverage_selected",
-        :applied_aptc_amount => { cents: BigDecimal(44_500), currency_iso: 'USD' },
-        :market_place_kind => "individual",
-        :total_premium => 445.09,
-        :enrollment_period_kind => "open_enrollment",
-        :product_kind => "health",
-        :hbx_enrollment_members => [
-          hbx_enrollment_member('1', 'Smith1', "1009522", 45, true),
-          hbx_enrollment_member('2', 'Smith2', "1009523", 46, false)
-        ],
-        :product_reference => product_reference,
-        :issuer_profile_reference => issuer_profile_reference,
-        :consumer_role_reference => consumer_role_preference
-      }
-    ]
+    [health_enrollment, dental_enrollment]
   end
 
   def hbx_enrollment_member(id, l_name, hbx_id, age, subs)
@@ -146,9 +167,9 @@ module FamilyHelper
     }
   end
 
-  def product_reference
+  def product_reference(csr)
     {
-      :is_csr => true,
+      :is_csr => csr,
       :individual_deductible => "700",
       :family_deductible => "1400",
       :hios_id => "41842DC0400010-01",
