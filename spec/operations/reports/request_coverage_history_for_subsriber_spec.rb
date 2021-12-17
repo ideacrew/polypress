@@ -13,7 +13,7 @@ RSpec.describe Reports::RequestCoverageHistoryForSubscriber do
     let(:feature_ns) { double }
 
     before :each do
-      allow(feature_ns).to receive(:setting).with(:gluedb_enrolled_subjects_coverage_history_uri).and_return(coverage_history_setting)
+      allow(feature_ns).to receive(:setting).with(:gluedb_enrolled_subjects_uri).and_return(coverage_history_setting)
       allow(feature_ns).to receive(:setting).with(:gluedb_user_access_token).and_return(user_token)
       allow(PolypressRegistry).to receive(:[]).with(:gluedb_integration).and_return(feature_ns)
     end

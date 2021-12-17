@@ -28,7 +28,7 @@ module Reports
 
     def fetch_coverage_history_end_point
       result = Try do
-        PolypressRegistry[:gluedb_integration].setting(:gluedb_enrolled_subjects_coverage_history_uri).item
+        PolypressRegistry[:gluedb_integration].setting(:gluedb_enrolled_subjects_uri).item
       end
 
       return Failure("Failed to find setting: :gluedb_integration, :gluedb_enrolled_subjects_coverage_history_uri") if result.failure?
@@ -47,7 +47,7 @@ module Reports
     def fetch_coverage_history(service_uri, user_token, valid_params)
       audit_report_execution = valid_params[:audit_report_execution]
       audit_datum = valid_params[:audit_report_datum]
-      params = { year: Date.today.year == 2021 ? "2022" : Date.today.year,
+      params = { year: Date.today.year == 2021 ? 2022 : Date.today.year,
                  hios_id: audit_report_execution.hios_id,
                  user_token: user_token }
 

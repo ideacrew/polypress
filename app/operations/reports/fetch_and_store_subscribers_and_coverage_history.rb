@@ -46,7 +46,7 @@ module Reports
     end
 
     def fetch_subscribers_list(service_uri, user_token, audit_report_execution)
-      params = { year: Date.today.year == 2021 ? "2022" : Date.today.year,
+      params = { year: Date.today.year == 2021 ? 2022 : Date.today.year,
                  hios_id: audit_report_execution.hios_id,
                  user_token: user_token }
 
