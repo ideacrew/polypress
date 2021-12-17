@@ -6,5 +6,5 @@ registry:
       - key: :pre_audit_report
         is_enabled: true
         settings:
-          - key: :carrier_hbx_ids
+          - key: :carrier_hios_ids
             item: ["48396", "50165", "33653", "96667"]
