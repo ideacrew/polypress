@@ -88,6 +88,10 @@ group :development, :test do
   gem 'yard'
 end
 
+group :test do
+  gem "webmock"
+end
+
 group :development do
   gem 'listen', '~> 3.3'
 

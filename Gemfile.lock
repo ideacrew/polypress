@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/ideacrew/aca_entities.git
-  revision: fa2b27eed314e4a55ea9f2db4ccdf7cfa76e537b
+  revision: 718972bd0c3f6b356a3a2775627768ec6ec8e0b3
   branch: trunk
   specs:
     aca_entities (0.9.0)
@@ -153,6 +153,8 @@ GEM
       minitest (>= 5.1)
       tzinfo (~> 2.0)
       zeitwerk (~> 2.3)
+    addressable (2.8.0)
+      public_suffix (>= 2.0.2, < 5.0)
     afm (0.2.2)
     amq-protocol (2.3.2)
     ast (2.4.2)
@@ -207,6 +209,8 @@ GEM
     config (2.2.3)
       deep_merge (~> 1.2, >= 1.2.1)
       dry-validation (~> 1.0, >= 1.0.0)
+    crack (0.4.5)
+      rexml
     crass (1.0.6)
     database_cleaner-core (2.0.1)
     database_cleaner-mongoid (2.0.1)
@@ -320,6 +324,7 @@ GEM
       haml (>= 4.0.6, < 6.0)
       html2haml (>= 1.0.1)
       railties (>= 5.1)
+    hashdiff (1.0.1)
     hashery (2.1.2)
     html2haml (2.2.0)
       erubis (~> 2.7.0)
@@ -396,7 +401,7 @@ GEM
       racc (~> 1.4)
     nokogiri-happymapper (0.8.1)
       nokogiri (~> 1.5)
-    oj (3.13.9)
+    oj (3.13.10)
     orm_adapter (0.5.0)
     ox (2.14.5)
     parallel (1.21.0)
@@ -414,6 +419,7 @@ GEM
     pry-byebug (3.9.0)
       byebug (~> 11.0)
       pry (~> 0.13.0)
+    public_suffix (4.0.6)
     puma (5.4.0)
       nio4r (~> 2.0)
     pundit (2.1.1)
@@ -605,6 +611,10 @@ GEM
       activemodel (>= 6.0.0)
       bindex (>= 0.4.0)
       railties (>= 6.0.0)
+    webmock (3.14.0)
+      addressable (>= 2.8.0)
+      crack (>= 0.3.2)
+      hashdiff (>= 0.4.0, < 2.0.0)
     webpacker (5.4.3)
       activesupport (>= 5.2)
       rack-proxy (>= 0.6.1)
@@ -670,6 +680,7 @@ DEPENDENCIES
   tzinfo-data
   unicorn (~> 4.8)
   web-console (>= 4.1.0)
+  webmock
   webpacker (~> 5.0)
   wicked_pdf (~> 2.1)
   wkhtmltopdf-binary-edge (~> 0.12.3.0)

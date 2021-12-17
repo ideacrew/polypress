@@ -1,0 +1,12 @@
+---
+registry:
+  - namespace:
+      - :features
+    features:
+      - key: :gluedb_integration
+        is_enabled: true
+        settings:
+          - key: :gluedb_user_access_token
+            item: <%= ENV['GLUEDB_USER_ACCESS_TOKEN'] %>
+          - key: :gluedb_enrolled_subjects_uri
+            item: <%= ENV['GLUEDB_ENROLLED_SUBJECTS_URI'] %>

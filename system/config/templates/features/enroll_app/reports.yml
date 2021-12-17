@@ -1,0 +1,10 @@
+---
+registry:
+  - namespace:
+      - :features
+    features:
+      - key: :pre_audit_report
+        is_enabled: true
+        settings:
+          - key: :carrier_hbx_ids
+            item: ["48396", "50165", "33653", "96667"]
