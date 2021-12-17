@@ -24,7 +24,7 @@ module Reports
     end
 
     def fetch_carrier_ids
-      Success(PolypressRegistry[:pre_audit_report].setting(:hios_ids).item)
+      Success(PolypressRegistry[:pre_audit_report].setting(:carrier_hios_ids).item)
     end
 
     def fetch_and_store_coverage_data(carrier_ids)
