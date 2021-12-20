@@ -7,19 +7,12 @@ RSpec.describe Reports::RequestCoverageHistoryForSubscriber do
 
   describe 'with valid arguments' do
     let(:audit_report_datum) { FactoryBot.create(:audit_report_datum, hios_id: "12345")}
-    let(:coverage_history_setting) { double(item: "http://localhost:3004/api/event_source/enrolled_subjects") }
-    let(:user_token) { double(item: "some token") }
-    let(:feature_ns) { double }
-
-    before :each do
-      allow(feature_ns).to receive(:setting).with(:gluedb_enrolled_subjects_uri).and_return(coverage_history_setting)
-      allow(feature_ns).to receive(:setting).with(:gluedb_user_access_token).and_return(user_token)
-      allow(PolypressRegistry).to receive(:[]).with(:gluedb_integration).and_return(feature_ns)
-    end
 
     subject do
       described_class.new.call({
-                                 audit_report_datum: audit_report_datum
+                                 audit_report_datum: audit_report_datum,
+                                 service_uri: "http://localhost:3004/api/event_source/enrolled_subjects",
+                                 user_token: "some token"
                                })
     end
 
