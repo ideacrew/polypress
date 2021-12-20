@@ -57,7 +57,7 @@ module Reports
 
     def fetch_relationship_code(code)
       {
-        "self" => "1:83",
+        "self" => "1:18",
         "spouse" => "2:01",
         "ward" => "32:15",
         "child" => "4:19"
