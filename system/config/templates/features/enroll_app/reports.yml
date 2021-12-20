@@ -7,4 +7,4 @@ registry:
         is_enabled: true
         settings:
           - key: :carrier_hios_ids
-            item: ["48396", "50165", "33653", "96667"]
+            item: ["96667", "48396", "33653", "50165"]

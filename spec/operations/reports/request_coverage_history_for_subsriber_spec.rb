@@ -6,8 +6,7 @@ require 'webmock/rspec'
 RSpec.describe Reports::RequestCoverageHistoryForSubscriber do
 
   describe 'with valid arguments' do
-    let(:audit_report_execution) { FactoryBot.create(:audit_report_execution)}
-    let(:audit_report_datum) { FactoryBot.create(:audit_report_datum, audit_report_execution: audit_report_execution)}
+    let(:audit_report_datum) { FactoryBot.create(:audit_report_datum, hios_id: "12345")}
     let(:coverage_history_setting) { double(item: "http://localhost:3004/api/event_source/enrolled_subjects") }
     let(:user_token) { double(item: "some token") }
     let(:feature_ns) { double }
@@ -20,7 +19,6 @@ RSpec.describe Reports::RequestCoverageHistoryForSubscriber do
 
     subject do
       described_class.new.call({
-                                 audit_report_execution: audit_report_execution,
                                  audit_report_datum: audit_report_datum
                                })
     end

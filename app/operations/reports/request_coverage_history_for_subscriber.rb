@@ -21,7 +21,6 @@ module Reports
 
     def validate(params)
       return Failure("No audit datum record") if params[:audit_report_datum].blank?
-      return Failure("No audit report execution record") if params[:audit_report_execution].blank?
 
       Success(params)
     end
@@ -45,10 +44,10 @@ module Reports
     end
 
     def fetch_coverage_history(service_uri, user_token, valid_params)
-      audit_report_execution = valid_params[:audit_report_execution]
       audit_datum = valid_params[:audit_report_datum]
+      hios_id = valid_params[:audit_report_datum].hios_id
       params = { year: Date.today.year == 2021 ? 2022 : Date.today.year,
-                 hios_id: audit_report_execution.hios_id,
+                 hios_id: hios_id,
                  user_token: user_token }
 
       response = Faraday.get("#{service_uri}/#{audit_datum.subscriber_id}", params)

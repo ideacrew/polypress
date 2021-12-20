@@ -9,12 +9,12 @@ module Reports
     send(:include, Dry::Monads[:try])
 
     def call(params)
-      audit_report_execution = yield create_audit_report_execution(params)
+      hios_id = params[:carrier_hios_id]
       service_uri = yield fetch_subscriber_list_end_point
       user_token = yield fetch_user_token
-      subscribers_list = yield fetch_subscribers_list(service_uri, user_token, audit_report_execution)
-      _status = yield store_subscribers_list(subscribers_list, audit_report_execution)
-      fetch_and_store_coverage_history(audit_report_execution)
+      subscribers_list = yield fetch_subscribers_list(service_uri, user_token, hios_id)
+      _status = yield store_subscribers_list(subscribers_list, hios_id)
+      fetch_and_store_coverage_history(hios_id)
       Success(true)
     end
 
@@ -38,16 +38,9 @@ module Reports
       result.nil? ? Failure(":gluedb_user_access_token cannot be nil") : result
     end
 
-    def create_audit_report_execution(params)
-      Success(AuditReportExecution.create!(report_kind: "pre_audit",
-                                           status: "pending",
-                                           audit_year: params[:year],
-                                           hios_id: params[:carrier_hios_id]))
-    end
-
-    def fetch_subscribers_list(service_uri, user_token, audit_report_execution)
+    def fetch_subscribers_list(service_uri, user_token, hios_id)
       params = { year: Date.today.year == 2021 ? 2022 : Date.today.year,
-                 hios_id: audit_report_execution.hios_id,
+                 hios_id: hios_id,
                  user_token: user_token }
 
       response = Faraday.get(service_uri, params)
@@ -55,11 +48,13 @@ module Reports
       response.status == 200 ? Success(response.body) : Failure("Unable to fetch subscribers list due to #{response.body}")
     end
 
-    def store_subscribers_list(subscribers_json, audit_report_execution)
+    def store_subscribers_list(subscribers_json, hios_id)
+      remove_existing_audit_datum(hios_id)
       parsed_subscriber_list = JSON.parse(subscribers_json)
       parsed_subscriber_list.each do |subscriber_id|
-        audit_report_execution.audit_report_datum << AuditReportDatum.new(subscriber_id: subscriber_id,
-                                                                          status: 'pending')
+        AuditReportDatum.create!(subscriber_id: subscriber_id,
+                                 status: 'pending',
+                                 hios_id: hios_id)
       end
       Success(true)
     rescue StandardError => e
@@ -67,13 +62,16 @@ module Reports
       Failure("Unable to store or parse response due to #{e.message}")
     end
 
-    def fetch_and_store_coverage_history(audit_report_execution)
-      puts "Total number of record for carrier #{audit_report_execution.hios_id} is
-            #{audit_report_execution.audit_report_datum.count}"
+    def remove_existing_audit_datum(hios_id)
+      AuditReportDatum.all.where(hios_id: hios_id).delete_all
+    end
+
+    def fetch_and_store_coverage_history(hios_id)
+      audit_datum = AuditReportDatum.where(hios_id: hios_id)
+      puts "Total number of record for carrier #{hios_id} is #{audit_datum.count}"
       counter = 0
-      audit_report_execution.audit_report_datum.each do |audit_datum|
-        status = Reports::RequestCoverageHistoryForSubscriber.new.call({ audit_report_datum: audit_datum,
-                                                                         audit_report_execution: audit_report_execution })
+      audit_datum.each do |audit|
+        status = Reports::RequestCoverageHistoryForSubscriber.new.call({ audit_report_datum: audit })
 
         status.success? ? counter += 1 : counter
 

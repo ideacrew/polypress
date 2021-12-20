@@ -18,14 +18,15 @@ module Reports
     private
 
     def validate(params)
-      return Failure("No carrier hios id present") if params[:payload][:carrier_hios_id].blank?
+      parsed_params = JSON.parse(params[:payload]).deep_symbolize_keys!
+      return Failure("No carrier hios id present") if parsed_params[:payload][:carrier_hios_id].blank?
 
-      Success(params)
+      Success(parsed_params)
     end
 
     def fetch_audit_report_datum(valid_params)
-      audit_report_execution = AuditReportExecution.where(hios_id: valid_params[:payload][:carrier_hios_id]).last
-      Success(audit_report_execution.audit_report_datum)
+      audit_report_datum = AuditReportDatum.where(hios_id: valid_params[:payload][:carrier_hios_id])
+      Success(audit_report_datum)
     end
 
     def generate_report(carrier_hios_id, audit_datum)

@@ -49,10 +49,9 @@ RSpec.describe Reports::FetchAndStoreSubscribersAndCoverageHistory, dbclean: :be
           .to_return(status: 200, body: "test".to_json, headers: {})
       end
 
-      it 'should return success and create audit execution and audit datum' do
+      it 'should return success and create audit datum' do
         expect(subject.success?).to be_truthy
-        expect(AuditReportExecution.count).to eq(1)
-        expect(AuditReportExecution.all.first.audit_report_datum.count).to eq(1)
+        expect(AuditReportDatum.all.count).to eq(1)
       end
     end
   end

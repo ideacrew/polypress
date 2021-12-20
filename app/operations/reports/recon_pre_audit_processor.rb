@@ -5,6 +5,8 @@ module Reports
   class ReconPreAuditProcessor
     send(:include, Dry::Monads[:result, :do])
     send(:include, Dry::Monads[:try])
+    send(:include, ::EventSource::Command)
+    send(:include, ::EventSource::Logging)
 
     def call(_params)
       _enabled = yield pre_audit_feature_enabled?
