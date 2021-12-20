@@ -4,17 +4,17 @@ module Subscribers
   module Reports
     # Subscribe events for report generations
     class PreAuditReportGenerationSubscriber
-      include ::EventSource::Subscriber[amqp: 'report_generation']
+      include ::EventSource::Subscriber[amqp: 'polypress.report_generation']
 
       # rubocop:disable Lint/RescueException
       # rubocop:disable Style/LineEndConcatenation
       # rubocop:disable Style/StringConcatenation
-      subscribe(:on_receive_pre_audit_generation_event) do |delivery_info, _properties, _payload|
+      subscribe(:on_generate_pre_audit_report) do |delivery_info, _properties, payload|
         # Sequence of steps that are executed as single operation
-        _event_key = "generate_pre_audit_report"
+        event_key = "generate_pre_audit_report"
 
-        result = Reports::GeneratePreAuditReport.new.call({ event_key: event_key,
-                                                            payload: payload })
+        result = ::Reports::GeneratePreAuditReport.new.call({ event_key: event_key,
+                                                              payload: payload })
 
         if result.success?
           logger.info(

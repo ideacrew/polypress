@@ -5,5 +5,6 @@ FactoryBot.define do
     subscriber_id { '12345'}
     status { 'pending'}
     payload { "test" }
+    hios_id { '12345'}
   end
 end

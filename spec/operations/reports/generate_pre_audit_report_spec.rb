@@ -4,8 +4,7 @@ require 'rails_helper'
 
 RSpec.describe Reports::GeneratePreAuditReport, dbclean: :before_each do
 
-  let(:audit_report_execution) { FactoryBot.create(:audit_report_execution)}
-  let!(:audit_report_datum) { FactoryBot.create_list(:audit_report_datum, 100, payload: json_payload, audit_report_execution: audit_report_execution)}
+  let!(:audit_report_datum) { FactoryBot.create_list(:audit_report_datum, 100, payload: json_payload, hios_id: "12345")}
   let(:enrollee) do
     {
       enrollee_demographics: demographics,
@@ -130,15 +129,15 @@ RSpec.describe Reports::GeneratePreAuditReport, dbclean: :before_each do
     [@result.to_h].to_json
   end
 
-  let(:payload_hash) { { payload: { carrier_hios_id: audit_report_execution.hios_id } } }
+  let(:payload_hash) { { payload: { carrier_hios_id: audit_report_datum.first.hios_id } } }
 
   after :each do
-    FileUtils.rm_rf("#{Rails.root}/carrier_hios_id_#{audit_report_execution.hios_id}.csv")
+    FileUtils.rm_rf("#{Rails.root}/carrier_hios_id_#{audit_report_datum.first.hios_id}.csv")
   end
 
   describe "with valid arguments" do
     subject do
-      described_class.new.call(payload_hash)
+      described_class.new.call({ :payload => payload_hash.to_json })
     end
 
     it "should be success" do
