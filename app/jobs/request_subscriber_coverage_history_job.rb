@@ -12,5 +12,13 @@ class RequestSubscriberCoverageHistoryJob < ApplicationJob
     })
     # Now here we're gonna check if our count of completed records
     # for audit report datum is all of them, and if so gen the report.
+    total_records = AuditReportDatum.where(hios_id: hios_id).count
+    completed_records = AuditReportDatum.where({
+      hios_id: hios_id,
+      status: "completed"
+    }).count
+    if completed_records >= total_records
+      # Complete the report
+    end
   end
 end

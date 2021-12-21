@@ -71,13 +71,15 @@ module Reports
       puts "Total number of record for carrier #{hios_id} is #{audit_datum.count}"
       counter = 0
       audit_datum.each do |audit|
-        status = Reports::RequestCoverageHistoryForSubscriber.new.call({ audit_report_datum: audit,
+        RequestSubscriberCoverageHistoryJob.perform_later(audit.id.to_s)
+
+        # status = Reports::RequestCoverageHistoryForSubscriber.new.call({ audit_report_datum: audit,
                                                                          service_uri: service_uri,
                                                                          user_token: user_token })
 
-        status.success? ? counter += 1 : counter
+        # status.success? ? counter += 1 : counter
 
-        puts "Total number of records updated with coverage information payload #{counter}" if counter % 100 == 0
+        # puts "Total number of records updated with coverage information payload #{counter}" if counter % 100 == 0
       end
     end
   end
