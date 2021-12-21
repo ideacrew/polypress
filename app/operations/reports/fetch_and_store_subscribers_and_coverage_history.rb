@@ -74,8 +74,8 @@ module Reports
         RequestSubscriberCoverageHistoryJob.perform_later(audit.id.to_s)
 
         # status = Reports::RequestCoverageHistoryForSubscriber.new.call({ audit_report_datum: audit,
-                                                                         service_uri: service_uri,
-                                                                         user_token: user_token })
+        #                                                                 service_uri: service_uri,
+        #                                                                 user_token: user_token })
 
         # status.success? ? counter += 1 : counter
 
