@@ -1,2 +1,2 @@
 #!/bin/bash
-WORKERS=ActiveJob::QueueAdapters::SneakersAdapter::JobWrapper rake sneakers:run
+WORKERS=ActiveJob::QueueAdapters::SneakersAdapter::JobWrapper rails sneakers:run

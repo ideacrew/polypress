@@ -40,5 +40,6 @@ module Polypress
     config.generators.system_tests = nil
 
     config.active_job.queue_adapter = :sneakers
+    config.active_job.queue_name_prefix = "polypress_jobs"
   end
 end
