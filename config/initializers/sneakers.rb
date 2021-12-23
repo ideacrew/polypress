@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'sneakers'
 require 'sneakers/handlers/maxretry'
 
@@ -20,8 +22,8 @@ end
 
 Sneakers.configure(
   {
-        amqp: ENV['RABBITMQ_URL_EVENT_SOURCE'] || 'amqp://localhost:5672/',
-        vhost: '/',
-        heartbeat: 10
+    amqp: ENV['RABBITMQ_URL_EVENT_SOURCE'] || 'amqp://localhost:5672/',
+    vhost: '/',
+    heartbeat: 10
   }
 )

@@ -14,7 +14,7 @@ module Reports
       user_token = yield fetch_user_token
       subscribers_list = yield fetch_subscribers_list(service_uri, user_token, hios_id)
       _status = yield store_subscribers_list(subscribers_list, hios_id)
-      fetch_and_store_coverage_history(hios_id, service_uri, user_token)
+      fetch_and_store_coverage_history(hios_id)
       Success(true)
     end
 
@@ -66,20 +66,11 @@ module Reports
       AuditReportDatum.all.where(hios_id: hios_id).delete_all
     end
 
-    def fetch_and_store_coverage_history(hios_id, service_uri, user_token)
+    def fetch_and_store_coverage_history(hios_id)
       audit_datum = AuditReportDatum.where(hios_id: hios_id)
       puts "Total number of record for carrier #{hios_id} is #{audit_datum.count}"
-      counter = 0
       audit_datum.each do |audit|
         RequestSubscriberCoverageHistoryJob.perform_later(audit.id.to_s)
-
-        # status = Reports::RequestCoverageHistoryForSubscriber.new.call({ audit_report_datum: audit,
-        #                                                                 service_uri: service_uri,
-        #                                                                 user_token: user_token })
-
-        # status.success? ? counter += 1 : counter
-
-        # puts "Total number of records updated with coverage information payload #{counter}" if counter % 100 == 0
       end
     end
   end

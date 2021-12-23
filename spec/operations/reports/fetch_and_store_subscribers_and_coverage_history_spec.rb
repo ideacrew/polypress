@@ -25,6 +25,7 @@ RSpec.describe Reports::FetchAndStoreSubscribersAndCoverageHistory, dbclean: :be
     end
 
     context 'fetch subscriber list and store coverage information of each subscriber' do
+      ActiveJob::Base.queue_adapter = :test
       before do
         stub_request(:get, "http://localhost:3004/api/event_source/enrolled_subjects?hios_id&user_token=some%20token&year=2022")
           .with(
@@ -52,6 +53,9 @@ RSpec.describe Reports::FetchAndStoreSubscribersAndCoverageHistory, dbclean: :be
       it 'should return success and create audit datum' do
         expect(subject.success?).to be_truthy
         expect(AuditReportDatum.all.count).to eq(1)
+        expect do
+          RequestSubscriberCoverageHistoryJob.perform_later(AuditReportDatum.all.first.id.to_s)
+        end.to have_enqueued_job
       end
     end
   end
