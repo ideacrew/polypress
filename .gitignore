@@ -38,3 +38,4 @@ doc/
 yarn-debug.log*
 .yarn-integrity
 .vscode/
+*.swp

@@ -29,6 +29,8 @@ gem 'event_source',
     git: 'https://github.com/ideacrew/event_source.git',
     branch: 'release_0.5.5'
 
+gem 'sneakers', '~> 2.12'
+
 gem 'httparty', '~> 0.16'
 
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
