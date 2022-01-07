@@ -24,6 +24,7 @@ module Reports
     end
 
     def fetch_coverage_history(valid_params)
+      @logger = Logger.new("#{Rails.root}/log/recon_report.log")
       audit_datum = valid_params[:audit_report_datum]
       hios_id = valid_params[:audit_report_datum].hios_id
       service_uri = valid_params[:service_uri]
@@ -34,12 +35,14 @@ module Reports
                  user_token: user_token }
 
       response = Faraday.get("#{service_uri}/#{audit_datum.subscriber_id}", params)
-
+      @logger.info "Response from glue for subscriber #{audit_datum.subscriber_id} payload #{response.body}"
       response.status == 200 ? Success(response.body) : Failure("Unable to fetch coverage history due to #{response.body}")
     end
 
     def store_coverage_history(coverage_history_response, audit_datum)
-      Success(audit_datum.update_attributes(payload: coverage_history_response, status: "completed"))
+      status = audit_datum.update_attributes(payload: coverage_history_response, status: "completed")
+      @logger.info "audit status in our db for subscriber #{audit_datum.subscriber_id} - #{audit_datum.status}"
+      Success(status)
     end
   end
 end
