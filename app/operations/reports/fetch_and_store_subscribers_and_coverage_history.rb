@@ -54,7 +54,8 @@ module Reports
       parsed_subscriber_list.each do |subscriber_id|
         AuditReportDatum.create!(subscriber_id: subscriber_id,
                                  status: 'pending',
-                                 hios_id: hios_id)
+                                 hios_id: hios_id,
+                                 report_type: "pre_audit")
       end
       Success(true)
     rescue StandardError => e
