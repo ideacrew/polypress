@@ -1,12 +1,9 @@
 # frozen_string_literal: true
 
 # Requests coverage information for a subscriber from Glue
-class RequestSubscriberCoverageHistoryJob < ApplicationJob
+class RequestSubscriberCoverageHistoryForRcnoJob < ApplicationJob
   queue_as :default
   retry_on Timeout::Error, wait: :exponentially_longer, attempts: 10
-
-  send(:include, ::EventSource::Command)
-  send(:include, ::EventSource::Logging)
 
   def perform(audit_report_datum_id)
     ard_record = AuditReportDatum.find(audit_report_datum_id)
@@ -25,21 +22,12 @@ class RequestSubscriberCoverageHistoryJob < ApplicationJob
   def generate_pre_audit_report(hios_id)
     total_records = AuditReportDatum.where(hios_id: hios_id).count
     completed_records = AuditReportDatum.where({ hios_id: hios_id,
+                                                 report_type: "rcno",
                                                  status: "completed" }).count
     return unless completed_records >= total_records
 
     payload = { carrier_hios_id: hios_id }
-    event =   event("events.reports.generate_pre_audit_report",
-                    attributes: { payload: payload }).success
-    unless Rails.env.test?
-      logger.info('-' * 100)
-      logger.info(
-        "Polypress to generate pre audit report, attributes: #{payload.to_h}"
-      )
-      logger.info('-' * 100)
-    end
 
-    event.publish
-    Success("Successfully published event to polypress to generate ")
+    Reports::GenerateRcnoReport.new.call({ :payload => { payload: payload }.to_json })
   end
 end
