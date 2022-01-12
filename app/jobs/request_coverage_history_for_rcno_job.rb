@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Requests coverage information for a subscriber from Glue
-class RequestSubscriberCoverageHistoryForRcnoJob < ApplicationJob
+class RequestCoverageHistoryForRcnoJob < ApplicationJob
   queue_as :default
   retry_on Timeout::Error, wait: :exponentially_longer, attempts: 10
 
