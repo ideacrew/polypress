@@ -43,7 +43,7 @@ module Reports
     end
 
     def create_audit_datum(subscriber_id, hios_id)
-      audit_records = AuditReportDatum.where(hios_id: hios_id, subscriber_id: subscriber_id, report_type: "RCNO")
+      audit_records = AuditReportDatum.where(hios_id: hios_id, subscriber_id: subscriber_id, report_type: "rcno")
       if audit_records.present?
         Success(audit_records.first)
       else
