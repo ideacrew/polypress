@@ -290,14 +290,13 @@ module Reports
     def benefit_end_date
       ffm_benefit_end = @member.coverage_end.strftime("%Y%m%d")
       issuer_benefit_end = @rcni_row[38]
-      if issuer_benefit_end.blank?
+      if issuer_benefit_end.blank? || !(ffm_benefit_end == issuer_benefit_end)
         @overall_flag = "N"
-        return [ffm_benefit_end, issuer_benefit_end, "G"]
+        fti_flag = @policy.term_for_np ? "K" : "I"
+        return [ffm_benefit_end, issuer_benefit_end, fti_flag]
       end
 
-      match_data = ffm_benefit_end == issuer_benefit_end ? "M" : "G"
-      @overall_flag = "N" if match_data == "G"
-      [ffm_benefit_end, issuer_benefit_end, match_data]
+      [ffm_benefit_end, issuer_benefit_end, "M"]
     end
 
     def applied_aptc_value
