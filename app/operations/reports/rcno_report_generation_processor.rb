@@ -37,25 +37,22 @@ module Reports
         result = line.split("|")
         next if result[0] != "01"
 
-        audit_record = create_audit_datum(result[16], hios_id)
-        fetch_coverage_history(audit_record.value!)
+        create_audit_datum_and_fetch_data(result[16], hios_id)
       end
     end
 
-    def create_audit_datum(subscriber_id, hios_id)
+    def create_audit_datum_and_fetch_data(subscriber_id, hios_id)
       audit_records = AuditReportDatum.where(hios_id: hios_id, subscriber_id: subscriber_id, report_type: "rcno")
-      if audit_records.present?
-        Success(audit_records.first)
-      else
-        audit_record = AuditReportDatum.create!(report_type: "rcno", subscriber_id: subscriber_id,
-                                                status: "pending", hios_id: hios_id)
-        Success(audit_record)
-      end
+      return if audit_records.present?
+
+      audit_record = AuditReportDatum.create!(report_type: "rcno", subscriber_id: subscriber_id,
+                                              status: "pending", hios_id: hios_id)
+      fetch_coverage_history(audit_record)
     end
 
     def fetch_coverage_history(audit_record)
       if Rails.env.production?
-        RequestSubscriberCoverageHistoryJob.perform_later(audit_record.id.to_s)
+        RequestCoverageHistoryForRcnoJob.perform_later(audit_record.id.to_s)
       else
         manually_fetch_coverage_history(audit_record.id.to_s)
       end
@@ -67,7 +64,7 @@ module Reports
       logger.info "record processing by queue for subscriber #{ard_record.subscriber_id} with status #{ard_record.status}"
       user_token = PolypressRegistry[:gluedb_integration].setting(:gluedb_user_access_token).item
       service_uri = PolypressRegistry[:gluedb_integration].setting(:gluedb_enrolled_subjects_uri).item
-      Reports::RequestSubscriberCoverageHistoryForRcnoJob.new.call({
+      Reports::RequestCoverageHistoryForSubscriber.new.call({
                                                                      audit_report_datum: ard_record,
                                                                      service_uri: service_uri,
                                                                      user_token: user_token
