@@ -30,7 +30,7 @@ module Reports
     def fetch_audit_report_datum(valid_params)
       audit_report_datum = AuditReportDatum.where(hios_id: valid_params[:payload][:carrier_hios_id],
                                                   status: "completed",
-                                                  report_type: "RCNO")
+                                                  report_type: "rcno")
       Success(audit_report_datum)
     end
 
