@@ -1,0 +1,177 @@
+############################################
+###             Base image               ###
+############################################
+
+# Taken from .ruby-version
+ARG RUBY_VERSION=2.7.3
+FROM ruby:$RUBY_VERSION-slim-buster as base
+LABEL author="IdeaCrew"
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+# Taken from Gemfile.lock
+ARG BUNDLER_VERSION=2.1.4
+
+# Must be set as ENV variable to overrride the default
+ENV BUNDLER_VERSION=$BUNDLER_VERSION
+
+# Needed for Java install
+# https://stackoverflow.com/questions/61815233/install-java-runtime-in-debian-based-docker-image
+RUN mkdir -p /usr/share/man/man1 /usr/share/man/man2
+
+# Basic packages needed because we're using the slim image
+RUN apt-get update && \
+    apt-get -yq dist-upgrade && \
+    apt-get install -y git gcc curl openssl libyaml-dev libyaml-cpp-dev libyaml-cpp0.6 libffi-dev libffi6 libreadline-dev libsodium-dev \
+                       zlibc libgdbm-dev libncurses-dev autoconf fontconfig unzip zip sshpass bzip2 libxrender1 libxext6 \
+                       build-essential ca-certificates && \
+    apt-get autoremove -y
+
+# Add NodeJS to sources list
+ARG NODE_MAJOR=14
+ENV NODE_MAJOR=$NODE_MAJOR
+RUN curl -sL https://deb.nodesource.com/setup_$NODE_MAJOR.x | bash -
+
+# Install Nodejs
+RUN apt-get update -qq \
+  && apt-get install -yq --no-install-recommends \
+  nodejs \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
+  && truncate -s 0 /var/log/*log
+
+# Configure bundler and PATH, install bundler version
+ENV GEM_HOME=/usr/local/bundle
+ENV BUNDLE_PATH=$GEM_HOME
+ENV BUNDLE_APP_CONFIG=$BUNDLE_PATH
+ENV BUNDLE_BIN=/usr/local/bin
+ENV BUNDLE_JOBS=4
+ENV BUNDLE_RETRY=3
+
+ENV LANG=C.UTF-8
+
+ENV HOME=/polypress
+
+ENV PATH=$HOME/bin:$BUNDLE_BIN:$GEM_HOME/gems/bin:$PATH
+
+RUN gem update --system
+RUN rm -f /usr/local/bin/ruby/gems/*/specifications/default/bundler-*.gemspec
+RUN gem install bundler -v $BUNDLER_VERSION
+
+RUN groupadd --gid 1001 nonroot \
+  && useradd --uid 1001 --gid nonroot --shell /bin/bash --create-home nonroot
+
+RUN mkdir $HOME \
+  && chown -R nonroot:nonroot $HOME
+
+# Configure app home directory
+WORKDIR $HOME
+
+ENV RAILS_ENV=production
+ENV NODE_ENV=production
+
+###############################################################################
+###       Builder. Adds node and Yarn. Not necessary in production.         ###
+###############################################################################
+
+FROM base as builder
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update -qq \
+  && apt-get install -yq --no-install-recommends \
+  build-essential \
+  curl \
+  libpq-dev \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
+  && truncate -s 0 /var/log/*log
+
+# Add NodeJS to sources list
+RUN curl -sL https://deb.nodesource.com/setup_$NODE_MAJOR.x | bash -
+
+# Add Yarn to the sources list
+RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
+  && echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
+
+# Install Nodejs & Yarn
+RUN apt-get update -qq \
+  && apt-get install -yq --no-install-recommends \
+  nodejs \
+  yarn \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
+  && truncate -s 0 /var/log/*log
+
+########################################################
+###          Node and Bundle for production          ###
+########################################################
+
+FROM builder as prod_gems_and_assets
+
+# Polypress Specific Config
+ARG POLYPRESS_DB_HOST_DEFAULT=localhost
+ARG POLYPRESS_DB_PORT_DEFAULT=27017
+ARG POLYPRESS_DB_NAME_DEFAULT=polypress_production
+ENV POLYPRESS_DB_HOST=$POLYPRESS_DB_HOST_DEFAULT
+ENV POLYPRESS_DB_PORT=$POLYPRESS_DB_PORT_DEFAULT
+ENV POLYPRESS_DB_NAME=$POLYPRESS_DB_NAME_DEFAULT
+
+# Needed for most repos, not service-specific
+ARG RABBITMQ_URL_DEFAULT=amqp://localhost:5672
+ARG RABBITMQ_URL_EVENT_SOURCE_DEFAULT=amqp://localhost
+ARG RABBITMQ_HOST_DEFAULT=amqp://localhost
+ARG RABBITMQ_PORT_DEFAULT=5672
+ARG RABBITMQ_VHOST_DEFAULT=event_source
+ENV RABBITMQ_URL=$RABBITMQ_URL_DEFAULT
+ENV RABBITMQ_URL_EVENT_SOURCE=$RABBITMQ_URL_EVENT_SOURCE_DEFAULT
+ENV RABBITMQ_HOST=$RABBITMQ_HOST_DEFAULT
+ENV RABBITMQ_PORT=$RABBITMQ_PORT_DEFAULT
+ENV RABBITMQ_VHOST=$RABBITMQ_VHOST_DEFAULT
+
+COPY --chown=nonroot:nonroot package.json $HOME/
+COPY --chown=nonroot:nonroot yarn.lock $HOME/
+
+RUN yarn install \
+  && (rm -rf /tmp/* || true)
+
+COPY --chown=nonroot:nonroot ./project_gems/effective_datatables-2.6.14/effective_datatables-2.6.14.gemspec $HOME/project_gems/effective_datatables-2.6.14/effective_datatables-2.6.14.gemspec
+COPY --chown=nonroot:nonroot ./project_gems/liquid-5.0.1/liquid.gemspec $HOME/project_gems/liquid-5.0.1/liquid.gemspec
+COPY --chown=nonroot:nonroot ./project_gems/liquid-5.0.1/lib/liquid/version.rb $HOME/project_gems/liquid-5.0.1/lib/liquid/version.rb
+
+COPY --chown=nonroot:nonroot ./Gemfile $HOME/Gemfile
+COPY --chown=nonroot:nonroot ./Gemfile.lock $HOME/Gemfile.lock
+
+RUN bundle config set --local without 'development test' \
+  && bundle install
+
+COPY --chown=nonroot:nonroot . $HOME
+COPY --chown=nonroot:nonroot ./.docker/config/master.key $HOME/config
+COPY --chown=nonroot:nonroot ./.docker/config/credentials.yml.enc $HOME/config
+COPY --chown=nonroot:nonroot ./.docker/config/mongoid.yml $HOME/config
+
+RUN bundle exec rails webpacker:install:erb
+
+RUN bundle exec rake assets:precompile
+
+################################################################
+###                     Deployable image                     ###
+################################################################
+
+FROM base as deploy
+
+# Copy prebuilt gems
+COPY --chown=nonroot:nonroot --from=prod_gems_and_assets $BUNDLE_PATH $BUNDLE_PATH
+
+# Copy all app code again (sans gems, node_modules, assets)
+COPY --chown=nonroot:nonroot . $HOME
+
+# Copy prebuilt assets
+COPY --chown=nonroot:nonroot --from=prod_gems_and_assets $HOME/public $HOME/public
+
+# Copy environment-based config files
+COPY --chown=nonroot:nonroot ./.docker/config/mongoid.yml $HOME/config
+COPY --chown=nonroot:nonroot ./.docker/config/credentials.yml.enc $HOME/config
+COPY --chown=nonroot:nonroot ./.docker/config/master.key $HOME/config
+
+USER nonroot 
