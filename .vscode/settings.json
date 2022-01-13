@@ -7,5 +7,9 @@
   },
   "[ruby]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
+  },
+  "cSpell.words": [
+    "rabbitmq",
+    "rabbitmqctl"
+  ]
 }
