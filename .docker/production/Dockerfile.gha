@@ -145,12 +145,13 @@ COPY --chown=nonroot:nonroot ./Gemfile.lock $HOME/Gemfile.lock
 RUN bundle config set --local without 'development test' \
   && bundle install
 
+RUN bundle exec rails webpacker:install:erb
+
 COPY --chown=nonroot:nonroot . $HOME
 COPY --chown=nonroot:nonroot ./.docker/config/master.key $HOME/config
 COPY --chown=nonroot:nonroot ./.docker/config/credentials.yml.enc $HOME/config
 COPY --chown=nonroot:nonroot ./.docker/config/mongoid.yml $HOME/config
 
-RUN bundle exec rails webpacker:install:erb
 
 RUN bundle exec rake assets:precompile
 
