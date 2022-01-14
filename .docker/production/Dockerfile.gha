@@ -152,8 +152,17 @@ COPY --chown=nonroot:nonroot ./.docker/config/master.key $HOME/config
 COPY --chown=nonroot:nonroot ./.docker/config/credentials.yml.enc $HOME/config
 COPY --chown=nonroot:nonroot ./.docker/config/mongoid.yml $HOME/config
 
+RUN bundle exec rake assets:precompile \
+  && yarn cache clean \
+  && (rm -rf /tmp/* || true) \
+  # Cleanup
+  && rm -rf $BUNDLE_PATH/*.gem \
+  && find $BUNDLE_PATH/ruby -name "*.c" -delete \
+  && find $BUNDLE_PATH/ruby -name "*.o" -delete \
+  && find $BUNDLE_PATH/ruby -name ".git"  -type d -prune -execdir rm -rf {} +
 
-RUN bundle exec rake assets:precompile
+# https://github.com/rubygems/rubygems/issues/3225
+RUN rm -rf $GEM_HOME/ruby/*/cache
 
 ################################################################
 ###                     Deployable image                     ###
