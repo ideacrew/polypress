@@ -170,18 +170,18 @@ module FinancialApplicationHelper
         :is_homeless => false,
         :mitc_income => mitc_income,
         :mitc_relationships => [],
-        :evidences => evidences
+        :local_mec_evidence => local_mec_evidence
       }
     ]
   end
   # rubocop:enable Metrics/MethodLength
 
-  def evidences
-    [{
+  def local_mec_evidence
+    {
       :key => :aces_mec,
       :title => "ACES MEC",
       :description => nil,
-      :eligibility_status => "outstanding",
+      :aasm_state => "outstanding",
       :due_on => current_date,
       :updated_by => nil,
       :eligibility_results => [
@@ -193,7 +193,7 @@ module FinancialApplicationHelper
           :code_description => nil
         }
       ]
-    }]
+    }
   end
 
   def application_hash

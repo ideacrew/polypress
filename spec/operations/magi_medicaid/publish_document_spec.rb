@@ -183,7 +183,6 @@ RSpec.describe MagiMedicaid::PublishDocument do
       end
 
       context '#requires_paper_communication?' do
-        include_context 'family response from enroll'
 
         let(:destination_folder) do
           MagiMedicaid::PublishDocument::DOCUMENT_LOCAL_PATH
@@ -192,6 +191,8 @@ RSpec.describe MagiMedicaid::PublishDocument do
         let(:result) { ::MagiMedicaid::PublishDocument.new.send(:requires_paper_communication?, entity) }
 
         context 'when the entity is AcaEntities::Families::Family' do
+          include_context 'family response from enroll'
+
           let(:entity) { AcaEntities::Families::Family.new(family_hash) }
 
           context 'when the consumer has contact method' do
@@ -218,8 +219,19 @@ RSpec.describe MagiMedicaid::PublishDocument do
         end
 
         context 'when the entity is AcaEntities::MagiMedicaid::Application' do
-          it 'should return true' do
-            expect(result).to be_truthy
+
+          context 'when paper_notification is true' do
+            it 'should return true' do
+              expect(result).to be_truthy
+            end
+          end
+
+          context 'when paper_notification is false' do
+            let(:paper_notification) { false }
+
+            it 'should return false' do
+              expect(result).to be_falsey
+            end
           end
         end
       end
