@@ -290,7 +290,7 @@ module Reports
     def benefit_end_date
       ffm_benefit_end = @member.coverage_end.strftime("%Y%m%d")
       issuer_benefit_end = @rcni_row[38]
-      if issuer_benefit_end.blank? || !(ffm_benefit_end == issuer_benefit_end)
+      if issuer_benefit_end.blank? || ffm_benefit_end != issuer_benefit_end
         @overall_flag = "N"
         fti_flag = @policy.term_for_np ? "K" : "I"
         return [ffm_benefit_end, issuer_benefit_end, fti_flag]
@@ -405,8 +405,8 @@ module Reports
 
     def market_place_segment_id
       subscriber = @policy.primary_subscriber
-      date = subscriber.coverage_start.strftime("%Y%m%d")
-      "#{subscriber.hbx_member_id}-#{@policy.enrollment_group_id}-#{date}"
+      date = @member.coverage_start.strftime("%Y%m%d")
+      "#{subscriber.hbx_member_id}-#{@policy.id}-#{date}"
     end
 
     # rubocop:disable Metrics/AbcSize
