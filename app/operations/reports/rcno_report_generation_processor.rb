@@ -65,10 +65,10 @@ module Reports
       user_token = PolypressRegistry[:gluedb_integration].setting(:gluedb_user_access_token).item
       service_uri = PolypressRegistry[:gluedb_integration].setting(:gluedb_enrolled_subjects_uri).item
       Reports::RequestCoverageHistoryForSubscriber.new.call({
-                                                                     audit_report_datum: ard_record,
-                                                                     service_uri: service_uri,
-                                                                     user_token: user_token
-                                                                   })
+                                                              audit_report_datum: ard_record,
+                                                              service_uri: service_uri,
+                                                              user_token: user_token
+                                                            })
       logger.info "record payload from glue #{ard_record.subscriber_id} with status #{ard_record.status}"
     end
   end
