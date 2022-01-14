@@ -3,7 +3,7 @@
 # Requests coverage information for a subscriber from Glue
 class RequestSubscriberCoverageHistoryJob < ApplicationJob
   queue_as :default
-  retry_on Timeout::Error, wait: :exponentially_longer, attempts: 10
+  retry_on Timeout::Error, wait: 5.seconds, attempts: 3
 
   send(:include, ::EventSource::Command)
   send(:include, ::EventSource::Logging)

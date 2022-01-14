@@ -3,7 +3,7 @@
 # Requests coverage information for a subscriber from Glue
 class RequestCoverageHistoryForRcnoJob < ApplicationJob
   queue_as :default
-  retry_on Timeout::Error, wait: :exponentially_longer, attempts: 10
+  retry_on Timeout::Error, wait: 5.seconds, attempts: 3
 
   def perform(audit_report_datum_id)
     ard_record = AuditReportDatum.find(audit_report_datum_id)
