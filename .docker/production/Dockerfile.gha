@@ -20,25 +20,26 @@ ENV BUNDLER_VERSION=$BUNDLER_VERSION
 RUN mkdir -p /usr/share/man/man1 /usr/share/man/man2
 
 # Basic packages needed because we're using the slim image
-RUN apt-get update && \
-    apt-get -yq dist-upgrade && \
-    apt-get install -y git gcc curl openssl libyaml-dev libyaml-cpp-dev libyaml-cpp0.6 libffi-dev libffi6 libreadline-dev libsodium-dev \
-                       zlibc libgdbm-dev libncurses-dev autoconf fontconfig unzip zip sshpass bzip2 libxrender1 libxext6 \
-                       build-essential ca-certificates && \
-    apt-get autoremove -y
-
-# Add NodeJS to sources list
-ARG NODE_MAJOR=14
-ENV NODE_MAJOR=$NODE_MAJOR
-RUN curl -sL https://deb.nodesource.com/setup_$NODE_MAJOR.x | bash -
-
-# Install Nodejs
-RUN apt-get update -qq \
-  && apt-get install -yq --no-install-recommends \
-  nodejs \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
-  && truncate -s 0 /var/log/*log
+RUN apt-get update \
+    && apt-get -yq dist-upgrade  \
+    && apt-get install -y \
+      fontconfig \
+      libffi6 \
+      libgdbm-dev \
+      libreadline-dev \
+      libsodium-dev \
+      libxext6 \
+      libxrender1 \
+      libyaml-cpp0.6 \
+      libyaml-dev \
+      openssl \
+      sshpass \
+      unzip \
+      zip \
+      zlibc \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
+    && truncate -s 0 /var/log/*log
 
 # Configure bundler and PATH, install bundler version
 ENV GEM_HOME=/usr/local/bundle
@@ -78,27 +79,28 @@ FROM base as builder
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update -qq \
-  && apt-get install -yq --no-install-recommends \
-  build-essential \
-  curl \
-  libpq-dev \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
-  && truncate -s 0 /var/log/*log
+RUN apt-get update -qq && \
+    apt-get install -yq --no-install-recommends \
+      curl \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
+    && truncate -s 0 /var/log/*log
 
-# Add NodeJS to sources list
-RUN curl -sL https://deb.nodesource.com/setup_$NODE_MAJOR.x | bash -
+ARG NODE_MAJOR=14
+ENV NODE_MAJOR=$NODE_MAJOR
+RUN curl -fsSL https://deb.nodesource.com/setup_$NODE_MAJOR.x | bash -
 
-# Add Yarn to the sources list
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
   && echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
 
-# Install Nodejs & Yarn
 RUN apt-get update -qq \
   && apt-get install -yq --no-install-recommends \
-  nodejs \
-  yarn \
+    curl \
+    build-essential \
+    git \
+    libpq-dev \
+    nodejs \
+    yarn \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
   && truncate -s 0 /var/log/*log
