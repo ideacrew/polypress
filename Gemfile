@@ -27,7 +27,7 @@ gem 'effective_datatables', path: './project_gems/effective_datatables-2.6.14'
 
 gem 'event_source',
     git: 'https://github.com/ideacrew/event_source.git',
-    branch: 'release_0.5.5'
+    branch: 'trunk'
 
 gem 'sneakers', '~> 2.12'
 
