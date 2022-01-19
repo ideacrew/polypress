@@ -52,7 +52,7 @@ module Reports
 
     def fetch_coverage_history(audit_record)
       if Rails.env.production?
-        RequestCoverageHistoryForRcnoJob.perform_later(audit_record.id.to_s)
+        RequestCoverageHistoryForRcnoJob.perform_later(audit_record.id.to_s, 0)
       else
         manually_fetch_coverage_history(audit_record.id.to_s)
       end
