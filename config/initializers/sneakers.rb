@@ -24,6 +24,7 @@ Sneakers.configure(
   {
     amqp: ENV['RABBITMQ_URL_EVENT_SOURCE'] || 'amqp://localhost:5672/',
     vhost: '/',
-    heartbeat: 10
+    heartbeat: 10,
+    workers: 1
   }
 )
