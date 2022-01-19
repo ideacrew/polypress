@@ -5,7 +5,7 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
 ruby '2.7.3'
 
-gem 'aca_entities', git: 'https://github.com/ideacrew/aca_entities.git', branch: 'trunk'
+gem 'aca_entities', git: 'https://github.com/ideacrew/aca_entities.git', branch: 'trunk', ref: "b9eaa23bd4bcb7fa7a90c9845dcfca10ff93ad4a"
 # Reduces boot times through caching; required in config/boot.rb
 gem 'bootsnap', '>= 1.4.4', require: false
 
@@ -27,7 +27,7 @@ gem 'effective_datatables', path: './project_gems/effective_datatables-2.6.14'
 
 gem 'event_source',
     git: 'https://github.com/ideacrew/event_source.git',
-    branch: 'trunk'
+    branch: 'trunk', ref: "4ad8aae6c76d0a0fd64907861c9a5f52c17bc47a"
 
 gem 'sneakers', '~> 2.12'
 
@@ -55,7 +55,8 @@ gem 'rails', '~> 6.1.4'
 # Use Puma as the app server
 gem 'resource_registry',
     git: 'https://github.com/ideacrew/resource_registry.git',
-    branch: 'trunk'
+    branch: 'trunk',
+    ref: "7b8f396afde849e584d0a749ade9ee88f1717e26"
 # gem 'resource_registry',  path: '../resource_registry'
 
 gem 'roo', '~> 2.7.0'
@@ -110,11 +111,6 @@ group :development do
 
   # Access an interactive console on exception pages or by calling 'console' anywhere in the code.
   gem 'web-console', '>= 4.1.0'
-end
-
-group :production do
-  gem 'eye', '0.10.0'
-  gem 'unicorn', '~> 4.8'
 end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
