@@ -71,7 +71,7 @@ module Reports
       audit_datum = AuditReportDatum.where(hios_id: hios_id)
       puts "Total number of record for carrier #{hios_id} is #{audit_datum.count}"
       audit_datum.each do |audit|
-        RequestSubscriberCoverageHistoryJob.perform_later(audit.id.to_s)
+        RequestSubscriberCoverageHistoryJob.perform_later(audit.id.to_s, 0)
       end
     end
   end
