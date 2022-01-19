@@ -24,6 +24,7 @@ RUN apt-get update \
     && apt-get -yq dist-upgrade  \
     && apt-get install -y \
       fontconfig \
+      libcurl4-openssl-dev \
       libffi6 \
       libsodium-dev \
       libxext6 \
