@@ -32,8 +32,10 @@ RUN apt-get update \
       libyaml-cpp0.6 \
       libyaml-dev \
       openssl \
+      nano \
       sshpass \
       unzip \
+      vim \
       zip \
       zlibc \
     && apt-get clean \
