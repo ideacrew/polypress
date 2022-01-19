@@ -13,4 +13,5 @@ class AuditReportDatum
   field :report_type, type: String
 
   index({ hios_id: 1, status: 1 })
+  index({ subscriber_id: 1, status: 1 })
 end
