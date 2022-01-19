@@ -7,9 +7,15 @@ class RequestSubscriberCoverageHistoryJob < ApplicationJob
 
   send(:include, ::EventSource::Command)
   send(:include, ::EventSource::Logging)
+  RETRY_LIMIT = 5
 
-  def perform(audit_report_datum_id)
+  def perform(audit_report_datum_id, attempt = 0)
     ard_record = AuditReportDatum.find(audit_report_datum_id)
+    if attempt > RETRY_LIMIT
+      Rails.logger.info "Retry Limit exceeded for subscriber #{ard_record&.subscriber_id}"
+      return
+    end
+
     user_token = PolypressRegistry[:gluedb_integration].setting(:gluedb_user_access_token).item
     service_uri = PolypressRegistry[:gluedb_integration].setting(:gluedb_enrolled_subjects_uri).item
     Reports::RequestCoverageHistoryForSubscriber.new.call({
@@ -17,7 +23,10 @@ class RequestSubscriberCoverageHistoryJob < ApplicationJob
                                                             service_uri: service_uri,
                                                             user_token: user_token
                                                           })
-    generate_pre_audit_report(ard_record.hios_id)
+    generate_pre_audit_report(ard_record&.hios_id)
+  rescue StandardError => e
+    Rails.logger.info "Failed due to #{e}, and retrying #{attempt} time for subscriber #{ard_record&.subscriber_id}"
+    RequestSubscriberCoverageHistoryJob.perform_later(audit_report_datum_id, attempt + 1)
   end
 
   private

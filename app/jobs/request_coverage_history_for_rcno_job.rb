@@ -8,29 +8,28 @@ class RequestCoverageHistoryForRcnoJob < ApplicationJob
   RETRY_LIMIT = 5
 
   def perform(audit_report_datum_id, attempt = 0)
+    ard_record = AuditReportDatum.find(audit_report_datum_id)
     if attempt > RETRY_LIMIT
-      # LOG FAILURE HERE
+      Rails.logger.info "Retry Limit exceeded for subscriber #{ard_record&.subscriber_id}"
       return
     end
-    begin      
-      ard_record = AuditReportDatum.find(audit_report_datum_id)
-      user_token = PolypressRegistry[:gluedb_integration].setting(:gluedb_user_access_token).item
-      service_uri = PolypressRegistry[:gluedb_integration].setting(:gluedb_enrolled_subjects_uri).item
-      Reports::RequestCoverageHistoryForSubscriber.new.call({
-                                                              audit_report_datum: ard_record,
-                                                              service_uri: service_uri,
-                                                              user_token: user_token
-                                                            })
-      generate_pre_audit_report(ard_record.hios_id)
-    rescue => exception
-      # Add logging here!
-      RequestCoverageHistoryForRcnoJob.perform_later(audit_report_datum_id, attempt + 1)
-    end
+
+    user_token = PolypressRegistry[:gluedb_integration].setting(:gluedb_user_access_token).item
+    service_uri = PolypressRegistry[:gluedb_integration].setting(:gluedb_enrolled_subjects_uri).item
+    Reports::RequestCoverageHistoryForSubscriber.new.call({
+                                                            audit_report_datum: ard_record,
+                                                            service_uri: service_uri,
+                                                            user_token: user_token
+                                                          })
+    generate_rcno_report(ard_record&.hios_id)
+  rescue StandardError => e
+    Rails.logger.info "Failed due to #{e}, and retrying #{attempt} time for subscriber #{ard_record&.subscriber_id}"
+    RequestCoverageHistoryForRcnoJob.perform_later(audit_report_datum_id, attempt + 1)
   end
 
   private
 
-  def generate_pre_audit_report(hios_id)
+  def generate_rcno_report(hios_id)
     total_records = AuditReportDatum.where(hios_id: hios_id).count
     completed_records = AuditReportDatum.where({ hios_id: hios_id,
                                                  report_type: "rcno",
