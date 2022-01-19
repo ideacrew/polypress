@@ -65,10 +65,9 @@ RUN gem install bundler -v $BUNDLER_VERSION
 RUN groupadd --gid 1001 $USERNAME \
   && useradd --uid 1001 --gid $USERNAME --shell /bin/bash --create-home $USERNAME
 
-RUN mkdir $HOME \
-  && chown -R $USERNAME:$USERNAME $HOME
+RUN mkdir $HOME && chown -R $USERNAME:$USERNAME $HOME
 
-RUN chown -R $USERNAME:$USERNAME /aws
+RUN mkdir /aws && chown -R $USERNAME:$USERNAME /aws
 
 # Configure app home directory
 WORKDIR $HOME
