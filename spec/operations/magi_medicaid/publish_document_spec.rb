@@ -146,7 +146,7 @@ RSpec.describe MagiMedicaid::PublishDocument do
       end
 
       after do
-        FileUtils.remove_dir(Rails.root.join('..', destination_folder)) if File.directory?(destination_folder)
+        FileUtils.remove_dir(Rails.root.join(destination_folder)) if File.directory?(destination_folder)
       end
 
       context 'when a document uploaded successfully' do
@@ -160,7 +160,7 @@ RSpec.describe MagiMedicaid::PublishDocument do
             Rails.root.join('tmp', "#{document_name}.pdf").to_s
           )
           destination_documents =
-            Dir[Rails.root.join('..', destination_folder, '**', '*.pdf')]
+            Dir[Rails.root.join(destination_folder, '**', '*.pdf')]
             .map { |file| File.basename(file) }
           expect(destination_documents).to include("#{document_name}.pdf")
         end
@@ -256,7 +256,7 @@ RSpec.describe MagiMedicaid::PublishDocument do
             Rails.root.join('tmp', "#{document_name}.pdf").to_s
           )
           destination_documents =
-            Dir[Rails.root.join('..', destination_folder, '**', '*.pdf')]
+            Dir[Rails.root.join(destination_folder, '**', '*.pdf')]
             .map { |file| File.basename(file) }
           expect(destination_documents).to include("#{document_name}.pdf")
         end
