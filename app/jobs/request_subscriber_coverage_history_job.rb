@@ -19,16 +19,18 @@ class RequestSubscriberCoverageHistoryJob < ApplicationJob
 
     user_token = PolypressRegistry[:gluedb_integration].setting(:gluedb_user_access_token).item
     service_uri = PolypressRegistry[:gluedb_integration].setting(:gluedb_enrolled_subjects_uri).item
-    Reports::RequestCoverageHistoryForSubscriber.new.call({
-                                                            audit_report_datum: ard_record,
-                                                            service_uri: service_uri,
-                                                            user_token: user_token,
-                                                            logger: @logger
-                                                          })
-    generate_pre_audit_report(ard_record&.hios_id)
-  rescue Timeout::Error => e
-    @logger.info "Failed due to #{e}, and retrying #{attempt} time for subscriber #{ard_record&.subscriber_id}"
-    RequestSubscriberCoverageHistoryJob.perform_later(audit_report_datum_id, attempt + 1)
+    result = Reports::RequestCoverageHistoryForSubscriber.new.call({
+                                                                     audit_report_datum: ard_record,
+                                                                     service_uri: service_uri,
+                                                                     user_token: user_token,
+                                                                     logger: @logger
+                                                                   })
+    if result.success?
+      generate_rcno_report(ard_record&.hios_id)
+    else
+      @logger.info "Failed due to #{result.failure}, and retrying #{attempt} time for subscriber #{ard_record&.subscriber_id}"
+      RequestCoverageHistoryForRcnoJob.perform_later(audit_report_datum_id, attempt + 1)
+    end
   end
 
   private
