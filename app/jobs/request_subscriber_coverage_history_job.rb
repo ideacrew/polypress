@@ -10,9 +10,10 @@ class RequestSubscriberCoverageHistoryJob < ApplicationJob
   RETRY_LIMIT = 5
 
   def perform(audit_report_datum_id, attempt = 0)
+    @logger = Logger.new("#{Rails.root}/log/recon_report.log")
     ard_record = AuditReportDatum.find(audit_report_datum_id)
     if attempt > RETRY_LIMIT
-      Rails.logger.info "Retry Limit exceeded for subscriber #{ard_record&.subscriber_id}"
+      @logger.info "Retry Limit exceeded for subscriber #{ard_record&.subscriber_id}"
       return
     end
 
@@ -21,11 +22,12 @@ class RequestSubscriberCoverageHistoryJob < ApplicationJob
     Reports::RequestCoverageHistoryForSubscriber.new.call({
                                                             audit_report_datum: ard_record,
                                                             service_uri: service_uri,
-                                                            user_token: user_token
+                                                            user_token: user_token,
+                                                            logger: @logger
                                                           })
     generate_pre_audit_report(ard_record&.hios_id)
-  rescue StandardError => e
-    Rails.logger.info "Failed due to #{e}, and retrying #{attempt} time for subscriber #{ard_record&.subscriber_id}"
+  rescue Timeout::Error => e
+    @logger.info "Failed due to #{e}, and retrying #{attempt} time for subscriber #{ard_record&.subscriber_id}"
     RequestSubscriberCoverageHistoryJob.perform_later(audit_report_datum_id, attempt + 1)
   end
 

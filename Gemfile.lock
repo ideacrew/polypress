@@ -3,7 +3,7 @@ GIT
   revision: 13fce8c3533f1c31e8252571baf806aad16ce0a5
   branch: trunk
   specs:
-    aca_entities (0.9.0)
+    aca_entities (0.10.0)
       deep_merge
       dry-monads (~> 1.2)
       dry-struct (~> 1.0)
