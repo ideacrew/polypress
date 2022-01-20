@@ -130,7 +130,7 @@ module MagiMedicaid
     def move_document_to_local(entity, document_path, destination_folder)
       return unless requires_paper_communication?(entity)
 
-      destination_path = Rails.root.join('..', destination_folder)
+      destination_path = Rails.root.join(destination_folder)
       FileUtils.mkdir_p destination_path
       FileUtils.mv document_path, destination_path
     end
