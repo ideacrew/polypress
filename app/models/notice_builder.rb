@@ -4,6 +4,7 @@
 # Builds notice with all the required information
 module NoticeBuilder
   include ApplicationHelper
+  NoticeRecipient = Struct.new(:hbx_id)
 
   def to_html(_options = {})
     data_object = (resource.present? ? construct_notice_object : stubbed_object(recipient.constantize))
@@ -11,7 +12,7 @@ module NoticeBuilder
   end
 
   def notice_recipient
-    return OpenStruct.new(hbx_id: "100009") if resource.blank?
+    return NoticeRecipient.new(hbx_id: "100009") if resource.blank?
     sub_resource? ? resource.person : resource
   end
 

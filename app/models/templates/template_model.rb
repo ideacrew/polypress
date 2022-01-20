@@ -32,6 +32,8 @@ module Templates
 
     accepts_nested_attributes_for :body, :publisher, :subscriber
 
+    DocumentRecipient = Struct.new(:hbx_id)
+
     # index({ key: 1 }, { unique: true, name: 'key_index' })
     index({ published_at: 1 }, { sparse: true })
     index({ marketplace: 1 })
@@ -163,7 +165,7 @@ module Templates
     end
 
     def document_recipient
-      OpenStruct.new(hbx_id: '100009')
+      DocumentRecipient.new(hbx_id: '100009')
     end
 
     def recipient_klass_name
