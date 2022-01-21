@@ -34,7 +34,7 @@ class RequestCoverageHistoryForRcnoJob < ApplicationJob
   private
 
   def generate_rcno_report(hios_id)
-    total_records = AuditReportDatum.where(hios_id: hios_id).count
+    total_records = AuditReportDatum.where(hios_id: hios_id, report_type: "rcno").count
     completed_records = AuditReportDatum.where({ hios_id: hios_id,
                                                  report_type: "rcno",
                                                  status: "completed" }).count

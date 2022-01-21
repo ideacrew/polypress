@@ -406,7 +406,7 @@ module Reports
     def market_place_segment_id
       subscriber = @policy.primary_subscriber
       date = @member.coverage_start.strftime("%Y%m%d")
-      "#{subscriber.hbx_member_id}-#{@policy.id}-#{date}"
+      "#{subscriber.hbx_member_id}-#{@policy.policy_id}-#{date}"
     end
 
     # rubocop:disable Metrics/AbcSize
