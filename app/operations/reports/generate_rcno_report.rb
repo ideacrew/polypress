@@ -54,6 +54,13 @@ module Reports
               next
             end
             @policy, @member = fetch_policy_and_member
+
+            if @member.blank? || @policy.blank?
+              @logger.info "Unable to find member_record for audit #{@audit_record.id}, with policy payload
+              #{@policy} at line #{@rcni_row}"
+              next
+            end
+
             csv << insert_data
             @total_number_of_issuer_records += 1
           else
