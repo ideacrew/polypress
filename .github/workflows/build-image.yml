@@ -138,7 +138,7 @@ jobs:
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
           build-args: |
             HOSTNAME=172.17.0.1
-      
+
       - name: Check Console access
         run: docker run --network="host" ${{ needs.prep.outputs.taggedImage }} /bin/bash .docker/check-console.sh
 
@@ -172,7 +172,7 @@ jobs:
         id: slack
         uses: slackapi/slack-github-action@v1.16.0
         with:
-          channel-id: "docker-images"
-          slack-message: "New image pushed: ${{ needs.prep.outputs.taggedImage }} built from <https://github.com/ideacrew/polypress/commit/${{ needs.prep.outputs.shortSha }}|${{ needs.prep.outputs.shortSha }}> on `${{ needs.prep.outputs.branchName }}`"
+          channel-id: "docker-images-${{ needs.prep.outputs.repositoryName }}"
+          slack-message: "New image pushed: ${{ needs.prep.outputs.taggedImage }} built from <https://github.com/ideacrew/${{ needs.prep.outputs.repositoryName }}/commit/${{ needs.prep.outputs.shortSha }}|${{ needs.prep.outputs.shortSha }}> on `${{ needs.prep.outputs.branchName }}`"
         env:
           SLACK_BOT_TOKEN: ${{ secrets.YELLR_BOT_TOKEN }}
