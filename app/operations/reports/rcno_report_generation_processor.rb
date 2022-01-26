@@ -16,9 +16,10 @@ module Reports
     private
 
     def validate(params)
-      Failure("Unable to find hios id") if params[:hios_id].blank?
+      return Failure("Pass in HIOS Id of the carrier") if params[:hios_id].blank?
+
       unless File.exist?("#{Rails.root}/RCNI_#{params[:hios_id]}")
-        Failure("Unable to find RCNI file for carrier hios_id #{params[:hios_id]}, please upload one")
+        return Failure("Unable to find RCNI file for carrier hios_id #{params[:hios_id]}, please upload one")
       end
 
       Success(params)

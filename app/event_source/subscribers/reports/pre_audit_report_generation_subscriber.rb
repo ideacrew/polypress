@@ -9,12 +9,16 @@ module Subscribers
       # rubocop:disable Lint/RescueException
       # rubocop:disable Style/LineEndConcatenation
       # rubocop:disable Style/StringConcatenation
-      subscribe(:on_generate_pre_audit_report) do |delivery_info, _properties, payload|
+      subscribe(:on_generate_pre_audit_report) do |delivery_info, _properties, response|
         # Sequence of steps that are executed as single operation
-        event_key = "generate_pre_audit_report"
+        payload = JSON.parse(response)
 
-        result = ::Reports::GeneratePreAuditReport.new.call({ event_key: event_key,
-                                                              payload: payload })
+        result =  case payload["payload"]["report_type"]
+                  when "pre_audit"
+                    ::Reports::GeneratePreAuditReport.new.call({ payload: response })
+                  when "rcno"
+                    ::Reports::GenerateRcnoReport.new.call({ payload: response })
+                  end
 
         if result.success?
           logger.info(
