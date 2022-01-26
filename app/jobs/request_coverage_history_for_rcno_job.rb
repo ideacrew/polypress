@@ -3,7 +3,8 @@
 # Requests coverage information for a subscriber from Glue
 class RequestCoverageHistoryForRcnoJob < ApplicationJob
   queue_as :default
-  retry_on Timeout::Error, wait: 5.seconds, attempts: 3
+  send(:include, ::EventSource::Command)
+  send(:include, ::EventSource::Logging)
 
   RETRY_LIMIT = 5
 
@@ -40,8 +41,18 @@ class RequestCoverageHistoryForRcnoJob < ApplicationJob
                                                  status: "completed" }).count
     return unless completed_records >= total_records
 
-    payload = { carrier_hios_id: hios_id }
+    payload = { carrier_hios_id: hios_id, report_type: "rcno" }
+    event =   event("events.reports.generate_pre_audit_report",
+                    attributes: { payload: payload }).success
+    unless Rails.env.test?
+      logger.info('-' * 100)
+      logger.info(
+        "Polypress to generate rcno report, attributes: #{payload.to_h}"
+      )
+      logger.info('-' * 100)
+    end
 
-    Reports::GenerateRcnoReport.new.call({ :payload => { payload: payload }.to_json })
+    event.publish
+    Success("Successfully published event to polypress to generate ")
   end
 end

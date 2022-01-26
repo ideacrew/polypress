@@ -3,8 +3,6 @@
 # Requests coverage information for a subscriber from Glue
 class RequestSubscriberCoverageHistoryJob < ApplicationJob
   queue_as :default
-  retry_on Timeout::Error, wait: 5.seconds, attempts: 3
-
   send(:include, ::EventSource::Command)
   send(:include, ::EventSource::Logging)
   RETRY_LIMIT = 5
@@ -36,12 +34,13 @@ class RequestSubscriberCoverageHistoryJob < ApplicationJob
   private
 
   def generate_pre_audit_report(hios_id)
-    total_records = AuditReportDatum.where(hios_id: hios_id).count
+    total_records = AuditReportDatum.where(hios_id: hios_id, report_type: "pre_audit").count
     completed_records = AuditReportDatum.where({ hios_id: hios_id,
+                                                 report_type: "pre_audit",
                                                  status: "completed" }).count
     return unless completed_records >= total_records
 
-    payload = { carrier_hios_id: hios_id }
+    payload = { carrier_hios_id: hios_id, report_type: "pre_audit" }
     event =   event("events.reports.generate_pre_audit_report",
                     attributes: { payload: payload }).success
     unless Rails.env.test?

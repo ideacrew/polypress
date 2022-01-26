@@ -6,8 +6,7 @@ module Reports
   # Store coverage history for a subscriber and publish event to generate report
   # rubocop:disable Metrics/ClassLength
   class GenerateRcnoReport
-    send(:include, Dry::Monads[:result, :do])
-    send(:include, Dry::Monads[:try])
+    include Dry::Monads[:result, :do]
 
     def call(params)
       valid_params = yield validate(params)
@@ -28,9 +27,10 @@ module Reports
     end
 
     def fetch_audit_report_datum(valid_params)
+      report_type = AuditReportDatum.where(report_type: "rcno").present? ? "rcno" : "pre_audit"
       audit_report_datum = AuditReportDatum.where(hios_id: valid_params[:payload][:carrier_hios_id],
                                                   status: "completed",
-                                                  report_type: "rcno")
+                                                  report_type: report_type)
       Success(audit_report_datum)
     end
 
@@ -42,9 +42,9 @@ module Reports
       @total_dependents = 0
       @total_premium_amount = 0.00
       @total_applied_premium_amount = 0.00
-      @overall_flag = "M"
       CSV.open(file_name, "w", col_sep: "|") do |csv|
         File.readlines(rcni_file_path, chomp: true).each do |line|
+          @overall_flag = "M"
           @rcni_row = line.split("|")
 
           next unless @rcni_row[0] == "01"
@@ -116,7 +116,11 @@ module Reports
     end
 
     def qhp_id
-      "#{@policy.qhp_id}#{@policy.csr_variant}"
+      if @policy.insurance_line_code == "HLT"
+        "#{@policy.qhp_id}#{@policy.csr_variant}"
+      else
+        @policy.qhp_id.to_s
+      end
     end
 
     def fetch_applied_aptc_amount
@@ -160,7 +164,6 @@ module Reports
       return [ffm_middle_name, issuer_middle_name, "D"] if ffm_middle_name.blank? && issuer_middle_name.blank?
 
       match_data = /#{ffm_middle_name}/i.match?(ffm_middle_name) ? "M" : "D"
-      @overall_flag = "N" if match_data == "I"
       [ffm_middle_name, issuer_middle_name, match_data]
     end
 
@@ -190,7 +193,6 @@ module Reports
       ffm_gender = @member.enrollee_demographics.gender_code
       issuer_gender = @rcni_row[12]
       match_data = /#{ffm_gender}/i.match?(issuer_gender) ? "M" : "I"
-      @overall_flag = "N" if match_data == "I"
       [ffm_gender, issuer_gender, match_data]
     end
 
@@ -200,15 +202,14 @@ module Reports
       ffm_ssn = @member.enrollee_demographics.ssn
       issuer_ssn = @rcni_row[13]
       match_data = ffm_ssn == issuer_ssn ? "M" : "I"
-      @overall_flag = "N" if match_data == "I"
       [ffm_ssn, issuer_ssn, match_data]
     end
 
     def subscriber_indicator
+      status = @member&.is_subscriber ? 'Y' : 'N'
+      members_count(status)
       return [nil, @rcni_row[14], "U"] if @member.blank?
 
-      status = @member.is_subscriber ? 'Y' : 'N'
-      members_count(status)
       ffm_subscriber_status = status
       issuer_subscriber_status = @rcni_row[14]
       match_data = /#{ffm_subscriber_status}/i.match?(issuer_subscriber_status) ? "M" : "I"
@@ -222,7 +223,6 @@ module Reports
       ffm_subscriber_status = fetch_relationship_code(@member.relationship_status_code)
       issuer_subscriber_status = @rcni_row[15]
       match_data = ffm_subscriber_status == issuer_subscriber_status ? "M" : "I"
-      @overall_flag = "N" if match_data == "I"
       [ffm_subscriber_status, issuer_subscriber_status, match_data]
     end
 
@@ -232,7 +232,6 @@ module Reports
       ffm_subscriber_id = @policy.primary_subscriber&.hbx_member_id
       issuer_subscriber_id = @rcni_row[16]
       match_data = ffm_subscriber_id == issuer_subscriber_id ? "M" : "I"
-      @overall_flag = "N" if match_data == "I"
       [ffm_subscriber_id, issuer_subscriber_id, match_data]
     end
 
@@ -242,7 +241,6 @@ module Reports
       ffm_member_id = @member.hbx_member_id
       issuer_member_id = @rcni_row[17]
       match_data = ffm_member_id == issuer_member_id ? "M" : "I"
-      @overall_flag = "N" if match_data == "I"
       [ffm_member_id, issuer_member_id, match_data]
     end
 
@@ -282,7 +280,7 @@ module Reports
       ffm_exchange_policy_number = @policy.enrollment_group_id
       issuer_exchange_policy_number = @rcni_row[20]
       match_data = ffm_exchange_policy_number == issuer_exchange_policy_number ? "M" : "I"
-      @overall_flag = "N" if match_data == "I"
+      @overall_flag = "N" if match_data == "M"
       [ffm_exchange_policy_number, issuer_exchange_policy_number, match_data]
     end
 
@@ -326,7 +324,9 @@ module Reports
 
       ffm_benefit_end = @member.coverage_end.strftime("%Y%m%d")
       issuer_benefit_end = @rcni_row[38]
-      if issuer_benefit_end.blank? || ffm_benefit_end != issuer_benefit_end
+      return [ffm_benefit_end, issuer_benefit_end, "D"] if ffm_benefit_end == Date.today.end_of_year.strftime("%Y%m%d") && issuer_benefit_end.blank?
+
+      if ffm_benefit_end != issuer_benefit_end
         @overall_flag = "N"
         fti_flag = @policy.term_for_np ? "K" : "I"
         return [ffm_benefit_end, issuer_benefit_end, fti_flag]
@@ -342,13 +342,18 @@ module Reports
       @total_applied_premium_amount += fetch_applied_aptc_amount
       ffm_applied_aptc_amount = format('%.2f', fetch_applied_aptc_amount)
       issuer_applied_aptc_amount = @rcni_row[39]
-      match_data = ffm_applied_aptc_amount == issuer_applied_aptc_amount ? "M" : "I"
+      match_data = if issuer_applied_aptc_amount.blank? || issuer_applied_aptc_amount == ".00"
+                     "D"
+                   else
+                     ffm_applied_aptc_amount == issuer_applied_aptc_amount ? "M" : "I"
+                   end
       @overall_flag = "N" if match_data == "I"
       [ffm_applied_aptc_amount, issuer_applied_aptc_amount, match_data]
     end
 
     def applied_aptc_start_date
       return [nil, @rcni_row[40], "U"] if @member.blank?
+      return [nil, @rcni_row[40], "D"] if @rcni_row[40].blank?
 
       ffm_applied_aptc_start_date = @member.coverage_start.strftime("%Y%m%d")
       issuer_applied_start_date = @rcni_row[40]
@@ -361,10 +366,15 @@ module Reports
 
     def applied_aptc_end_date
       return [nil, @rcni_row[41], "U"] if @member.blank?
+      return [nil, @rcni_row[41], "D"] if @rcni_row[41].blank?
 
       ffm_applied_aptc_end_date = @member.coverage_end.strftime("%Y%m%d")
       issuer_applied_end_date = @rcni_row[41]
       return [nil, issuer_applied_end_date, "D"] unless @member.is_subscriber
+      if ffm_applied_aptc_end_date == Date.today.end_of_year.strftime("%Y%m%d") && issuer_applied_end_date.blank?
+        return [ffm_applied_aptc_end_date, issuer_applied_end_date,
+                "D"]
+      end
 
       match_data = ffm_applied_aptc_end_date == issuer_applied_end_date ? "M" : "I"
       @overall_flag = "N" if match_data == "I"
@@ -385,6 +395,7 @@ module Reports
 
     def total_premium_start_date
       return [nil, @rcni_row[46], "U"] if @member.blank?
+      return [nil, @rcni_row[46], "D"] if @rcni_row[46].blank?
 
       ffm_total_premium_start = @member.coverage_start.strftime("%Y%m%d")
       issuer_total_premium_start = @rcni_row[46]
@@ -395,9 +406,15 @@ module Reports
 
     def total_premium_end_date
       return [nil, @rcni_row[47], "U"] if @member.blank?
+      return [nil, @rcni_row[47], "D"] if @rcni_row[47].blank?
 
       ffm_total_premium_end = @member.coverage_end.strftime("%Y%m%d")
       issuer_total_premium_end = @rcni_row[47]
+      if ffm_total_premium_end == Date.today.end_of_year.strftime("%Y%m%d") && issuer_total_premium_end.blank?
+        return [ffm_total_premium_end, issuer_total_premium_end,
+                "D"]
+      end
+
       match_data = ffm_total_premium_end == issuer_total_premium_end ? "M" : "I"
       @overall_flag = "N" if match_data == "I"
       [ffm_total_premium_end, issuer_total_premium_end, match_data]
@@ -433,6 +450,10 @@ module Reports
       ffm_individual_premium_end_date =  @member.coverage_end.strftime("%Y%m%d")
       issuer_individual_premium_end_date = @rcni_row[50]
       return [ffm_individual_premium_end_date, issuer_individual_premium_end_date, "D"] if ["N", "C"].include?(@policy.effectuation_status)
+      if ffm_individual_premium_end_date == Date.today.end_of_year.strftime("%Y%m%d") && issuer_individual_premium_end_date.blank?
+        return [ffm_individual_premium_end_date, issuer_individual_premium_end_date,
+                "D"]
+      end
 
       match_data = ffm_individual_premium_end_date == issuer_individual_premium_end_date ? "M" : "I"
       @overall_flag = "N" if match_data == "I"
@@ -455,7 +476,6 @@ module Reports
       ffm_coverage_year = @policy.primary_subscriber.coverage_start.year.to_s
       issuer_coverage_year = @rcni_row[53]
       match_data = ffm_coverage_year == issuer_coverage_year ? "M" : "I"
-      @overall_flag = "N" if match_data == "I"
       [ffm_coverage_year, issuer_coverage_year, match_data]
     end
 
@@ -489,6 +509,7 @@ module Reports
       issuer_assigned_policy_id = issuer_assigned_policy_number
       applied_aptc_amount = applied_aptc_value
       all_policy_total_premium_amount = total_premium_amount
+      ind_premium_amount = individual_premium_amount
 
       [@rcni_row[0], @rcni_row[1], @rcni_row[2], @rcni_row[3], @rcni_row[4], @rcni_row[5], @rcni_row[6],
        first_name[0], first_name[1], first_name[2],
@@ -535,12 +556,12 @@ module Reports
        total_premium_start_date[0], total_premium_start_date[1], total_premium_start_date[2],
        total_premium_end_date[0], total_premium_end_date[1], total_premium_end_date[2],
 
-       individual_premium_amount[0], individual_premium_amount[1], individual_premium_amount[2],
+       ind_premium_amount[0], ind_premium_amount[1], ind_premium_amount[2],
        individual_premium_start_date[0], individual_premium_start_date[1], individual_premium_start_date[2],
        individual_premium_end_date[0], individual_premium_end_date[1], individual_premium_end_date[2],
        premium_paid_status[0], premium_paid_status[1], premium_paid_status[2],
-       (@policy.blank? || @member.blank?) ? "U" : @overall_flag, @rcni_row[52], "D",
-       nil, nil, nil,
+       (@policy.blank? || @member.blank?) ? "U" : @overall_flag, nil, nil,
+       nil, nil, @rcni_row[52],
        coverage_year[0], coverage_year[1], coverage_year[2],
        nil, @rcni_row[54], "D",
        nil, @rcni_row[55], "D",
@@ -560,9 +581,10 @@ module Reports
     # rubocop:enable Metrics/MethodLength
 
     def insert_total_record_data
-      [@rcni_row[0], @rcni_row[1], @rcni_row[2], @rcni_row[3], @rcni_row[4], @rcni_row[5], @total_number_of_issuer_records,
+      [@rcni_row[0], @rcni_row[1], @rcni_row[2], @rcni_row[3], @rcni_row[4], @rcni_row[5], @rcni_row[6],
+       @total_number_of_issuer_records,
        @total_subscribers, @total_dependents,  format('%.2f', @total_premium_amount),
-       format('%.2f', @total_applied_premium_amount)]
+       format('%.2f', @total_applied_premium_amount), nil]
     end
   end
   # rubocop:enable Metrics/ClassLength
