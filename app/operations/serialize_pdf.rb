@@ -41,7 +41,7 @@ class SerializePdf
   end
 
   def set_margin
-    { top: 10, bottom: 24, left: 22, right: 22 }
+    { top: 10, bottom: 24, left: 22, right: 21 }
   end
 
   def header(recipient_hbx_id)
