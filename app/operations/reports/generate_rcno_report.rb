@@ -53,29 +53,31 @@ module Reports
             @logger.info "Unable to find subscriber from given rcni report #{@rcni_row[16]}"
             next
           end
-          @policy, @member = fetch_policy_and_member
+          @policy, @member, @segments = fetch_policy_member_and_segments
           csv << insert_data
           @total_number_of_issuer_records += 1
         end
         csv << insert_total_record_data
       rescue StandardError => e
-        puts e.backtrace
+        puts e
+        puts "Error for row #{@rcni_row}"
         @logger.info "Unable to generate report due to #{e.backtrace} for member #{@member} record #{@audit_record.id} row #{@rcni_row}"
-        Rails.logger.error("Unable to generate report due to #{e}")
+        Rails.logger.error("Unable to generate report due to #{e} for row #{@rcni_row}")
       end
     end
     # rubocop:enable Metrics/MethodLength
 
-    def fetch_policy_and_member
+    def fetch_policy_member_and_segments
       policies = JSON.parse(@audit_record.payload)
       fetched_policy = policies.detect {|policy| policy["enrollment_group_id"] == @rcni_row[20]}
       policy_contract_result = AcaEntities::Contracts::Policies::PolicyContract.new.call(fetched_policy)
-      return [nil, nil] if policy_contract_result.failure?
+      return [nil, nil, nil] if policy_contract_result.failure?
 
       policy_entity = AcaEntities::Policies::Policy.new(policy_contract_result.to_h)
 
       member = policy_entity.enrollees.detect {|enrollee| enrollee.hbx_member_id == @rcni_row[17]}
-      [policy_entity, member]
+      segments = member.present? ? member.segments : nil
+      [policy_entity, member, segments]
     end
 
     def fetch_rcni_file_path(hios_id)
@@ -97,6 +99,14 @@ module Reports
         "ward" => "15",
         "child" => "19"
       }.stringify_keys[code.to_s]
+    end
+
+    def fetch_segment(coverage_start)
+      return if coverage_start.blank?
+      return if @segments.blank?
+
+      start = Date.strptime(coverage_start, "%Y%m%d")
+      @segments.detect{|segment| segment.effective_start_date == start}
     end
 
     def phone_number
@@ -123,11 +133,11 @@ module Reports
       end
     end
 
-    def fetch_applied_aptc_amount
+    def fetch_applied_aptc_amount(segment)
       return 0.00 unless @member.is_subscriber
       return 0.00 if [0.0, 0, 0.00].include?(@policy.applied_aptc)
 
-      @policy.applied_aptc
+      segment.present? ? segment.aptc_amount : @policy.applied_aptc
     end
 
     def fetch_effectuation_status
@@ -311,8 +321,10 @@ module Reports
 
     def benefit_start_date
       return [nil, @rcni_row[37], "U"] if @member.blank?
+      segment = fetch_segment(@rcni_row[37])
+      start_date = @member.is_subscriber ? segment&.effective_start_date : @member.coverage_start
 
-      ffm_benefit_start = @member.coverage_start.strftime("%Y%m%d")
+      ffm_benefit_start = start_date&.strftime("%Y%m%d")
       issuer_benefit_start = @rcni_row[37]
       match_data = ffm_benefit_start == issuer_benefit_start ? "M" : "I"
       @overall_flag = "N" if match_data == "I"
@@ -321,8 +333,10 @@ module Reports
 
     def benefit_end_date
       return [nil, @rcni_row[38], "U"] if @member.blank?
+      segment = fetch_segment(@rcni_row[37])
+      end_date = @member.is_subscriber ? segment&.effective_end_date : @member.coverage_end
 
-      ffm_benefit_end = @member.coverage_end.strftime("%Y%m%d")
+      ffm_benefit_end = end_date&.strftime("%Y%m%d")
       issuer_benefit_end = @rcni_row[38]
       return [ffm_benefit_end, issuer_benefit_end, "D"] if ffm_benefit_end == Date.today.end_of_year.strftime("%Y%m%d") && issuer_benefit_end.blank?
 
@@ -338,9 +352,10 @@ module Reports
     def applied_aptc_value
       return [nil, @rcni_row[39], "U"] if @member.blank?
       return ["0.00", @rcni_row[39], "D"] unless @member.is_subscriber
+      segment = fetch_segment(@rcni_row[40])
 
-      @total_applied_premium_amount += fetch_applied_aptc_amount
-      ffm_applied_aptc_amount = format('%.2f', fetch_applied_aptc_amount)
+      @total_applied_premium_amount += fetch_applied_aptc_amount(segment)
+      ffm_applied_aptc_amount = format('%.2f', fetch_applied_aptc_amount(segment))
       issuer_applied_aptc_amount = @rcni_row[39]
       match_data = if issuer_applied_aptc_amount.blank? || issuer_applied_aptc_amount == ".00"
                      "D"
@@ -354,8 +369,10 @@ module Reports
     def applied_aptc_start_date
       return [nil, @rcni_row[40], "U"] if @member.blank?
       return [nil, @rcni_row[40], "D"] if @rcni_row[40].blank?
+      segment = fetch_segment(@rcni_row[40])
+      start_date = segment.present? ? segment&.effective_start_date : @member.coverage_start
 
-      ffm_applied_aptc_start_date = @member.coverage_start.strftime("%Y%m%d")
+      ffm_applied_aptc_start_date = start_date&.strftime("%Y%m%d")
       issuer_applied_start_date = @rcni_row[40]
       return [nil, issuer_applied_start_date, "D"] unless @member.is_subscriber
 
@@ -367,8 +384,10 @@ module Reports
     def applied_aptc_end_date
       return [nil, @rcni_row[41], "U"] if @member.blank?
       return [nil, @rcni_row[41], "D"] if @rcni_row[41].blank?
+      segment = fetch_segment(@rcni_row[40])
+      end_date = segment.present? ? segment&.effective_end_date : @member.coverage_end
 
-      ffm_applied_aptc_end_date = @member.coverage_end.strftime("%Y%m%d")
+      ffm_applied_aptc_end_date = end_date&.strftime("%Y%m%d")
       issuer_applied_end_date = @rcni_row[41]
       return [nil, issuer_applied_end_date, "D"] unless @member.is_subscriber
       if ffm_applied_aptc_end_date == Date.today.end_of_year.strftime("%Y%m%d") && issuer_applied_end_date.blank?
@@ -384,9 +403,10 @@ module Reports
     def total_premium_amount
       return [nil, @rcni_row[45], "U"] if @member.blank?
       return ["0.00", @rcni_row[45],  "D"] unless @member.is_subscriber
+      segment = fetch_segment(@rcni_row[46])
 
-      @total_premium_amount += @policy.total_premium_amount
-      ffm_total_premium = format('%.2f', @policy.total_premium_amount)
+      @total_premium_amount += segment.present? ? segment.total_premium_amount : 0.00
+      ffm_total_premium = format('%.2f', segment.total_premium_amount) rescue "0.00"
       issuer_total_premium = @rcni_row[45]
       match_data = ffm_total_premium == issuer_total_premium ? "M" : "I"
       @overall_flag = "N" if match_data == "I"
@@ -396,8 +416,9 @@ module Reports
     def total_premium_start_date
       return [nil, @rcni_row[46], "U"] if @member.blank?
       return [nil, @rcni_row[46], "D"] if @rcni_row[46].blank?
+      segment = fetch_segment(@rcni_row[46])
 
-      ffm_total_premium_start = @member.coverage_start.strftime("%Y%m%d")
+      ffm_total_premium_start = segment.present? ? segment&.effective_start_date&.strftime("%Y%m%d") : nil
       issuer_total_premium_start = @rcni_row[46]
       match_data = ffm_total_premium_start == issuer_total_premium_start ? "M" : "I"
       @overall_flag = "N" if match_data == "I"
@@ -407,8 +428,9 @@ module Reports
     def total_premium_end_date
       return [nil, @rcni_row[47], "U"] if @member.blank?
       return [nil, @rcni_row[47], "D"] if @rcni_row[47].blank?
+      segment = fetch_segment(@rcni_row[46])
 
-      ffm_total_premium_end = @member.coverage_end.strftime("%Y%m%d")
+      ffm_total_premium_end = segment.present? ? segment&.effective_end_date&.strftime("%Y%m%d") : nil
       issuer_total_premium_end = @rcni_row[47]
       if ffm_total_premium_end == Date.today.end_of_year.strftime("%Y%m%d") && issuer_total_premium_end.blank?
         return [ffm_total_premium_end, issuer_total_premium_end,
@@ -422,8 +444,12 @@ module Reports
 
     def individual_premium_amount
       return [nil, @rcni_row[48], "U"] if @member.blank?
+      segment = fetch_segment(@rcni_row[49])
+      amount = segment.present? ? segment.individual_premium_amount : 0.00
 
-      ffm_individual_premium = format('%.2f', @member.premium_amount)
+      premium_amount = @member.is_subscriber ? amount : @member.premium_amount
+
+      ffm_individual_premium = format('%.2f',premium_amount)
       issuer_premium_mount = @rcni_row[48]
       return [ffm_individual_premium, issuer_premium_mount, "D"] if ["N", "C"].include?(@policy.effectuation_status)
 
@@ -434,8 +460,10 @@ module Reports
 
     def individual_premium_start_date
       return [nil, @rcni_row[49], "U"] if @member.blank?
+      segment = fetch_segment(@rcni_row[49])
+      start_date = @member.is_subscriber ? segment&.effective_start_date : @member.coverage_start
 
-      ffm_individual_premium_start_date =  @member.coverage_start.strftime("%Y%m%d")
+      ffm_individual_premium_start_date =  start_date&.strftime("%Y%m%d")
       issuer_individual_premium_start_date = @rcni_row[49]
       return [ffm_individual_premium_start_date, issuer_individual_premium_start_date, "D"] if ["N", "C"].include?(@policy.effectuation_status)
 
@@ -446,8 +474,10 @@ module Reports
 
     def individual_premium_end_date
       return [nil, @rcni_row[50], "U"] if @member.blank?
+      segment = fetch_segment(@rcni_row[49])
+      end_date = @member.is_subscriber ? segment&.effective_end_date : @member.coverage_end
 
-      ffm_individual_premium_end_date =  @member.coverage_end.strftime("%Y%m%d")
+      ffm_individual_premium_end_date =  end_date&.strftime("%Y%m%d")
       issuer_individual_premium_end_date = @rcni_row[50]
       return [ffm_individual_premium_end_date, issuer_individual_premium_end_date, "D"] if ["N", "C"].include?(@policy.effectuation_status)
       if ffm_individual_premium_end_date == Date.today.end_of_year.strftime("%Y%m%d") && issuer_individual_premium_end_date.blank?
