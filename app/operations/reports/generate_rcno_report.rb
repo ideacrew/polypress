@@ -541,7 +541,7 @@ module Reports
       all_policy_total_premium_amount = total_premium_amount
       ind_premium_amount = individual_premium_amount
 
-      [@rcni_row[0], @rcni_row[1], @rcni_row[2], @rcni_row[3], @rcni_row[4], @rcni_row[5], @rcni_row[6],
+      [@rcni_row[0], @rcni_row[1], nil, @rcni_row[3], @rcni_row[4], @rcni_row[5], @rcni_row[6],
        first_name[0], first_name[1], first_name[2],
        middle_name[0], middle_name[1], middle_name[2],
        last_name[0], last_name[1], last_name[2],
@@ -611,7 +611,8 @@ module Reports
     # rubocop:enable Metrics/MethodLength
 
     def insert_total_record_data
-      [@rcni_row[0], @rcni_row[1], @rcni_row[2], @rcni_row[3], @rcni_row[4], @rcni_row[5], @rcni_row[6],
+      [@rcni_row[0], @rcni_row[1],("----------").gsub(/-/, " "),
+       @rcni_row[3], @rcni_row[4], @rcni_row[5], @rcni_row[6],
        @total_number_of_issuer_records,
        @total_subscribers, @total_dependents,  format('%.2f', @total_premium_amount),
        format('%.2f', @total_applied_premium_amount), "A"]
