@@ -106,7 +106,7 @@ module Reports
       return if @segments.blank?
 
       start = Date.strptime(coverage_start, "%Y%m%d")
-      @segments.detect{|segment| segment.effective_start_date == start}
+      @segments.detect {|segment| segment.effective_start_date == start}
     end
 
     def phone_number
@@ -406,7 +406,11 @@ module Reports
       segment = fetch_segment(@rcni_row[46])
 
       @total_premium_amount += segment.present? ? segment.total_premium_amount : 0.00
-      ffm_total_premium = format('%.2f', segment.total_premium_amount) rescue "0.00"
+      ffm_total_premium = begin
+        format('%.2f', segment.total_premium_amount)
+      rescue StandardError
+        "0.00"
+      end
       issuer_total_premium = @rcni_row[45]
       match_data = ffm_total_premium == issuer_total_premium ? "M" : "I"
       @overall_flag = "N" if match_data == "I"
@@ -449,7 +453,7 @@ module Reports
 
       premium_amount = @member.is_subscriber ? amount : @member.premium_amount
 
-      ffm_individual_premium = format('%.2f',premium_amount)
+      ffm_individual_premium = format('%.2f', premium_amount)
       issuer_premium_mount = @rcni_row[48]
       return [ffm_individual_premium, issuer_premium_mount, "D"] if ["N", "C"].include?(@policy.effectuation_status)
 
@@ -611,7 +615,7 @@ module Reports
     # rubocop:enable Metrics/MethodLength
 
     def insert_total_record_data
-      [@rcni_row[0], @rcni_row[1],("----------").gsub(/-/, " "),
+      [@rcni_row[0], @rcni_row[1], "----------".gsub(/-/, " "),
        @rcni_row[3], @rcni_row[4], @rcni_row[5], @rcni_row[6],
        @total_number_of_issuer_records,
        @total_subscribers, @total_dependents,  format('%.2f', @total_premium_amount),
