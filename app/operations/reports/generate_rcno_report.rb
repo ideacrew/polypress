@@ -614,7 +614,7 @@ module Reports
       [@rcni_row[0], @rcni_row[1], @rcni_row[2], @rcni_row[3], @rcni_row[4], @rcni_row[5], @rcni_row[6],
        @total_number_of_issuer_records,
        @total_subscribers, @total_dependents,  format('%.2f', @total_premium_amount),
-       format('%.2f', @total_applied_premium_amount), nil]
+       format('%.2f', @total_applied_premium_amount), "A"]
     end
   end
   # rubocop:enable Metrics/ClassLength
