@@ -24,7 +24,7 @@ class RequestSubscriberCoverageHistoryJob < ApplicationJob
                                                                      logger: @logger
                                                                    })
     if result.success?
-      generate_rcno_report(ard_record&.hios_id)
+      generate_pre_audit_report(ard_record&.hios_id)
     else
       @logger.info "Failed due to #{result.failure}, and retrying #{attempt} time for subscriber #{ard_record&.subscriber_id}"
       RequestCoverageHistoryForRcnoJob.perform_later(audit_report_datum_id, attempt + 1)
