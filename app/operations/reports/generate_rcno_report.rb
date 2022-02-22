@@ -282,7 +282,7 @@ module Reports
       ffm_exchange_policy_number = @policy.enrollment_group_id
       issuer_exchange_policy_number = @rcni_row[20]
       match_data = ffm_exchange_policy_number == issuer_exchange_policy_number ? "M" : "I"
-      @overall_flag = "N" if match_data == "M"
+      @overall_flag = "N" if match_data == "I"
       [ffm_exchange_policy_number, issuer_exchange_policy_number, match_data]
     end
 
