@@ -322,7 +322,7 @@ module Reports
     def benefit_start_date
       return [nil, @rcni_row[37], "U"] if @member.blank?
       segment = fetch_segment(@rcni_row[37])
-      start_date = @member.is_subscriber ? segment&.effective_start_date : @member.coverage_start
+      start_date = segment&.effective_start_date
 
       ffm_benefit_start = start_date&.strftime("%Y%m%d")
       issuer_benefit_start = @rcni_row[37]
@@ -334,7 +334,7 @@ module Reports
     def benefit_end_date
       return [nil, @rcni_row[38], "U"] if @member.blank?
       segment = fetch_segment(@rcni_row[37])
-      end_date = @member.is_subscriber ? segment&.effective_end_date : @member.coverage_end
+      end_date = segment&.effective_end_date
 
       ffm_benefit_end = end_date&.strftime("%Y%m%d")
       issuer_benefit_end = @rcni_row[38]
