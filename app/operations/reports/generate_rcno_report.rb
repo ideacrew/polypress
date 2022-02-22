@@ -515,7 +515,7 @@ module Reports
 
       subscriber = @policy.primary_subscriber
       date = @member.coverage_start.strftime("%Y%m%d")
-      "#{subscriber.hbx_member_id}-#{@policy.policy_id}-#{date}"
+      "#{subscriber.hbx_member_id}-#{@policy.enrollment_group_id}-#{date}"
     end
 
     # rubocop:disable Metrics/AbcSize
