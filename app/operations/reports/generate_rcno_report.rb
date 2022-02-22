@@ -259,9 +259,7 @@ module Reports
 
       ffm_issuer_subscriber_id = @policy.primary_subscriber&.issuer_assigned_member_id
       issuer_issuer_subscriber_id = @rcni_row[18]
-      if issuer_issuer_subscriber_id.blank? && ffm_issuer_subscriber_id.present?
-        return [ffm_issuer_subscriber_id, issuer_issuer_subscriber_id, "F"]
-      end
+      return [ffm_issuer_subscriber_id, issuer_issuer_subscriber_id, "F"] if issuer_issuer_subscriber_id.blank? && ffm_issuer_subscriber_id.present?
 
       match_data = ffm_issuer_subscriber_id == issuer_issuer_subscriber_id ? "M" : "G"
       [ffm_issuer_subscriber_id, issuer_issuer_subscriber_id, match_data]
@@ -272,9 +270,7 @@ module Reports
 
       ffm_issuer_member_id = @member.issuer_assigned_member_id
       issuer_issuer_member_id = @rcni_row[19]
-      if issuer_issuer_member_id.blank? && ffm_issuer_member_id.present?
-        return [ffm_issuer_member_id, issuer_issuer_member_id, "F"]
-      end
+      return [ffm_issuer_member_id, issuer_issuer_member_id, "F"] if issuer_issuer_member_id.blank? && ffm_issuer_member_id.present?
 
       match_data = ffm_issuer_member_id == issuer_issuer_member_id ? "M" : "G"
       [ffm_issuer_member_id, issuer_issuer_member_id, match_data]
@@ -295,9 +291,7 @@ module Reports
 
       ffm_issuer_policy_number = @member.issuer_assigned_policy_id
       issuer_issuer_policy_number = @rcni_row[21]
-      if issuer_issuer_policy_number.blank? && ffm_issuer_policy_number.present?
-        return [ffm_issuer_policy_number, issuer_issuer_policy_number, "F"]
-      end
+      return [ffm_issuer_policy_number, issuer_issuer_policy_number, "F"] if issuer_issuer_policy_number.blank? && ffm_issuer_policy_number.present?
 
       match_data = ffm_issuer_policy_number == issuer_issuer_policy_number ? "M" : "G"
       [ffm_issuer_policy_number, issuer_issuer_policy_number, match_data]
