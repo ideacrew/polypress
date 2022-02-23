@@ -33,11 +33,8 @@ module Reports
 
     def generate_report(carrier_hios_id, audit_datum)
       file_name = fetch_file_name(carrier_hios_id)
-      field_names = fetch_field_names
 
       CSV.open(file_name, "w", col_sep: "|") do |csv|
-        csv << field_names
-
         audit_datum.where(status: "completed").each do |audit_data|
           policies = JSON.parse(audit_data.payload)
           policies.each do |policy|
@@ -123,12 +120,26 @@ module Reports
       end
     end
 
-    def tobacco_use_code(tobacco_code)
-      case tobacco_code
+    def tobacco_use_code(enrollee)
+      enrollee_age = age_of(enrollee)
+      return 2 if enrollee_age < 18
+
+      case enrollee.enrollee_demographics.tobacco_use_code
       when "Y"
         1
       when "N"
         2
+      end
+    end
+
+    def age_of(enrollee)
+      date = enrollee.coverage_start
+      dob = enrollee.enrollee_demographics&.dob
+      age = date.year - dob.year
+      if date.month < dob.month || (date.month == dob.month && date.day < dob.day)
+        age - 1
+      else
+        age
       end
     end
 
@@ -150,36 +161,6 @@ module Reports
     # rubocop:disable Metrics/CyclomaticComplexity
     # rubocop:disable Metrics/PerceivedComplexity
     # rubocop:disable Metrics/MethodLength
-    def fetch_field_names
-      ["Trading Partner ID", "SPOE ID", "Tenant ID", "HIOS_ID", "QHP Lookup Key", "Application Extract Date",
-       "Application Extract Time", "Policy Last Maintenance Date", "Policy Last Maintenance Time", "Application ID",
-       "Transaction Code Type", "Agent/Broker First Name", "Agent/Broker Middle Name", "Agent/Broker Last Name",
-       "Agent/Broker NPN", "Assistor Type Code", "Individual Relationship Code", "Subscriber Indicator",
-       "Reserved for Future Use", "Exchange-Assigned Subscriber ID", "Exchange-Assigned Member ID",
-       "Issuer-Assigned Member ID", "Issuer-Assigned Subscriber ID", "QI Last Name", "QI First Name", "QI Middle Name",
-       "QI Marital Status", "Residential Address Line 1", "Residential Address Line 2", "Residential City Name",
-       "Residential State Code", " Residential ZIP Code", "Residential County Code", "Phone Number",
-       "Social Security Number (SSN)", "QI Birth Date", "QI Gender", "Tobacco Use Code", "Race Type",
-       "Ethnicity", "Language Code – Spoken", "Language Code – Written", "Email Address", "Mailing Address Line 1",
-       "Mailing Address Line 2", "Mailing Address City Name", "Mailing Address State Code", "Mailing Address ZIP Code",
-       "Custodial Parent Last Name", "Custodial Parent First Name", "Custodial Parent Mailing Address Line 1",
-       "Custodial Parent Mailing Address Line 2", "Custodial Parent Mailing Address City",
-       "Custodial Parent State Code", "Custodial Parent ZIP Code", "Responsible Person Last Name",
-       "Responsible Person First Name", "Responsible Person Mailing Address Line 1",
-       "Responsible Person Mailing Address Line 2", "Responsible Person Mailing Address City",
-       "Responsible Person State Code", "Responsible Person ZIP Code", "Benefit Start Date", "Benefit End Date",
-       "Issuer-Assigned Policy Number", "QHP Identifier", "Confirmation Indicator", "Exchange-Assigned Policy Number",
-       "Marketplace-Assigned Segment ID", "Applied APTC Amount", "Applied APTC Effective Date", "Applied APTC End Date",
-       "CSR Amount", "CSR Effective Date", "CSR End Date", "Total Premium Amount", "Total Premium Effective Date",
-       "Total Premium End Date", "Individual Premium Amount", "Individual Premium Effective Date",
-       "Individual Premium End Date", "Total Responsibility Amount", "Total Responsibility Amount Effective Date",
-       "Total Responsibility Amount End Date", "End of Year Termination Indicator", "Cancellation Source",
-       "Termination Source", "Cancellation Reason", "Overlap Indicator", "Termination Reason", "Rating Area",
-       "Paid Through Date", "Payment Transaction ID", "Insurance Application Origin Type", "Insurance Line of Business",
-       "CIC Correlation Key", "Agent/Broker Suffix", "Reserved for Future Use", "Reserved for Future Use",
-       "New Policy ID Indicator", "Date of Birth Cleanup Indicator", "Missing Outbound 834 Indicator",
-       "Outbound 834 Retransmission Indicator", "Outbound 834 Transaction History"]
-    end
 
     def insert_data(carrier_hios_id, policy_entity, segment, enrollee)
       [carrier_hios_id, nil, "ME0", carrier_hios_id, policy_entity.qhp_id[0, 10], Date.today.strftime("%Y%m%d"),
@@ -195,7 +176,7 @@ module Reports
        enrollee.residential_address&.city, enrollee.residential_address&.state, enrollee.residential_address&.zip,
        enrollee.residential_address&.county, phone_number(enrollee), enrollee.enrollee_demographics&.ssn,
        enrollee.enrollee_demographics&.dob&.strftime("%Y%m%d"), enrollee.enrollee_demographics.gender_code,
-       tobacco_use_code(enrollee.enrollee_demographics.tobacco_use_code), nil, nil, nil, nil, email_address(enrollee),
+       tobacco_use_code(enrollee), nil, nil, nil, nil, email_address(enrollee),
        enrollee.mailing_address&.address_1,
        enrollee.mailing_address&.address_2, enrollee.mailing_address&.city, enrollee.mailing_address&.state,
        enrollee.mailing_address&.zip, nil, nil, nil, nil, nil, nil, nil,
@@ -205,7 +186,7 @@ module Reports
        policy_entity.responsible_party_subscriber&.mailing_address&.city,
        policy_entity.responsible_party_subscriber&.mailing_address&.state,
        policy_entity.responsible_party_subscriber&.mailing_address&.zip,
-       enrollee.coverage_start.strftime("%Y%m%d"), enrollee.coverage_end.strftime("%Y%m%d"),
+       segment.effective_start_date&.strftime("%Y%m%d"), segment.effective_end_date&.strftime("%Y%m%d"),
        enrollee.issuer_assigned_policy_id, qhp_id(policy_entity), policy_entity.effectuation_status,
        policy_entity.enrollment_group_id, segment.id, aptc_amount(enrollee, segment),
        effective_start_date(enrollee, segment), effective_end_date(enrollee, segment),
