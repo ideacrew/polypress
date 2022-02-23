@@ -76,11 +76,14 @@ RUN mkdir $HOME && chown -R $USERNAME:$USERNAME $HOME
 
 WORKDIR $HOME
 
+COPY ./.docker/config/91-bad-kerning.conf /etc/fonts/conf.d/
+COPY ./.docker/config/open_sans.zip .
+COPY ./.docker/config/roboto_slab.zip .
+
 # Add/configure fonts
-RUN cp .docker/config/91-bad-kerning.conf /etc/fonts/conf.d/ && \
-    chmod 755 /etc/fonts/conf.d/91-bad-kerning.conf && \
-    unzip .docker/config/open_sans.zip -d google-open-sans && \
-    unzip .docker/config/roboto_slab.zip -d roboto-slab && \
+RUN chmod 755 /etc/fonts/conf.d/91-bad-kerning.conf && \
+    unzip open_sans.zip -d google-open-sans && \
+    unzip roboto_slab.zip -d roboto-slab && \
     mv google-open-sans /usr/share/fonts/ && \
     mv roboto-slab /usr/share/fonts/ && \
     fc-cache
