@@ -74,6 +74,8 @@ RUN mkdir $HOME && chown -R $USERNAME:$USERNAME $HOME
 
 # RUN mkdir /aws && chown -R $USERNAME:$USERNAME /aws
 
+WORKDIR $HOME
+
 # Add/configure fonts
 RUN cp .docker/config/91-bad-kerning.conf /etc/fonts/conf.d/ && \
     chmod 755 /etc/fonts/conf.d/91-bad-kerning.conf && \
@@ -84,9 +86,6 @@ RUN cp .docker/config/91-bad-kerning.conf /etc/fonts/conf.d/ && \
     fc-cache
 
 # COPY --chown=$USERNAME:$USERNAME .docker/config/91-bad-kerning.conf /etc/fonts/conf.d/
-
-# Configure app home directory
-WORKDIR $HOME
 
 ENV RAILS_ENV=production
 ENV NODE_ENV=production
