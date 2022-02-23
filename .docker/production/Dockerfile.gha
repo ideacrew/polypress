@@ -74,6 +74,17 @@ RUN mkdir $HOME && chown -R $USERNAME:$USERNAME $HOME
 
 # RUN mkdir /aws && chown -R $USERNAME:$USERNAME /aws
 
+# Add/configure fonts
+RUN cp .docker/config/91-bad-kerning.conf /etc/fonts/conf.d/ && \
+    chmod 755 /etc/fonts/conf.d/91-bad-kerning.conf && \
+    unzip .docker/config/open_sans.zip -d google-open-sans && \
+    unzip .docker/config/roboto_slab.zip -d roboto-slab && \
+    mv google-open-sans /usr/share/fonts/ && \
+    mv roboto-slab /usr/share/fonts/ && \
+    fc-cache
+
+# COPY --chown=$USERNAME:$USERNAME .docker/config/91-bad-kerning.conf /etc/fonts/conf.d/
+
 # Configure app home directory
 WORKDIR $HOME
 
@@ -154,17 +165,6 @@ COPY --chown=$USERNAME:$USERNAME . $HOME
 COPY --chown=$USERNAME:$USERNAME ./.docker/config/master.key $HOME/config
 COPY --chown=$USERNAME:$USERNAME ./.docker/config/credentials.yml.enc $HOME/config
 COPY --chown=$USERNAME:$USERNAME ./.docker/config/mongoid.yml $HOME/config
-
-# Add/configure fonts
-RUN cp .docker/config/91-bad-kerning.conf /etc/fonts/conf.d/ && \
-    chmod 755 /etc/fonts/conf.d/91-bad-kerning.conf && \
-    unzip .docker/config/open_sans.zip -d google-open-sans && \
-    unzip .docker/config/roboto_slab.zip -d roboto-slab && \
-    mv google-open-sans /usr/share/fonts/ && \
-    mv roboto-slab /usr/share/fonts/ && \
-    fc-cache
-
-# COPY --chown=$USERNAME:$USERNAME .docker/config/91-bad-kerning.conf /etc/fonts/conf.d/
 
 RUN bundle exec rails assets:precompile \
   && yarn cache clean \
