@@ -4,7 +4,8 @@ require 'rails_helper'
 
 RSpec.describe Reports::GeneratePreAuditReport, dbclean: :before_each do
 
-  let!(:audit_report_datum) { FactoryBot.create_list(:audit_report_datum, 100, payload: json_payload, hios_id: "12345")}
+  let!(:audit_report_datum) { FactoryBot.create(:audit_report_datum, payload: json_payload, hios_id: "12345",
+                                                status: "completed", report_type: "pre_audit")}
   let(:enrollee) do
     {
       enrollee_demographics: demographics,
@@ -106,7 +107,7 @@ RSpec.describe Reports::GeneratePreAuditReport, dbclean: :before_each do
       applied_aptc: "20.0",
       csr_amt: nil,
       total_premium_amount: "20.0",
-      total_responsible_amt: "20.0",
+      total_responsible_amount: "20.0",
       coverage_kind: "health",
       term_for_np: "false",
       rating_area: "RDC",
@@ -129,10 +130,10 @@ RSpec.describe Reports::GeneratePreAuditReport, dbclean: :before_each do
     [@result.to_h].to_json
   end
 
-  let(:payload_hash) { { payload: { carrier_hios_id: audit_report_datum.first.hios_id } } }
+  let(:payload_hash) { { payload: { carrier_hios_id: audit_report_datum.hios_id } } }
 
   after :each do
-    FileUtils.rm_rf("#{Rails.root}/carrier_hios_id_#{audit_report_datum.first.hios_id}.csv")
+    FileUtils.rm_rf("#{Rails.root}/carrier_hios_id_#{audit_report_datum.hios_id}.csv")
   end
 
   describe "with valid arguments" do
@@ -142,6 +143,10 @@ RSpec.describe Reports::GeneratePreAuditReport, dbclean: :before_each do
 
     it "should be success" do
       expect(subject.success?).to eq true
+      file_content = CSV.read("#{Rails.root}/carrier_hios_id_#{audit_report_datum.hios_id}.csv", col_sep: "|", headers: false)
+      expect( file_content.count).to eq 1
+      expect( file_content[0]).to include(enrollee[:first_name])
+      expect( file_content[0]).to include(enrollee[:last_name])
     end
   end
 end
