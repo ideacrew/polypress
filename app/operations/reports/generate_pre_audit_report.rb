@@ -40,6 +40,8 @@ module Reports
             next if policy_contract_result.errors.present?
 
             policy_entity = AcaEntities::Policies::Policy.new(policy_contract_result.to_h)
+            next unless policy_entity.exchange_subscriber_id == audit_data.subscriber_id
+
             policy_entity.enrollees.each do |enrollee|
               enrollee.segments.each do |segment|
                 csv << insert_data(carrier_hios_id, policy_entity, segment, enrollee)
@@ -190,10 +192,12 @@ module Reports
        effective_start_date(enrollee, segment), effective_end_date(enrollee, segment),
        nil, effective_start_date(enrollee, segment),
        effective_end_date(enrollee, segment), total_premium_amount(enrollee, segment),
-       nil, nil, format('%.2f', segment.individual_premium_amount),
+       effective_start_date(enrollee, segment), effective_end_date(enrollee, segment),
+       format('%.2f', segment.individual_premium_amount),
        segment.effective_start_date.strftime("%Y%m%d"), segment.effective_end_date.strftime("%Y%m%d"),
        total_responsible_amount(enrollee, segment), segment.effective_start_date.strftime("%Y%m%d"),
-       segment.effective_end_date.strftime("%Y%m%d"), nil, nil, nil, nil, nil,  policy_entity.term_for_np ? 6 : nil,
+       segment.effective_end_date.strftime("%Y%m%d"), nil, nil, nil, policy_entity.term_for_np ? 6 : nil, nil,
+       policy_entity.term_for_np ? 6 : nil,
        policy_entity.rating_area, nil, nil, nil, policy_entity.insurance_line_code, nil, nil, nil, nil, nil, nil, nil,
        nil, nil]
     end
