@@ -1,21 +1,20 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
+require 'webmock/rspec'
 
-RSpec.describe Reports::GeneratePreAuditReport, dbclean: :before_each do
+RSpec.describe Reports::GenerateRcnoReport do
+  include Dry::Monads[:result, :do]
 
-  let!(:audit_report_datum) do
-    FactoryBot.create(:audit_report_datum, payload: json_payload, hios_id: "12345",
-                                           status: "completed", report_type: "pre_audit")
-  end
+  let!(:audit_report_datum) { FactoryBot.create_list(:audit_report_datum, 100, payload: json_payload, hios_id: "1234567")}
   let(:enrollee) do
     {
       enrollee_demographics: demographics,
-      first_name: "test",
+      first_name: "dummy",
       middle_name: nil,
-      last_name: "test",
+      last_name: "dummy",
       name_sfx: nil,
-      hbx_member_id: "12345",
+      hbx_member_id: "1234567",
       premium_amount: "20.0",
       coverage_start: "2021-11-10",
       coverage_end: "2021-11-10",
@@ -34,9 +33,9 @@ RSpec.describe Reports::GeneratePreAuditReport, dbclean: :before_each do
 
   let(:demographics) do
     {
-      dob: "2011-10-12",
-      ssn: "123456789",
-      gender_code: "M",
+      dob: "2020-01-01",
+      ssn: "999999999",
+      gender_code: "F",
       tobacco_use_code: "unknown"
     }
   end
@@ -61,12 +60,12 @@ RSpec.describe Reports::GeneratePreAuditReport, dbclean: :before_each do
     [
       {
         kind: "home",
-        address_1: "S Street NW",
+        address_1: "dummy",
         address_2: "",
         address_3: "",
-        city: "Washington",
+        city: "dummy",
         county: "",
-        state: "DC",
+        state: "ME",
         location_state_code: nil,
         full_text: nil,
         zip: "20009",
@@ -81,10 +80,10 @@ RSpec.describe Reports::GeneratePreAuditReport, dbclean: :before_each do
         kind: "home",
         country_code: "",
         area_code: "202",
-        number: "2991290",
+        number: "123455",
         extension: "",
         primary: true,
-        full_phone_number: "2022991290"
+        full_phone_number: "202123455"
       }
     ]
   end
@@ -109,7 +108,7 @@ RSpec.describe Reports::GeneratePreAuditReport, dbclean: :before_each do
       applied_aptc: "20.0",
       csr_amt: nil,
       total_premium_amount: "20.0",
-      total_responsible_amount: "20.0",
+      total_responsible_amt: "20.0",
       coverage_kind: "health",
       term_for_np: "false",
       rating_area: "RDC",
@@ -132,23 +131,21 @@ RSpec.describe Reports::GeneratePreAuditReport, dbclean: :before_each do
     [@result.to_h].to_json
   end
 
-  let(:payload_hash) { { payload: { carrier_hios_id: audit_report_datum.hios_id } } }
-
   after :each do
-    FileUtils.rm_rf("#{Rails.root}/carrier_hios_id_#{audit_report_datum.hios_id}.csv")
+    FileUtils.rm_rf("#{Rails.root}/rcno_carrier_hios_id_#{audit_report_datum.first&.hios_id}.csv")
   end
 
   describe "with valid arguments" do
-    subject do
-      Reports::GeneratePreAuditReport.new.call({ :payload => payload_hash.to_json })
-    end
+    let(:output_file) { "#{Rails.root}/rcno_carrier_hios_id_#{audit_report_datum.first&.hios_id}.csv" }
 
     it "should be success" do
-      expect(subject.success?).to eq true
-      file_content = CSV.read("#{Rails.root}/carrier_hios_id_#{audit_report_datum.hios_id}.csv", col_sep: "|", headers: false)
-      expect(file_content.count).to eq 1
-      expect(file_content[0]).to include(enrollee[:first_name])
-      expect(file_content[0]).to include(enrollee[:last_name])
+      subject = described_class.new
+      payload_hash = { payload: { carrier_hios_id: audit_report_datum.first&.hios_id } }
+      File.stub(:exist?).and_return(true)
+      allow(subject).to receive(:fetch_rcni_file_path).and_return(Success("#{Rails.root}/spec/test_data/RCNI_33653.txt"))
+      result = subject.call({ :payload => payload_hash.to_json })
+      expect(result.success?).to eq true
+      expect(File.exist?(output_file)).to eq true
     end
   end
 end

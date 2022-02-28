@@ -10,6 +10,8 @@ class AuditReportDatum
   field :subscriber_id, type: String
   field :status, type: String
   field :payload, type: String
+  field :report_type, type: String
 
   index({ hios_id: 1, status: 1 })
+  index({ subscriber_id: 1, status: 1 })
 end

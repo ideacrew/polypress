@@ -10,6 +10,7 @@ module Reports
 
     def call(params)
       valid_params = yield validate(params)
+      @logger = valid_params[:logger]
       coverage_history_response = yield fetch_coverage_history(valid_params)
       status = yield store_coverage_history(coverage_history_response, valid_params[:audit_report_datum])
       Success(status)
@@ -34,12 +35,14 @@ module Reports
                  user_token: user_token }
 
       response = Faraday.get("#{service_uri}/#{audit_datum.subscriber_id}", params)
-
+      @logger.info "Response from glue for subscriber #{audit_datum.subscriber_id} payload #{response.body}" if @logger.present?
       response.status == 200 ? Success(response.body) : Failure("Unable to fetch coverage history due to #{response.body}")
     end
 
     def store_coverage_history(coverage_history_response, audit_datum)
-      Success(audit_datum.update_attributes(payload: coverage_history_response, status: "completed"))
+      status = audit_datum.update_attributes(payload: coverage_history_response, status: "completed")
+      @logger.info "audit status in our db for subscriber #{audit_datum.subscriber_id} - #{audit_datum.status}" if @logger.present?
+      Success(status)
     end
   end
 end

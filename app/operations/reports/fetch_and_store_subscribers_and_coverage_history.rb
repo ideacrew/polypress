@@ -49,12 +49,17 @@ module Reports
     end
 
     def store_subscribers_list(subscribers_json, hios_id)
-      remove_existing_audit_datum(hios_id)
       parsed_subscriber_list = JSON.parse(subscribers_json)
       parsed_subscriber_list.each do |subscriber_id|
-        AuditReportDatum.create!(subscriber_id: subscriber_id,
-                                 status: 'pending',
-                                 hios_id: hios_id)
+        audit_record = AuditReportDatum.where(subscriber_id: subscriber_id, hios_id: hios_id).first
+        if audit_record.present?
+          audit_record.update_attributes(status: "pending", payload: nil)
+        else
+          AuditReportDatum.create!(subscriber_id: subscriber_id,
+                                   status: 'pending',
+                                   hios_id: hios_id,
+                                   report_type: "pre_audit")
+        end
       end
       Success(true)
     rescue StandardError => e
@@ -70,7 +75,7 @@ module Reports
       audit_datum = AuditReportDatum.where(hios_id: hios_id)
       puts "Total number of record for carrier #{hios_id} is #{audit_datum.count}"
       audit_datum.each do |audit|
-        RequestSubscriberCoverageHistoryJob.perform_later(audit.id.to_s)
+        RequestSubscriberCoverageHistoryJob.perform_later(audit.id.to_s, 0)
       end
     end
   end

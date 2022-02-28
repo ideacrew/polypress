@@ -1,10 +1,11 @@
 # frozen_string_literal: true
 
 # Requests coverage information for a subscriber from Glue
-class RequestSubscriberCoverageHistoryJob < ApplicationJob
+class RequestCoverageHistoryForRcnoJob < ApplicationJob
   queue_as :default
   send(:include, ::EventSource::Command)
   send(:include, ::EventSource::Logging)
+
   RETRY_LIMIT = 5
 
   def perform(audit_report_datum_id, attempt = 0)
@@ -24,7 +25,7 @@ class RequestSubscriberCoverageHistoryJob < ApplicationJob
                                                                      logger: @logger
                                                                    })
     if result.success?
-      generate_pre_audit_report(ard_record&.hios_id)
+      generate_rcno_report(ard_record&.hios_id)
     else
       @logger.info "Failed due to #{result.failure}, and retrying #{attempt} time for subscriber #{ard_record&.subscriber_id}"
       RequestCoverageHistoryForRcnoJob.perform_later(audit_report_datum_id, attempt + 1)
@@ -33,20 +34,20 @@ class RequestSubscriberCoverageHistoryJob < ApplicationJob
 
   private
 
-  def generate_pre_audit_report(hios_id)
-    total_records = AuditReportDatum.where(hios_id: hios_id, report_type: "pre_audit").count
+  def generate_rcno_report(hios_id)
+    total_records = AuditReportDatum.where(hios_id: hios_id, report_type: "rcno").count
     completed_records = AuditReportDatum.where({ hios_id: hios_id,
-                                                 report_type: "pre_audit",
+                                                 report_type: "rcno",
                                                  status: "completed" }).count
     return unless completed_records >= total_records
 
-    payload = { carrier_hios_id: hios_id, report_type: "pre_audit" }
+    payload = { carrier_hios_id: hios_id, report_type: "rcno" }
     event =   event("events.reports.generate_pre_audit_report",
                     attributes: { payload: payload }).success
     unless Rails.env.test?
       logger.info('-' * 100)
       logger.info(
-        "Polypress to generate pre audit report, attributes: #{payload.to_h}"
+        "Polypress to generate rcno report, attributes: #{payload.to_h}"
       )
       logger.info('-' * 100)
     end
