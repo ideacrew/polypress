@@ -259,13 +259,9 @@ module Reports
 
       ffm_issuer_subscriber_id = @policy.primary_subscriber&.issuer_assigned_member_id
       issuer_issuer_subscriber_id = @rcni_row[18]
-      if issuer_issuer_subscriber_id.blank? && ffm_issuer_subscriber_id.present?
-        @overall_flag = "N"
-        return [ffm_issuer_subscriber_id, issuer_issuer_subscriber_id, "U"]
-      end
+      return [ffm_issuer_subscriber_id, issuer_issuer_subscriber_id, "F"] if issuer_issuer_subscriber_id.blank? && ffm_issuer_subscriber_id.present?
 
       match_data = ffm_issuer_subscriber_id == issuer_issuer_subscriber_id ? "M" : "G"
-      @overall_flag = "N" if match_data == "G"
       [ffm_issuer_subscriber_id, issuer_issuer_subscriber_id, match_data]
     end
 
@@ -274,13 +270,9 @@ module Reports
 
       ffm_issuer_member_id = @member.issuer_assigned_member_id
       issuer_issuer_member_id = @rcni_row[19]
-      if issuer_issuer_member_id.blank? && ffm_issuer_member_id.present?
-        @overall_flag = "N"
-        return [ffm_issuer_member_id, issuer_issuer_member_id, "U"]
-      end
+      return [ffm_issuer_member_id, issuer_issuer_member_id, "F"] if issuer_issuer_member_id.blank? && ffm_issuer_member_id.present?
 
       match_data = ffm_issuer_member_id == issuer_issuer_member_id ? "M" : "G"
-      @overall_flag = "N" if match_data == "G"
       [ffm_issuer_member_id, issuer_issuer_member_id, match_data]
     end
 
@@ -290,7 +282,7 @@ module Reports
       ffm_exchange_policy_number = @policy.enrollment_group_id
       issuer_exchange_policy_number = @rcni_row[20]
       match_data = ffm_exchange_policy_number == issuer_exchange_policy_number ? "M" : "I"
-      @overall_flag = "N" if match_data == "M"
+      @overall_flag = "N" if match_data == "I"
       [ffm_exchange_policy_number, issuer_exchange_policy_number, match_data]
     end
 
@@ -299,13 +291,9 @@ module Reports
 
       ffm_issuer_policy_number = @member.issuer_assigned_policy_id
       issuer_issuer_policy_number = @rcni_row[21]
-      if issuer_issuer_policy_number.blank? && ffm_issuer_policy_number.present?
-        @overall_flag = "N"
-        return [ffm_issuer_policy_number, issuer_issuer_policy_number, "U"]
-      end
+      return [ffm_issuer_policy_number, issuer_issuer_policy_number, "F"] if issuer_issuer_policy_number.blank? && ffm_issuer_policy_number.present?
 
       match_data = ffm_issuer_policy_number == issuer_issuer_policy_number ? "M" : "G"
-      @overall_flag = "N" if match_data == "G"
       [ffm_issuer_policy_number, issuer_issuer_policy_number, match_data]
     end
 
@@ -322,7 +310,7 @@ module Reports
     def benefit_start_date
       return [nil, @rcni_row[37], "U"] if @member.blank?
       segment = fetch_segment(@rcni_row[37])
-      start_date = @member.is_subscriber ? segment&.effective_start_date : @member.coverage_start
+      start_date = segment&.effective_start_date
 
       ffm_benefit_start = start_date&.strftime("%Y%m%d")
       issuer_benefit_start = @rcni_row[37]
@@ -334,7 +322,7 @@ module Reports
     def benefit_end_date
       return [nil, @rcni_row[38], "U"] if @member.blank?
       segment = fetch_segment(@rcni_row[37])
-      end_date = @member.is_subscriber ? segment&.effective_end_date : @member.coverage_end
+      end_date = segment&.effective_end_date
 
       ffm_benefit_end = end_date&.strftime("%Y%m%d")
       issuer_benefit_end = @rcni_row[38]
@@ -420,6 +408,7 @@ module Reports
     def total_premium_start_date
       return [nil, @rcni_row[46], "U"] if @member.blank?
       return [nil, @rcni_row[46], "D"] if @rcni_row[46].blank?
+      return [nil, @rcni_row[45],  "D"] unless @member.is_subscriber
       segment = fetch_segment(@rcni_row[46])
 
       ffm_total_premium_start = segment.present? ? segment&.effective_start_date&.strftime("%Y%m%d") : nil
@@ -432,6 +421,7 @@ module Reports
     def total_premium_end_date
       return [nil, @rcni_row[47], "U"] if @member.blank?
       return [nil, @rcni_row[47], "D"] if @rcni_row[47].blank?
+      return [nil, @rcni_row[45],  "D"] unless @member.is_subscriber
       segment = fetch_segment(@rcni_row[46])
 
       ffm_total_premium_end = segment.present? ? segment&.effective_end_date&.strftime("%Y%m%d") : nil
@@ -465,7 +455,7 @@ module Reports
     def individual_premium_start_date
       return [nil, @rcni_row[49], "U"] if @member.blank?
       segment = fetch_segment(@rcni_row[49])
-      start_date = @member.is_subscriber ? segment&.effective_start_date : @member.coverage_start
+      start_date = segment&.effective_start_date
 
       ffm_individual_premium_start_date =  start_date&.strftime("%Y%m%d")
       issuer_individual_premium_start_date = @rcni_row[49]
@@ -479,7 +469,7 @@ module Reports
     def individual_premium_end_date
       return [nil, @rcni_row[50], "U"] if @member.blank?
       segment = fetch_segment(@rcni_row[49])
-      end_date = @member.is_subscriber ? segment&.effective_end_date : @member.coverage_end
+      end_date = segment&.effective_end_date
 
       ffm_individual_premium_end_date =  end_date&.strftime("%Y%m%d")
       issuer_individual_premium_end_date = @rcni_row[50]
@@ -519,7 +509,7 @@ module Reports
 
       subscriber = @policy.primary_subscriber
       date = @member.coverage_start.strftime("%Y%m%d")
-      "#{subscriber.hbx_member_id}-#{@policy.policy_id}-#{date}"
+      "#{subscriber.hbx_member_id}-#{@policy.enrollment_group_id}-#{date}"
     end
 
     # rubocop:disable Metrics/AbcSize
