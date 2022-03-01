@@ -61,7 +61,8 @@ module Reports
         "self" => "1:18",
         "spouse" => "2:01",
         "ward" => "32:15",
-        "child" => "4:19"
+        "child" => "4:19",
+        "life partner" => "8:53"
       }.stringify_keys[code.to_s]
     end
 
@@ -115,10 +116,10 @@ module Reports
     end
 
     def transaction_code_type(aasm_state)
-      if %w[submitted effectuated hbx_terminated hbx_terminated].include?(aasm_state)
-        1
-      else
+      if aasm_state == "canceled"
         3
+      else
+        1
       end
     end
 
