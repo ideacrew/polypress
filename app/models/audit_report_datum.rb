@@ -12,6 +12,8 @@ class AuditReportDatum
   field :payload, type: String
   field :report_type, type: String
 
+  embeds_many :policies, cascade_callbacks: true
+
   index({ hios_id: 1, status: 1 })
   index({ subscriber_id: 1, status: 1 })
 end

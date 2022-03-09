@@ -57,6 +57,7 @@ module Reports
           csv << insert_data
           @total_number_of_issuer_records += 1
         end
+        insert_missing_policy_data(csv, carrier_hios_id, rcni_file_path)
         csv << insert_total_record_data
       rescue StandardError => e
         puts e
@@ -68,9 +69,12 @@ module Reports
     # rubocop:enable Metrics/MethodLength
 
     def fetch_policy_member_and_segments
-      policies = JSON.parse(@audit_record.payload)
-      fetched_policy = policies.detect {|policy| policy["enrollment_group_id"] == @rcni_row[20]}
-      policy_contract_result = AcaEntities::Contracts::Policies::PolicyContract.new.call(fetched_policy)
+      policies = @audit_record.policies
+      fetched_policy = policies.detect {|policy| policy.policy_eg_id == @rcni_row[20]}
+      fetched_policy.update_attributes(rcno_processed: true) if fetched_policy.present?
+      return [nil, nil, nil] if fetched_policy.blank?
+
+      policy_contract_result = AcaEntities::Contracts::Policies::PolicyContract.new.call(JSON.parse(fetched_policy.payload))
       return [nil, nil, nil] if policy_contract_result.failure?
 
       policy_entity = AcaEntities::Policies::Policy.new(policy_contract_result.to_h)
@@ -81,6 +85,8 @@ module Reports
     end
 
     def fetch_rcni_file_path(hios_id)
+      return Success("#{Rails.root}/spec/test_data/RCNI_33653.txt") if Rails.env.test?
+
       if File.exist?("#{Rails.root}/RCNI_#{hios_id}.txt")
         Success("#{Rails.root}/RCNI_#{hios_id}.txt")
       else
@@ -173,7 +179,7 @@ module Reports
       issuer_middle_name = @rcni_row[9]
       return [ffm_middle_name, issuer_middle_name, "D"] if ffm_middle_name.blank? && issuer_middle_name.blank?
 
-      match_data = /#{ffm_middle_name}/i.match?(ffm_middle_name) ? "M" : "D"
+      match_data = "D"
       [ffm_middle_name, issuer_middle_name, match_data]
     end
 
@@ -512,6 +518,30 @@ module Reports
       "#{subscriber.hbx_member_id}-#{@policy.enrollment_group_id}-#{date}"
     end
 
+    def insert_missing_policy_data(csv, carrier_hios_id, rcni_file_path)
+      records = AuditReportDatum.all.where(hios_id: carrier_hios_id).where(:'policies.rcno_processed' => false)
+      records.each do |record|
+        policies = record.policies
+        policies.each do |policy|
+          next if policy.rcno_processed
+          policy_contract_result = AcaEntities::Contracts::Policies::PolicyContract.new.call(JSON.parse(policy.payload))
+          policy_entity = AcaEntities::Policies::Policy.new(policy_contract_result.to_h)
+
+          rcni_first_row = File.readlines(rcni_file_path, chomp: true).first.split("|")
+          @rcni_row = [rcni_first_row[0], rcni_first_row[1], rcni_first_row[2], rcni_first_row[3],
+                       rcni_first_row[4], rcni_first_row[5], rcni_first_row[6]] + ([""] * 56)
+
+          policy_entity.enrollees.each do |enrollee|
+            @policy = policy_entity
+            @member = enrollee
+            @segments = enrollee.segments
+            csv << insert_data
+            @total_number_of_issuer_records += 1
+          end
+        end
+      end
+    end
+
     # rubocop:disable Metrics/AbcSize
     # rubocop:disable Metrics/CyclomaticComplexity
     # rubocop:disable Metrics/PerceivedComplexity
@@ -605,7 +635,7 @@ module Reports
     # rubocop:enable Metrics/MethodLength
 
     def insert_total_record_data
-      [@rcni_row[0], @rcni_row[1], "----------".gsub(/-/, " "),
+      ["02", @rcni_row[1], "----------".gsub(/-/, " "),
        @rcni_row[3], @rcni_row[4], @rcni_row[5], @rcni_row[6],
        @total_number_of_issuer_records,
        @total_subscribers, @total_dependents,  format('%.2f', @total_premium_amount),
