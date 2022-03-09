@@ -103,7 +103,8 @@ module Reports
         "self" => "18",
         "spouse" => "01",
         "ward" => "15",
-        "child" => "19"
+        "child" => "19",
+        "life partner" => "53"
       }.stringify_keys[code.to_s]
     end
 
