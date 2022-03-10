@@ -42,7 +42,7 @@ RSpec.describe Reports::RcnoReportGenerationProcessor do
             'User-Agent' => 'Faraday v1.4.3'
           }
         )
-        .to_return(status: 200, body: "", headers: {})
+        .to_return(status: 200, body: [{ enrollment_group_id: "12345" }].to_json, headers: {})
     end
 
     it 'should be success' do

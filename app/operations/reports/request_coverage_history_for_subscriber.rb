@@ -41,6 +41,10 @@ module Reports
 
     def store_coverage_history(coverage_history_response, audit_datum)
       status = audit_datum.update_attributes(payload: coverage_history_response, status: "completed")
+      policies_response = JSON.parse(coverage_history_response)
+      policies_response.each do |policy|
+        audit_datum.policies << Policy.new(payload: policy.to_json, policy_eg_id: policy["enrollment_group_id"])
+      end
       @logger.info "audit status in our db for subscriber #{audit_datum.subscriber_id} - #{audit_datum.status}" if @logger.present?
       Success(status)
     end

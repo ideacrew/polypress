@@ -54,6 +54,7 @@ module Reports
         audit_record = AuditReportDatum.where(subscriber_id: subscriber_id, hios_id: hios_id).first
         if audit_record.present?
           audit_record.update_attributes(status: "pending", payload: nil)
+          audit_record.policies = []
         else
           AuditReportDatum.create!(subscriber_id: subscriber_id,
                                    status: 'pending',

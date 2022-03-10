@@ -26,12 +26,12 @@ RSpec.describe Reports::RequestCoverageHistoryForSubscriber do
               'User-Agent' => 'Faraday v1.4.3'
             }
           )
-          .to_return(status: 200, body: "test".to_json, headers: {})
+          .to_return(status: 200, body: [{ enrollment_group_id: "12345" }].to_json, headers: {})
       end
 
       it 'should return success' do
         expect(subject.success?).to be_truthy
-        expect(audit_report_datum.payload).to eq "test".to_json
+        expect(audit_report_datum.payload).to eq [{ enrollment_group_id: "12345" }].to_json
       end
     end
   end
