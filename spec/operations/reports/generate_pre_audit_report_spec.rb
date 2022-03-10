@@ -8,7 +8,7 @@ RSpec.describe Reports::GeneratePreAuditReport, dbclean: :before_each do
     FactoryBot.create(:audit_report_datum, payload: json_payload, hios_id: "12345",
                                            status: "completed", report_type: "pre_audit")
   end
-  let(:enrollee) do
+  let(:enrollee_1) do
     {
       enrollee_demographics: demographics,
       first_name: "test",
@@ -21,6 +21,30 @@ RSpec.describe Reports::GeneratePreAuditReport, dbclean: :before_each do
       coverage_end: "2021-11-10",
       coverage_status: "test",
       relationship_status_code: "self",
+      issuer_assigned_member_id: "12345",
+      issuer_assigned_policy_id: nil,
+      is_subscriber: "true",
+      is_responsible_party: "false",
+      addresses: addresses,
+      phones: phones,
+      emails: emails,
+      segments: segments
+    }
+  end
+
+  let(:enrollee_2) do
+    {
+      enrollee_demographics: demographics,
+      first_name: "test",
+      middle_name: nil,
+      last_name: "test",
+      name_sfx: nil,
+      hbx_member_id: "12345",
+      premium_amount: "20.0",
+      coverage_start: "2021-11-10",
+      coverage_end: "2021-11-10",
+      coverage_status: "test",
+      relationship_status_code: "life partner",
       issuer_assigned_member_id: "12345",
       issuer_assigned_policy_id: nil,
       is_subscriber: "true",
@@ -116,12 +140,12 @@ RSpec.describe Reports::GeneratePreAuditReport, dbclean: :before_each do
       service_area: nil,
       last_maintenance_date: "2021-11-10",
       last_maintenance_time: "16:40:41",
-      aasm_state: "submitted",
+      aasm_state: "canceled",
       exchange_subscriber_id: "12345",
       effectuation_status: "Y",
       insurance_line_code: "test",
       csr_variant: nil,
-      enrollees: [enrollee],
+      enrollees: [enrollee_1, enrollee_2],
       aptc_maximums: [],
       aptc_credits: []
     }
@@ -146,9 +170,13 @@ RSpec.describe Reports::GeneratePreAuditReport, dbclean: :before_each do
     it "should be success" do
       expect(subject.success?).to eq true
       file_content = CSV.read("#{Rails.root}/carrier_hios_id_#{audit_report_datum.hios_id}.csv", col_sep: "|", headers: false)
-      expect(file_content.count).to eq 1
-      expect(file_content[0]).to include(enrollee[:first_name])
-      expect(file_content[0]).to include(enrollee[:last_name])
+      expect(file_content.count).to eq 2
+      expect(file_content[0]).to include(enrollee_1[:first_name])
+      expect(file_content[0]).to include(enrollee_1[:last_name])
+      expect(file_content[0]).to include("3")
+      expect(file_content[1]).to include("3")
+      expect(file_content[0]).to include("1:18")
+      expect(file_content[1]).to include("8:53")
     end
   end
 end
