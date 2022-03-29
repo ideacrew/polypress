@@ -56,6 +56,11 @@ module Reports
           @policy, @member, @segments = fetch_policy_member_and_segments
           csv << insert_data
           @total_number_of_issuer_records += 1
+        rescue StandardError => e
+          puts e
+          puts "Error for row #{@rcni_row}"
+          @logger.info "Unable to generate report due to #{e.backtrace} for member #{@member} record #{@audit_record.id} row #{@rcni_row}"
+          Rails.logger.error("Unable to generate report due to #{e} for row #{@rcni_row}")
         end
         insert_missing_policy_data(csv, carrier_hios_id, rcni_file_path)
         csv << insert_total_record_data
@@ -120,7 +125,7 @@ module Reports
       return nil if @member.blank?
       return nil if @member&.phones&.blank?
 
-      @member.phones.last.full_phone_number
+      @member.phones.last.full_phone_number&.gsub("|", "")
     end
 
     def tobacco_use_code(tobacco_code)
@@ -166,7 +171,7 @@ module Reports
     def compare_first_name
       return [nil, @rcni_row[8], "U"] if @member.blank?
 
-      ffm_first_name = @member.first_name
+      ffm_first_name = @member.first_name&.gsub("|", "")
       issuer_first_name = @rcni_row[8]
       match_data = /#{ffm_first_name}/i.match?(issuer_first_name) ? "M" : "I"
       @overall_flag = "N" if match_data == "I"
@@ -176,7 +181,7 @@ module Reports
     def compare_middle_name
       return [nil, @rcni_row[9], "U"] if @member.blank?
 
-      ffm_middle_name = @member.middle_name
+      ffm_middle_name = @member.middle_name&.gsub("|", "")
       issuer_middle_name = @rcni_row[9]
       return [ffm_middle_name, issuer_middle_name, "D"] if ffm_middle_name.blank? && issuer_middle_name.blank?
 
@@ -187,7 +192,7 @@ module Reports
     def compare_last_name
       return [nil, @rcni_row[10], "U"] if @member.blank?
 
-      ffm_last_name = @member.last_name
+      ffm_last_name = @member.last_name&.gsub("|", "")
       issuer_last_name = @rcni_row[10]
       match_data = /#{ffm_last_name}/i.match?(issuer_last_name) ? "M" : "I"
       @overall_flag = "N" if match_data == "I"
@@ -399,10 +404,16 @@ module Reports
       return [nil, @rcni_row[45], "U"] if @member.blank?
       return ["0.00", @rcni_row[45],  "D"] unless @member.is_subscriber
       segment = fetch_segment(@rcni_row[46])
+      kind = @policy.insurance_line_code == "HLT" ? "health" : "dental"
+      premium_amount = if kind == "dental"
+                         @policy.total_premium_amount
+                       else
+                         segment.present? ? segment.total_premium_amount : 0.00
+                       end
 
-      @total_premium_amount += segment.present? ? segment.total_premium_amount : 0.00
+      @total_premium_amount += premium_amount
       ffm_total_premium = begin
-        format('%.2f', segment.total_premium_amount)
+        format('%.2f', premium_amount)
       rescue StandardError
         "0.00"
       end
@@ -519,6 +530,11 @@ module Reports
       "#{subscriber.hbx_member_id}-#{@policy.enrollment_group_id}-#{date}"
     end
 
+    def overall_indicator
+      return "G" if @rcni_row[8].blank?
+      (@policy.blank? || @member.blank?) ? "U" : @overall_flag
+    end
+
     def insert_missing_policy_data(csv, carrier_hios_id, rcni_file_path)
       records = AuditReportDatum.all.where(hios_id: carrier_hios_id).where(:'policies.rcno_processed' => false)
       records.each do |record|
@@ -526,6 +542,12 @@ module Reports
         policies.each do |policy|
           next if policy.rcno_processed
           policy_contract_result = AcaEntities::Contracts::Policies::PolicyContract.new.call(JSON.parse(policy.payload))
+
+          if policy_contract_result.errors.present?
+            puts "Policy id - #{policy.policy_eg_id}"
+            Rails.logger.error("Errors for Policy in RCNO report for id - #{policy.policy_eg_id}")
+            next
+          end
           policy_entity = AcaEntities::Policies::Policy.new(policy_contract_result.to_h)
 
           rcni_first_row = File.readlines(rcni_file_path, chomp: true).first.split("|")
@@ -581,17 +603,17 @@ module Reports
        issuer_assigned_mem_id[0], issuer_assigned_mem_id[1], issuer_assigned_mem_id[2],
        exh_assigned_policy_id[0], exh_assigned_policy_id[1], exh_assigned_policy_id[2],
        issuer_assigned_policy_id[0], issuer_assigned_policy_id[1], issuer_assigned_policy_id[2],
-       @member&.residential_address&.address_1, @rcni_row[22], 'D',
-       @member&.residential_address&.address_2, @rcni_row[23], 'D',
-       @member&.residential_address&.city, @rcni_row[24], 'D',
-       @member&.residential_address&.state, @rcni_row[25],  'D',
-       @member&.residential_address&.zip, @rcni_row[26], 'D',
-       @member&.mailing_address&.address_1, @rcni_row[27],  'D',
-       @member&.mailing_address&.address_2, @rcni_row[28],  'D',
-       @member&.mailing_address&.city, @rcni_row[29],  'D',
-       @member&.mailing_address&.state, @rcni_row[30],  'D',
-       @member&.mailing_address&.zip, @rcni_row[31], 'D',
-       @member&.residential_address&.county, @rcni_row[32], 'D',
+       @member&.residential_address&.address_1&.gsub("|", ""), @rcni_row[22], 'D',
+       @member&.residential_address&.address_2&.gsub("|", ""), @rcni_row[23], 'D',
+       @member&.residential_address&.city&.gsub("|", ""), @rcni_row[24], 'D',
+       @member&.residential_address&.state&.gsub("|", ""), @rcni_row[25],  'D',
+       @member&.residential_address&.zip&.gsub("|", ""), @rcni_row[26], 'D',
+       @member&.mailing_address&.address_1&.gsub("|", ""), @rcni_row[27],  'D',
+       @member&.mailing_address&.address_2&.gsub("|", ""), @rcni_row[28],  'D',
+       @member&.mailing_address&.city&.gsub("|", ""), @rcni_row[29],  'D',
+       @member&.mailing_address&.state&.gsub("|", ""), @rcni_row[30],  'D',
+       @member&.mailing_address&.zip&.gsub("|", ""), @rcni_row[31], 'D',
+       @member&.residential_address&.county&.gsub("|", ""), @rcni_row[32], 'D',
        @policy&.rating_area, @rcni_row[33], 'D',
        phone_number, @rcni_row[34],  'D',
        tobacco_use_code(@member&.enrollee_demographics&.tobacco_use_code), @rcni_row[35], 'D',
@@ -615,8 +637,8 @@ module Reports
        individual_premium_start_date[0], individual_premium_start_date[1], individual_premium_start_date[2],
        individual_premium_end_date[0], individual_premium_end_date[1], individual_premium_end_date[2],
        premium_paid_status[0], premium_paid_status[1], premium_paid_status[2],
-       (@policy.blank? || @member.blank?) ? "U" : @overall_flag, nil, nil,
-       nil, nil, @rcni_row[52],
+       overall_indicator, nil, nil,
+       Date.today.strftime("%Y%m"), nil, @rcni_row[52],
        coverage_year[0], coverage_year[1], coverage_year[2],
        nil, @rcni_row[54], "D",
        nil, @rcni_row[55], "D",
