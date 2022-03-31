@@ -15,7 +15,7 @@ RSpec.describe Reports::GenerateRcnoReport do
       enrollee_demographics: demographics,
       first_name: "dummy",
       middle_name: nil,
-      last_name: "dummy",
+      last_name: "dummy|test",
       name_sfx: nil,
       hbx_member_id: "1234567",
       premium_amount: "20.0",
@@ -188,6 +188,7 @@ RSpec.describe Reports::GenerateRcnoReport do
       file_content = CSV.read(output_file, col_sep: "|", headers: false)
       expect(file_content.count).to eq 3
       expect(file_content[1]).to include("10011")
+      expect(file_content[1]).to include("dummytest")
     end
   end
 end
