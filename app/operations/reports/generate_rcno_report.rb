@@ -479,7 +479,6 @@ module Reports
         return [nil, @rcni_row[46], "D"]
       end
 
-
       match_data = ffm_total_premium_start == issuer_total_premium_start ? "M" : "I"
       @overall_flag = "N" if match_data == "I"
       [ffm_total_premium_start, issuer_total_premium_start, match_data]
