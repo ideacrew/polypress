@@ -137,11 +137,11 @@ module Reports
       end
     end
 
-    def qhp_id
-      if @policy.insurance_line_code == "HLT"
-        "#{@policy.qhp_id}#{@policy.csr_variant}"
-      else
+    def qhp_id(issuer_qhp_id)
+      if issuer_qhp_id.length == 14
         @policy.qhp_id.to_s
+      else
+        "#{@policy.qhp_id}#{@policy.csr_variant}"
       end
     end
 
@@ -155,6 +155,8 @@ module Reports
     def fetch_effectuation_status
       if @policy.effectuation_status == "N" && @policy.aasm_state == "canceled"
         "C"
+      elsif @policy.effectuation_status == "Y" || @member.issuer_assigned_policy_id.present?
+        "Y"
       else
         @policy.effectuation_status
       end
@@ -214,8 +216,7 @@ module Reports
 
       ffm_gender = @member.enrollee_demographics.gender_code
       issuer_gender = @rcni_row[12]
-      match_data = /#{ffm_gender}/i.match?(issuer_gender) ? "M" : "I"
-      [ffm_gender, issuer_gender, match_data]
+      [ffm_gender, issuer_gender, "D"]
     end
 
     def compare_ssn
@@ -223,8 +224,7 @@ module Reports
 
       ffm_ssn = @member.enrollee_demographics.ssn
       issuer_ssn = @rcni_row[13]
-      match_data = ffm_ssn == issuer_ssn ? "M" : "I"
-      [ffm_ssn, issuer_ssn, match_data]
+      [ffm_ssn, issuer_ssn, "D"]
     end
 
     def subscriber_indicator
@@ -244,8 +244,7 @@ module Reports
 
       ffm_subscriber_status = fetch_relationship_code(@member.relationship_status_code)
       issuer_subscriber_status = @rcni_row[15]
-      match_data = ffm_subscriber_status == issuer_subscriber_status ? "M" : "I"
-      [ffm_subscriber_status, issuer_subscriber_status, match_data]
+      [ffm_subscriber_status, issuer_subscriber_status, "D"]
     end
 
     def exchange_assigned_subscriber_id
@@ -271,7 +270,10 @@ module Reports
 
       ffm_issuer_subscriber_id = @policy.primary_subscriber&.issuer_assigned_member_id
       issuer_issuer_subscriber_id = @rcni_row[18]
-      return [ffm_issuer_subscriber_id, issuer_issuer_subscriber_id, "F"] if issuer_issuer_subscriber_id.blank? && ffm_issuer_subscriber_id.present?
+
+      return [ffm_issuer_subscriber_id, issuer_issuer_subscriber_id, "D"] if ffm_issuer_subscriber_id.blank? && issuer_issuer_subscriber_id.blank?
+      return [ffm_issuer_subscriber_id, issuer_issuer_subscriber_id, "F"] if ffm_issuer_subscriber_id.blank? && issuer_issuer_subscriber_id.present?
+      return [ffm_issuer_subscriber_id, issuer_issuer_subscriber_id, "K"] if ffm_issuer_subscriber_id.present? && issuer_issuer_subscriber_id.blank?
 
       match_data = ffm_issuer_subscriber_id == issuer_issuer_subscriber_id ? "M" : "G"
       [ffm_issuer_subscriber_id, issuer_issuer_subscriber_id, match_data]
@@ -282,7 +284,10 @@ module Reports
 
       ffm_issuer_member_id = @member.issuer_assigned_member_id
       issuer_issuer_member_id = @rcni_row[19]
-      return [ffm_issuer_member_id, issuer_issuer_member_id, "F"] if issuer_issuer_member_id.blank? && ffm_issuer_member_id.present?
+
+      return [ffm_issuer_member_id, issuer_issuer_member_id, "D"] if ffm_issuer_member_id.blank? && issuer_issuer_member_id.blank?
+      return [ffm_issuer_member_id, issuer_issuer_member_id, "F"] if ffm_issuer_member_id.blank? && issuer_issuer_member_id.present?
+      return [ffm_issuer_member_id, issuer_issuer_member_id, "K"] if ffm_issuer_member_id.present? && issuer_issuer_member_id.blank?
 
       match_data = ffm_issuer_member_id == issuer_issuer_member_id ? "M" : "G"
       [ffm_issuer_member_id, issuer_issuer_member_id, match_data]
@@ -303,7 +308,10 @@ module Reports
 
       ffm_issuer_policy_number = @member.issuer_assigned_policy_id
       issuer_issuer_policy_number = @rcni_row[21]
-      return [ffm_issuer_policy_number, issuer_issuer_policy_number, "F"] if issuer_issuer_policy_number.blank? && ffm_issuer_policy_number.present?
+
+      return [ffm_issuer_policy_number, issuer_issuer_policy_number, "D"] if ffm_issuer_policy_number.blank? && issuer_issuer_policy_number.blank?
+      return [ffm_issuer_policy_number, issuer_issuer_policy_number, "F"] if ffm_issuer_policy_number.blank? && issuer_issuer_policy_number.present?
+      return [ffm_issuer_policy_number, issuer_issuer_policy_number, "K"] if ffm_issuer_policy_number.present? && issuer_issuer_policy_number.blank?
 
       match_data = ffm_issuer_policy_number == issuer_issuer_policy_number ? "M" : "G"
       [ffm_issuer_policy_number, issuer_issuer_policy_number, match_data]
@@ -312,7 +320,7 @@ module Reports
     def qhp_id_match
       return [nil, @rcni_row[36], "U"] if @policy.blank?
 
-      ffm_qhp_id = qhp_id
+      ffm_qhp_id = qhp_id(@rcni_row[36])
       issuer_qhp_id = @rcni_row[36]
       match_data = ffm_qhp_id == issuer_qhp_id ? "M" : "I"
       @overall_flag = "N" if match_data == "I"
@@ -326,6 +334,12 @@ module Reports
 
       ffm_benefit_start = start_date&.strftime("%Y%m%d")
       issuer_benefit_start = @rcni_row[37]
+
+      if segment.blank?
+        @overall_flag = "R"
+        return [nil, @rcni_row[37], "D"]
+      end
+
       match_data = ffm_benefit_start == issuer_benefit_start ? "M" : "I"
       @overall_flag = "N" if match_data == "I"
       [ffm_benefit_start, issuer_benefit_start, match_data]
@@ -338,7 +352,13 @@ module Reports
 
       ffm_benefit_end = end_date&.strftime("%Y%m%d")
       issuer_benefit_end = @rcni_row[38]
-      return [ffm_benefit_end, issuer_benefit_end, "D"] if ffm_benefit_end == Date.today.end_of_year.strftime("%Y%m%d") && issuer_benefit_end.blank?
+
+      if segment.blank?
+        @overall_flag = "R"
+        return [nil, @rcni_row[38], "D"]
+      end
+
+      return [ffm_benefit_end, issuer_benefit_end, "M"] if ffm_benefit_end == Date.today.end_of_year.strftime("%Y%m%d") && issuer_benefit_end.blank?
 
       if ffm_benefit_end != issuer_benefit_end
         @overall_flag = "N"
@@ -353,6 +373,11 @@ module Reports
       return [nil, @rcni_row[39], "U"] if @member.blank?
       return ["0.00", @rcni_row[39], "D"] unless @member.is_subscriber
       segment = fetch_segment(@rcni_row[40])
+
+      if segment.blank?
+        @overall_flag = "R"
+        return [nil, @rcni_row[39], "D"]
+      end
 
       @total_applied_premium_amount += fetch_applied_aptc_amount(segment)
       ffm_applied_aptc_amount = format('%.2f', fetch_applied_aptc_amount(segment))
@@ -370,10 +395,16 @@ module Reports
       return [nil, @rcni_row[40], "U"] if @member.blank?
       return [nil, @rcni_row[40], "D"] if @rcni_row[40].blank?
       segment = fetch_segment(@rcni_row[40])
-      start_date = segment.present? ? segment&.effective_start_date : @member.coverage_start
+      start_date = segment&.effective_start_date
 
       ffm_applied_aptc_start_date = start_date&.strftime("%Y%m%d")
       issuer_applied_start_date = @rcni_row[40]
+
+      if segment.blank?
+        @overall_flag = "R"
+        return [nil, @rcni_row[40], "D"]
+      end
+
       return [nil, issuer_applied_start_date, "D"] unless @member.is_subscriber
 
       match_data = ffm_applied_aptc_start_date == issuer_applied_start_date ? "M" : "I"
@@ -385,14 +416,20 @@ module Reports
       return [nil, @rcni_row[41], "U"] if @member.blank?
       return [nil, @rcni_row[41], "D"] if @rcni_row[41].blank?
       segment = fetch_segment(@rcni_row[40])
-      end_date = segment.present? ? segment&.effective_end_date : @member.coverage_end
+      end_date = segment&.effective_end_date
 
       ffm_applied_aptc_end_date = end_date&.strftime("%Y%m%d")
       issuer_applied_end_date = @rcni_row[41]
+
+      if segment.blank?
+        @overall_flag = "R"
+        return [nil, @rcni_row[41], "D"]
+      end
+
       return [nil, issuer_applied_end_date, "D"] unless @member.is_subscriber
       if ffm_applied_aptc_end_date == Date.today.end_of_year.strftime("%Y%m%d") && issuer_applied_end_date.blank?
         return [ffm_applied_aptc_end_date, issuer_applied_end_date,
-                "D"]
+                "M"]
       end
 
       match_data = ffm_applied_aptc_end_date == issuer_applied_end_date ? "M" : "I"
@@ -408,8 +445,13 @@ module Reports
       premium_amount = if kind == "dental"
                          @policy.total_premium_amount
                        else
-                         segment.present? ? segment.total_premium_amount : 0.00
+                         segment&.total_premium_amount
                        end
+
+      if segment.blank?
+        @overall_flag = "R"
+        return [nil, @rcni_row[45], "D"]
+      end
 
       @total_premium_amount += premium_amount
       ffm_total_premium = begin
@@ -429,8 +471,14 @@ module Reports
       return [nil, @rcni_row[45],  "D"] unless @member.is_subscriber
       segment = fetch_segment(@rcni_row[46])
 
-      ffm_total_premium_start = segment.present? ? segment&.effective_start_date&.strftime("%Y%m%d") : nil
+      ffm_total_premium_start = segment&.effective_start_date&.strftime("%Y%m%d")
       issuer_total_premium_start = @rcni_row[46]
+
+      if ffm_total_premium_start.blank?
+        @overall_flag = "R"
+        return [nil, @rcni_row[46], "D"]
+      end
+
       match_data = ffm_total_premium_start == issuer_total_premium_start ? "M" : "I"
       @overall_flag = "N" if match_data == "I"
       [ffm_total_premium_start, issuer_total_premium_start, match_data]
@@ -442,11 +490,17 @@ module Reports
       return [nil, @rcni_row[45],  "D"] unless @member.is_subscriber
       segment = fetch_segment(@rcni_row[46])
 
-      ffm_total_premium_end = segment.present? ? segment&.effective_end_date&.strftime("%Y%m%d") : nil
+      ffm_total_premium_end = segment&.effective_end_date&.strftime("%Y%m%d")
+
+      if ffm_total_premium_end.blank?
+        @overall_flag = "R"
+        return [nil, @rcni_row[47], "D"]
+      end
+
       issuer_total_premium_end = @rcni_row[47]
       if ffm_total_premium_end == Date.today.end_of_year.strftime("%Y%m%d") && issuer_total_premium_end.blank?
         return [ffm_total_premium_end, issuer_total_premium_end,
-                "D"]
+                "M"]
       end
 
       match_data = ffm_total_premium_end == issuer_total_premium_end ? "M" : "I"
@@ -457,12 +511,17 @@ module Reports
     def individual_premium_amount
       return [nil, @rcni_row[48], "U"] if @member.blank?
       segment = fetch_segment(@rcni_row[49])
+      issuer_premium_mount = @rcni_row[48]
+      if segment.blank?
+        @overall_flag = "R"
+        return [nil, issuer_premium_mount, "D"]
+      end
+
       amount = segment.present? ? segment.individual_premium_amount : 0.00
 
       premium_amount = @member.is_subscriber ? amount : @member.premium_amount
 
       ffm_individual_premium = format('%.2f', premium_amount)
-      issuer_premium_mount = @rcni_row[48]
       return [ffm_individual_premium, issuer_premium_mount, "D"] if ["N", "C"].include?(@policy.effectuation_status)
 
       match_data = ffm_individual_premium == issuer_premium_mount ? "M" : "I"
@@ -477,6 +536,12 @@ module Reports
 
       ffm_individual_premium_start_date =  start_date&.strftime("%Y%m%d")
       issuer_individual_premium_start_date = @rcni_row[49]
+
+      if ffm_individual_premium_start_date.blank?
+        @overall_flag = "R"
+        return [nil, ffm_individual_premium_start_date, "D"]
+      end
+
       return [ffm_individual_premium_start_date, issuer_individual_premium_start_date, "D"] if ["N", "C"].include?(@policy.effectuation_status)
 
       match_data = ffm_individual_premium_start_date == issuer_individual_premium_start_date ? "M" : "I"
@@ -491,10 +556,16 @@ module Reports
 
       ffm_individual_premium_end_date =  end_date&.strftime("%Y%m%d")
       issuer_individual_premium_end_date = @rcni_row[50]
+
+      if ffm_individual_premium_end_date.blank?
+        @overall_flag = "R"
+        return [nil, ffm_individual_premium_end_date, "D"]
+      end
+
       return [ffm_individual_premium_end_date, issuer_individual_premium_end_date, "D"] if ["N", "C"].include?(@policy.effectuation_status)
       if ffm_individual_premium_end_date == Date.today.end_of_year.strftime("%Y%m%d") && issuer_individual_premium_end_date.blank?
         return [ffm_individual_premium_end_date, issuer_individual_premium_end_date,
-                "D"]
+                "M"]
       end
 
       match_data = ffm_individual_premium_end_date == issuer_individual_premium_end_date ? "M" : "I"
@@ -507,8 +578,10 @@ module Reports
 
       ffm_premium_status = fetch_effectuation_status
       issuer_premium_status = @rcni_row[51]
+      return [ffm_premium_status, nil, "D"] unless @member.is_subscriber
+
       match_data = ffm_premium_status == issuer_premium_status ? "M" : "G"
-      @overall_flag = "N" if match_data == "G"
+      @overall_flag = "N" if match_data == "G" && @overall_flag != "R"
       [ffm_premium_status, issuer_premium_status, match_data]
     end
 
