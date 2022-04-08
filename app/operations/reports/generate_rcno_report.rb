@@ -371,7 +371,7 @@ module Reports
 
     def applied_aptc_value
       return [nil, @rcni_row[39], "U"] if @member.blank?
-      return ["0.00", @rcni_row[39], "D"] unless @member.is_subscriber
+      return ["0.00", @rcni_row[39], "D"] unless @member&.is_subscriber
       segment = fetch_segment(@rcni_row[40])
 
       if segment.blank?
@@ -405,13 +405,14 @@ module Reports
         return [nil, @rcni_row[40], "D"]
       end
 
-      return [nil, issuer_applied_start_date, "D"] unless @member.is_subscriber
+      return [nil, issuer_applied_start_date, "D"] unless @member&.is_subscriber
 
       match_data = ffm_applied_aptc_start_date == issuer_applied_start_date ? "M" : "I"
       @overall_flag = "N" if match_data == "I"
       [ffm_applied_aptc_start_date, issuer_applied_start_date, match_data]
     end
 
+    # rubocop:disable Metrics/CyclomaticComplexity
     def applied_aptc_end_date
       return [nil, @rcni_row[41], "U"] if @member.blank?
       return [nil, @rcni_row[41], "D"] if @rcni_row[41].blank?
@@ -426,7 +427,7 @@ module Reports
         return [nil, @rcni_row[41], "D"]
       end
 
-      return [nil, issuer_applied_end_date, "D"] unless @member.is_subscriber
+      return [nil, issuer_applied_end_date, "D"] unless @member&.is_subscriber
       if ffm_applied_aptc_end_date == Date.today.end_of_year.strftime("%Y%m%d") && issuer_applied_end_date.blank?
         return [ffm_applied_aptc_end_date, issuer_applied_end_date,
                 "M"]
@@ -436,6 +437,7 @@ module Reports
       @overall_flag = "N" if match_data == "I"
       [ffm_applied_aptc_end_date, issuer_applied_end_date, match_data]
     end
+    # rubocop:enable Metrics/CyclomaticComplexity
 
     def total_premium_amount
       return [nil, @rcni_row[45], "U"] if @member.blank?
@@ -578,7 +580,7 @@ module Reports
 
       ffm_premium_status = fetch_effectuation_status
       issuer_premium_status = @rcni_row[51]
-      return [ffm_premium_status, nil, "D"] unless @member.is_subscriber
+      return [ffm_premium_status, nil, "D"] unless @member&.is_subscriber
 
       match_data = ffm_premium_status == issuer_premium_status ? "M" : "G"
       @overall_flag = "N" if match_data == "G" && @overall_flag != "R"

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-["rcno_carrier_hios_id_48396.csv"].each do |file|
+["rcno_carrier_hios_id_33653.csv", "rcno_carrier_hios_id_48396.csv", "rcno_carrier_hios_id_96667.csv",
+ "rcno_carrier_hios_id_50165.csv"].each do |file|
   @hash = Hash.new
 
   [:first_name, :last_name, :dob, :subscriber_indicator, :issuer_subscriber_id, :exchange_policy_id, :issuer_member_id,
