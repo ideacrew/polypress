@@ -1,9 +1,9 @@
 site:
-  key: :me
-  subdomain: "cme"
-  domain_name: "cme.enroll.openhbx.org"
+  key: :dc
+  subdomain: "dc"
+  domain_name: "www.DCHealthLink.com"
   site_title: "Maine CoverME"
-  home_url: "https://cme.enroll.openhbx.org/"
+  home_url: "https://www.DCHealthLink.com/"
   home_business_url: "https://www.accesshealthct.com/AHCT/LandingPageCTHIX"
   # copyright_period_start: "2013"
   help_url: "https://www.coverme.gov/help/"
@@ -15,14 +15,14 @@ site:
   invoice_bill_url: "https://www.e-billexpress.com/ebpp/DCHEALTHPAY/"
   payment_pdf_url: "pdf/employers_paying_your_premiums_online.pdf"
   user_sign_in_url: "https://www.accesshealthct.com/AHCT/LandingPageCTHIX"
-  website_name: "https://www.accesshealthct.com/AHCT/LandingPageCTHIX"
+  website_name: "www.DCHealthLink.com"
   main_web_address: "https://www.accesshealthct.com/AHCT/LandingPageCTHIX"
   health_care_website: "www.healthcare.gov"
   health_care_website_url: "https://www.healthcare.gov"
-  short_name: "CoverME"
+  short_name: "DC"
   byline: "Maine's Official Health Insurance Marketplace"
   long_name: "Maine CoverME"
-  header_message: "Maine's Official Health Insurance Marketplace"
+  header_message: "Welcome to the District's Health Insurance Marketplace"
   logo_file_name: "logo_me.svg"
   make_their_premium_payments_online: "https://www.e-billexpress.com/ebpp/DCHEALTHPAY/"
   tab_icon: 'favicon_me.ico'
@@ -72,9 +72,9 @@ site:
 contact_center:
   state_and_city: "Augusta, ME"
   name: "Maine CoverME's Customer Care Center"
-  alt_name: "Maine CoverME Customer Service"
+  alt_name: "DC Health Link Customer Service"
   po_box: "PO Box 97022"
-  phone_number: "1-800-965-7476"
+  phone_number: "1-855-532-5465"
   fax: "1-617-933-3099"
   alt_fax: "617-722-4033"
   tty_number: "711"
@@ -150,7 +150,7 @@ invoices:
 aca:
   state_key : "me"
   state_name: "Maine"
-  state_abbreviation: "ME"
+  state_abbreviation: "DC"
   market_kinds: ["shop", "individual", "fehb"]
 
   hbx_abbreviation: "Maine CoverME"
@@ -347,10 +347,9 @@ notices:
   individual_market:
     shopping_name: "Plan Compare"
     mail_address:
-      address_1: "PO Box 44018"
-      city: "Augusta"
-      state: "Maine"
-      zip_code: "20026"
+      address_1: 'PO Box 44018'
+      city: 'Washington'
+      zip_code: '20026'
     medicaid:
       agency_name: "Office for Family Independence"
       program_name: "MaineCare (Medicaid)"
