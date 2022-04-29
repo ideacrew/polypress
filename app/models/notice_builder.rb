@@ -196,12 +196,12 @@ module NoticeBuilder
   end
 
   def ivl_taglines
-    join_pdfs [notice_path, Rails.root.join('lib/pdf_templates', "#{Settings.site.key}_taglines.pdf")]
+    join_pdfs [notice_path, Rails.root.join("lib/pdf_templates/#{Settings.site.key}", "taglines.pdf")]
   end
 
   def attach_blank_page(template_path = nil)
     path = template_path.nil? ? notice_path : template_path
-    blank_page = Rails.root.join('lib/pdf_templates', 'blank.pdf')
+    blank_page = Rails.root.join("lib/pdf_templates/#{Settings.site.key}", 'blank.pdf')
     page_count = Prawn::Document.new(:template => path).page_count
     join_pdfs([path, blank_page], path) if page_count.odd?
   end
