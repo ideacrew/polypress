@@ -139,9 +139,6 @@ jobs:
           build-args: |
             HOSTNAME=172.17.0.1
 
-      - name: Check Console access
-        run: docker run --network="host" ${{ needs.prep.outputs.taggedImage }} /bin/bash .docker/check-console.sh
-
       - name: Scan Docker image
         if: github.event_name != 'pull_request'
         id: scan
