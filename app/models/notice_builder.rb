@@ -196,7 +196,7 @@ module NoticeBuilder
   end
 
   def ivl_taglines
-    join_pdfs [notice_path, Rails.root.join('lib/pdf_templates', 'taglines.pdf')]
+    join_pdfs [notice_path, Rails.root.join('lib/pdf_templates', "#{Settings.site.key.to_s}_taglines.pdf")]
   end
 
   def attach_blank_page(template_path = nil)

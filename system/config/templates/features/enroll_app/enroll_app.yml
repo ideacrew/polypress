@@ -76,7 +76,7 @@ registry:
           - key: :byline
             item: "Welcome to Maine's Health Insurance Marketplace"
           - key: :logo_file_name
-            item: "logo_me.svg"
+            item: "dc_logo.png"
           - key: :make_their_premium_payments_online
             item: ""
           - key: :tab_icon
@@ -209,7 +209,7 @@ registry:
           - key: :producer_advisory_committee_url
             item: ""
           - key: :mailer_logo_file_name
-            item: "coverme.jpg"
+            item: "dc_logo.jpg"
           - key: :broker_course_administering_organization_number
             item: '(877) 880-1335'
           - key: :broker_course_administering_organization
@@ -233,7 +233,7 @@ registry:
           - key: :assistance_estimate_url
             item: ''
           - key: :header_logo
-            item: "logo_me.svg"
+            item: "dc_logo.jpg"
           - key: :eligibile_immigration_statuses_url
             item: ""
           - key: :assistance_estimate_url
