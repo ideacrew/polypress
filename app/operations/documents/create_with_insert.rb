@@ -118,7 +118,7 @@ module Documents
     def ivl_attach_envelope
       join_pdfs [
         @main_document_path,
-        Rails.root.join('lib/pdf_templates', 'taglines.pdf')
+        Rails.root.join("lib/pdf_templates", "#{Settings.site.key.to_s}_taglines.pdf")
       ]
     end
 
