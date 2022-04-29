@@ -368,7 +368,7 @@ notices:
   shop:
     store_paper_notice: false
     attachments:
-      envelope_without_address: "dc_taglines.pdf"
+      envelope_without_address: "taglines.pdf"
       non_discrimination_attachment: "shop_non_discrimination_attachment.pdf"
       employee_appeal_rights: "employee_appeal_rights.pdf"
     partials:
@@ -381,7 +381,7 @@ notices:
     store_paper_notice: true
     attachments:
       blank_page_attachment: "blank.pdf"
-      envelope_without_address: "dc_taglines.pdf"
+      envelope_without_address: "taglines.pdf"
       non_discrimination_attachment: "ivl_non_discrimination.pdf"
       voter_application: "voter_application.pdf"
     partials:
