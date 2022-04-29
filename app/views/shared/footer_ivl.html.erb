@@ -53,7 +53,9 @@
       </tr>
     <% else %>
       <tr>
-        <td> Questions? Call <%= Settings.site.short_name %> at <%= Settings.contact_center.contact_center_number_for_display %>, or go to <%= Settings.site.policies_url %>. </td>
+        <td style="padding:3px 10px; font-size:8px;" align="center">
+          Questions? Call <%= Settings.site.short_name %> at <%= Settings.contact_center.contact_center_number_for_display %>, or go to <%= Settings.site.policies_url %>.
+        </td>
       </tr>
     <% end %>
   </table>
