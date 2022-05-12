@@ -114,13 +114,14 @@ class RenderLiquid
         applicant =
           params[:applicants].detect { |app| app[:is_primary_applicant] } ||
             params[:applicants][0]
-        mailing_address = applicant[:addresses][0]
+        mailing_address = applicant[:addresses].detect { |address| address[:kind] == 'mailing' } || applicant[:addresses][0]
         applicant[:name]
       else
         applicant =
           params[:family_members].detect { |app| app[:is_primary_applicant] } ||
             params[:family_members][0]
-        mailing_address = applicant[:person][:addresses]&.send(:[], 0)
+        mailing_address = applicant[:person][:addresses].detect { |address| address[:kind] == 'mailing' } ||
+          applicant[:person][:addresses]&.send(:[], 0)
         applicant[:person][:person_name]
       end
     [

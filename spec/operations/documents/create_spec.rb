@@ -57,6 +57,49 @@ RSpec.describe Documents::Create do
       end
     end
 
+    context 'render_liquid_template' do
+      let(:params) do
+        {
+          template_model: template_model,
+          entity: entity,
+          document_name: document_name,
+          recipient_hbx_id: primary_applicant_hbx_id
+        }
+      end
+      let(:template) { Documents::Create.new.send(:fetch_template, params).success }
+      let(:rendered_template) { Documents::Create.new.send(:render_liquid_template, template, params).success }
+
+      it 'should include mailing address when present' do
+        expect(rendered_template[:entity][:mailing_address][:kind]).to eq('mailing')
+      end
+
+      context 'when mailing address is not present' do
+        let(:addresses) do
+          [
+            {
+              :has_fixed_address => true,
+              :kind => "home",
+              :address_1 => "1234",
+              :address_3 => "person",
+              :city => "test",
+              :county => nil,
+              :state => "DC",
+              :zip => "12345",
+              :country_name => "USA",
+              :validation_status => "ValidMatch",
+              :start_on => aptc_effective_date,
+              :end_on => nil,
+              :lives_outside_state_temporarily => false
+            }
+          ]
+        end
+
+        it 'should include home address' do
+          expect(rendered_template[:entity][:mailing_address][:kind]).to eq('home')
+        end
+      end
+    end
+
     context 'when template body has unknown attributes' do
       let(:body) { '<p>Uqhp Eligible Document for {{ unknown_attribute }}</p>' }
 

@@ -15,6 +15,41 @@ RSpec.shared_context 'application response from medicaid gateway', :shared_conte
 
   let(:paper_notification) { true }
 
+  let(:addresses) do
+    [
+      {
+        :has_fixed_address => true,
+        :kind => "home",
+        :address_1 => "1234",
+        :address_3 => "person",
+        :city => "test",
+        :county => nil,
+        :state => "DC",
+        :zip => "12345",
+        :country_name => "USA",
+        :validation_status => "ValidMatch",
+        :start_on => aptc_effective_date,
+        :end_on => nil,
+        :lives_outside_state_temporarily => false
+      },
+      {
+        :has_fixed_address => true,
+        :kind => "mailing",
+        :address_1 => "899",
+        :address_3 => "",
+        :city => "new city",
+        :county => nil,
+        :state => "DC",
+        :zip => "94385",
+        :country_name => "USA",
+        :validation_status => "ValidMatch",
+        :start_on => aptc_effective_date,
+        :end_on => nil,
+        :lives_outside_state_temporarily => false
+      }
+    ]
+  end
+
   let(:application_hash) do
     {
       :notice_options => { send_eligibility_notices: true, send_open_enrollment_notices: false, paper_notification: paper_notification },
@@ -63,19 +98,7 @@ RSpec.shared_context 'application response from medicaid gateway', :shared_conte
                         :has_eligible_health_coverage => false,
                         :medicaid_and_chip => { :not_eligible_in_last_90_days => true,
                                                 :denied_on => Date.today },
-                        :addresses => [{ :has_fixed_address => true,
-                                         :kind => "home",
-                                         :address_1 => "1234",
-                                         :address_3 => "person",
-                                         :city => "test",
-                                         :county => nil,
-                                         :state => "DC",
-                                         :zip => "12345",
-                                         :country_name => "USA",
-                                         :validation_status => "ValidMatch",
-                                         :start_on => aptc_effective_date,
-                                         :end_on => nil,
-                                         :lives_outside_state_temporarily => false }],
+                        :addresses => addresses,
                         :incomes => [{ :kind => "wages_and_salaries",
                                        :amount => 16_500.00,
                                        :frequency_kind => "Annually",
