@@ -6,7 +6,7 @@ Rails
   .draw do
 
     devise_scope :account do
-      get 'accounts/sign_up' => 'application#resource_not_found'
+      get 'accounts/sign_up' => 'application#resource_not_available'
     end
 
     devise_for :accounts
