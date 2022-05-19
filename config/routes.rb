@@ -4,12 +4,17 @@ Rails
   .application
   .routes
   .draw do
+
+    devise_scope :account do
+      get 'accounts/sign_up' => 'application#resource_not_found'
+    end
+
     devise_for :accounts
 
     # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html
     mount Ckeditor::Engine => '/ckeditor'
     root 'new/templates#index'
-    get 'accounts/sign_up', to: 'application#resource_not_available'
+
     namespace :new do
       resources :templates do
         member do
