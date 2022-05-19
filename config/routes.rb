@@ -4,6 +4,11 @@ Rails
   .application
   .routes
   .draw do
+
+    devise_scope :account do
+      get 'accounts/sign_up' => 'application#resource_not_available'
+    end
+
     devise_for :accounts
 
     # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html
