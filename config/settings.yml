@@ -20,7 +20,6 @@ site:
   main_web_address: "https://www.accesshealthct.com/AHCT/LandingPageCTHIX"
   health_care_website: "www.healthcare.gov"
   health_care_website_url: "https://www.healthcare.gov"
-  short_name: "DC"
   byline: "Maine's Official Health Insurance Marketplace"
   long_name: "Maine CoverME"
   header_message: "Welcome to the District's Health Insurance Marketplace"
@@ -91,7 +90,7 @@ contact_center:
   zip_code: "04330"
   small_business_email: "smallbusiness@coverme.gov"
   non_discrimination_email: "info@coverme.gov"
-  contact_center_number_for_display: "(855) 532-5465"
+  contact_center_number_for_display: "(855) 532-5465 / TTY: 771"
 
   appeals: "info@coverme.gov"
 
