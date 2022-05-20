@@ -10,7 +10,7 @@
 	<%#= template.recipient_klass_name.to_s.titleize %>
 	<td><%= template.updated_at.in_time_zone('Eastern Time (US & Canada)').strftime('%m/%d/%Y %H:%M') %></td>
 	<td>
-		<a data-turbolinks='false' class="text-reset" href="<%= preview_new_template_path(template) %>"><i class="fas fa-eye"></i></a>
+		<a data-turbolinks='false' rel="noopener noreferrer" target="_blank" class="text-reset" href="<%= preview_new_template_path(template) %>"><i class="fas fa-eye"></i></a>
 		<a class="text-reset" href="<%= edit_new_template_path(template) %>"><i class="fas fa-edit"></i></a>
 		<a class="text-reset" href="<%= new_template_path(template) %>" data-confirm="Are you sure?" data-method="delete"><i class="fas fa-trash"></i></a>
 	</td>
