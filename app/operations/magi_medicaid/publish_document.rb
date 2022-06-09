@@ -26,8 +26,8 @@ module MagiMedicaid
           document_name,
           recipient_hbx_id
         )
-      resource_id = yield fetch_resource_id(params)
-      uploaded_document = yield upload_document(params[:entity], documents_hash, resource_id)
+
+      uploaded_document = yield upload_document(params[:entity], documents_hash, recipient_hbx_id)
       event = yield build_event(uploaded_document)
       result = yield publish_response(event)
       Success(result)
@@ -76,17 +76,6 @@ module MagiMedicaid
         end
         Failure(result.failure)
       end
-    end
-
-    def fetch_resource_id(params)
-      resource_id =
-        if params[:entity].respond_to?(:family_reference)
-          params[:entity].family_reference.hbx_id
-        else
-          params[:entity].hbx_id
-        end
-
-      Success(resource_id)
     end
 
     def requires_paper_communication?(entity)

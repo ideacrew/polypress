@@ -262,5 +262,29 @@ RSpec.describe MagiMedicaid::PublishDocument do
         end
       end
     end
+
+    describe '#get_recipient_hbx_id' do
+      context 'when the entity is AcaEntities::Families::Family' do
+        include_context 'family response from enroll'
+        let(:entity) { AcaEntities::Families::Family.new(family_hash) }
+        let(:recipient_hbx_id) { entity[:family_members].detect { |a| a[:is_primary_applicant] == true }[:person][:hbx_id] }
+
+        it "should return primary family member's person hbx_id" do
+          result = MagiMedicaid::PublishDocument.new.send(:get_recipient_hbx_id, entity)
+          expect(result.value!).to eq recipient_hbx_id
+        end
+      end
+
+      context 'when the entity is AcaEntities::MagiMedicaid::Application' do
+        include_context 'application response from medicaid gateway'
+        let(:entity) { ::AcaEntities::MagiMedicaid::Application.new(application_hash) }
+        let(:recipient_hbx_id) { entity[:applicants].detect { |a| a[:is_primary_applicant] == true }[:person_hbx_id] }
+
+        it "should return primary applicant's person hbx_id" do
+          result = MagiMedicaid::PublishDocument.new.send(:get_recipient_hbx_id, entity)
+          expect(result.value!).to eq recipient_hbx_id
+        end
+      end
+    end
   end
 end
