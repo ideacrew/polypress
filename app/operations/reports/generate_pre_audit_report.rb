@@ -91,16 +91,23 @@ module Reports
       segment.csr_variant
     end
 
-    def total_premium_amount(enrollee, segment)
+    def total_premium_amount(enrollee, segment, policy_entity)
       return nil unless enrollee.is_subscriber
-
-      format('%.2f', segment.total_premium_amount)
+      if policy_entity.coverage_kind == "dental"
+        format('%.2f', policy_entity.total_premium_amount)
+      else
+        format('%.2f', segment.total_premium_amount)
+      end
     end
 
-    def total_responsible_amount(enrollee, segment)
+    def total_responsible_amount(enrollee, segment, policy_entity)
       return nil unless enrollee.is_subscriber
 
-      format('%.2f', segment.total_responsible_amount)
+      if policy_entity.coverage_kind == "dental"
+        format('%.2f', policy_entity.total_responsible_amount)
+      else
+        format('%.2f', segment.total_responsible_amount)
+      end
     end
 
     def phone_number(enrollee)
@@ -115,8 +122,8 @@ module Reports
       enrollee.emails.last.address
     end
 
-    def transaction_code_type(aasm_state)
-      if aasm_state == "canceled"
+    def transaction_code_type(enrollee)
+      if enrollee&.coverage_start == enrollee&.coverage_end
         3
       else
         1
@@ -146,6 +153,11 @@ module Reports
       end
     end
 
+    def non_subscriber_end_date(enrollee, segment)
+      return enrollee.coverage_end&.strftime("%Y%m%d") if enrollee.coverage_start == enrollee.coverage_end
+      segment.effective_end_date&.strftime("%Y%m%d")
+    end
+
     def qhp_id(policy_entity)
       "#{policy_entity.qhp_id}#{policy_entity.csr_variant}"
     end
@@ -169,7 +181,7 @@ module Reports
       [carrier_hios_id, nil, "ME0", carrier_hios_id, policy_entity.qhp_id[0, 10], Date.today.strftime("%Y%m%d"),
        DateTime.now.strftime("%H%M%S%L"),
        policy_entity.last_maintenance_date.strftime("%Y%m%d"), policy_entity.last_maintenance_time,
-       policy_entity.primary_subscriber&.hbx_member_id, transaction_code_type(policy_entity.aasm_state), nil, nil,
+       policy_entity.primary_subscriber&.hbx_member_id, transaction_code_type(enrollee), nil, nil,
        nil, nil, nil,
        fetch_relationship_code(enrollee.relationship_status_code), enrollee.is_subscriber ? 'Y' : 'N', nil,
        policy_entity.primary_subscriber&.hbx_member_id,
@@ -189,17 +201,17 @@ module Reports
        policy_entity.responsible_party_subscriber&.mailing_address&.city,
        policy_entity.responsible_party_subscriber&.mailing_address&.state,
        policy_entity.responsible_party_subscriber&.mailing_address&.zip,
-       segment.effective_start_date&.strftime("%Y%m%d"), segment.effective_end_date&.strftime("%Y%m%d"),
+       segment.effective_start_date&.strftime("%Y%m%d"), non_subscriber_end_date(enrollee, segment),
        enrollee.issuer_assigned_policy_id, qhp_id(policy_entity), policy_entity.effectuation_status,
        policy_entity.enrollment_group_id, segment.id, aptc_amount(enrollee, segment),
        effective_start_date(enrollee, segment), effective_end_date(enrollee, segment),
        nil, effective_start_date(enrollee, segment),
-       effective_end_date(enrollee, segment), total_premium_amount(enrollee, segment),
+       effective_end_date(enrollee, segment), total_premium_amount(enrollee, segment, policy_entity),
        effective_start_date(enrollee, segment), effective_end_date(enrollee, segment),
        format('%.2f', segment.individual_premium_amount),
-       segment.effective_start_date.strftime("%Y%m%d"), segment.effective_end_date.strftime("%Y%m%d"),
-       total_responsible_amount(enrollee, segment), segment.effective_start_date.strftime("%Y%m%d"),
-       segment.effective_end_date.strftime("%Y%m%d"), nil, nil, nil, policy_entity.term_for_np ? 6 : nil, nil,
+       segment.effective_start_date&.strftime("%Y%m%d"), non_subscriber_end_date(enrollee, segment),
+       total_responsible_amount(enrollee, segment, policy_entity), segment.effective_start_date&.strftime("%Y%m%d"),
+       segment.effective_end_date&.strftime("%Y%m%d"), nil, nil, nil, policy_entity.term_for_np ? 6 : nil, nil,
        policy_entity.term_for_np ? 6 : nil,
        policy_entity.rating_area, nil, nil, nil, policy_entity.insurance_line_code, nil, nil, nil, nil, nil, nil, nil,
        nil, nil]
