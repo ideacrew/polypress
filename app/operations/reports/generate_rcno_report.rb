@@ -48,18 +48,29 @@ module Reports
           @rcni_row = line.split("|")
 
           next unless @rcni_row[0] == "01"
-          @audit_record = audit_datum.where(subscriber_id: @rcni_row[16]).first
-          if  @audit_record.blank?
-            @logger.info "Unable to find subscriber from given rcni report #{@rcni_row[16]}"
-            next
+          # mark over flag to U unprocessable if subscriber_id, member_id, policy_id, or benefit_start_date are blank?
+          if @rcni_row[16].blank? || @rcni_row[17].blank? || @rcni_row[20].blank? || @rcni_row[37].blank?
+            @overall_flag = "U"
+          else
+            @audit_record = audit_datum.where(subscriber_id: @rcni_row[16]).first
+            if  @audit_record.blank?
+              # Create a row in RCNO with blank maine data and RCNI eched out carrier data
+              # Every field level disposition should be D which is did not compare
+              # Overall record level disposition should be R
+              @overall_flag = "R"
+              @logger.info "Unable to find subscriber from given rcni report #{@rcni_row[16]}"
+            else
+              @policy, @member, @segments = fetch_policy_member_and_segments
+              segment = fetch_segment(@rcni_row[37])
+              @overall_flag = "R" if segment.blank?
+            end
           end
-          @policy, @member, @segments = fetch_policy_member_and_segments
           csv << insert_data
           @total_number_of_issuer_records += 1
         rescue StandardError => e
           puts e
           puts "Error for row #{@rcni_row}"
-          @logger.info "Unable to generate report due to #{e.backtrace} for member #{@member} record #{@audit_record.id} row #{@rcni_row}"
+          @logger.info "Unable to generate report due to #{e.backtrace} for member #{@member} record row #{@rcni_row}"
           Rails.logger.error("Unable to generate report due to #{e} for row #{@rcni_row}")
         end
         insert_missing_policy_data(csv, carrier_hios_id, rcni_file_path)
@@ -67,7 +78,7 @@ module Reports
       rescue StandardError => e
         puts e
         puts "Error for row #{@rcni_row}"
-        @logger.info "Unable to generate report due to #{e.backtrace} for member #{@member} record #{@audit_record.id} row #{@rcni_row}"
+        @logger.info "Unable to generate report due to #{e.backtrace} for member #{@member} record row #{@rcni_row}"
         Rails.logger.error("Unable to generate report due to #{e} for row #{@rcni_row}")
       end
     end
@@ -75,17 +86,28 @@ module Reports
 
     def fetch_policy_member_and_segments
       policies = @audit_record.policies
-      fetched_policy = policies.detect {|policy| policy.policy_eg_id == @rcni_row[20]}
-      fetched_policy.update_attributes(rcno_processed: true) if fetched_policy.present?
-      return [nil, nil, nil] if fetched_policy.blank?
-
+      fetched_policy = policies.detect {|policy| (policy.policy_eg_id == @rcni_row[20])}
+      if fetched_policy.present?
+        fetched_policies = policies.select {|policy| policy.policy_eg_id == @rcni_row[20]}
+        fetched_policies.each {|pol| pol.update_attributes!(rcno_processed: true)}
+      end
+      if fetched_policy.blank?
+        @overall_flag = "R"
+        return [nil, nil, nil]
+      end
       policy_contract_result = AcaEntities::Contracts::Policies::PolicyContract.new.call(JSON.parse(fetched_policy.payload))
       return [nil, nil, nil] if policy_contract_result.failure?
 
       policy_entity = AcaEntities::Policies::Policy.new(policy_contract_result.to_h)
 
       member = policy_entity.enrollees.detect {|enrollee| enrollee.hbx_member_id == @rcni_row[17]}
-      segments = member.present? ? member.segments : nil
+      if member.present?
+        segments = member.segments
+        @overall_flag = "R" if segments.blank?
+      else
+        @overall_flag = "R"
+        segments = nil
+      end
       [policy_entity, member, segments]
     end
 
@@ -116,8 +138,12 @@ module Reports
     def fetch_segment(coverage_start)
       return if coverage_start.blank?
       return if @segments.blank?
-
-      start = Date.strptime(coverage_start, "%Y%m%d")
+      # unprocessed policy
+      start = if @overall_flag == "G"
+                coverage_start
+              else
+                Date.strptime(coverage_start, "%Y%m%d")
+              end
       @segments.detect {|segment| segment.effective_start_date == start}
     end
 
@@ -171,9 +197,15 @@ module Reports
     end
 
     def compare_first_name
-      return [nil, @rcni_row[8], "U"] if @member.blank?
-
+      # If overall flag is R then we need to put ME data blank, carrier data from RCNI, and field level disposition to D
+      # If overall flag is not a R then we do normal data population for ME and carrier and field level disposition
+      # If Subscriber, Member, or Policy are not found
+      return [nil, @rcni_row[8], "D"] if @overall_flag == "R" || @overall_flag == "U"
+      # return [nil, @rcni_row[8], "U"] if @member.blank?
       ffm_first_name = @member.first_name&.gsub("|", "")
+
+      # unprocessed policy
+      return [ffm_first_name, nil, "D"] if @overall_flag == "G"
       issuer_first_name = @rcni_row[8]
       match_data = /#{ffm_first_name}/i.match?(issuer_first_name) ? "M" : "I"
       @overall_flag = "N" if match_data == "I"
@@ -181,9 +213,14 @@ module Reports
     end
 
     def compare_middle_name
-      return [nil, @rcni_row[9], "U"] if @member.blank?
+      # If Subscriber, Member, or Policy are not found
+      return [nil, @rcni_row[9], "D"] if @overall_flag == "R" || @overall_flag == "U"
+      # return [nil, @rcni_row[9], "U"] if @member.blank?
 
       ffm_middle_name = @member.middle_name&.gsub("|", "")
+
+      # unprocessed policy
+      return [ffm_middle_name, nil, "D"] if @overall_flag == "G"
       issuer_middle_name = @rcni_row[9]
       return [ffm_middle_name, issuer_middle_name, "D"] if ffm_middle_name.blank? && issuer_middle_name.blank?
 
@@ -192,9 +229,15 @@ module Reports
     end
 
     def compare_last_name
-      return [nil, @rcni_row[10], "U"] if @member.blank?
+      # If Subscriber, Member, or Policy are not found
+      return [nil, @rcni_row[10], "D"] if @overall_flag == "R" || @overall_flag == "U"
+      # return [nil, @rcni_row[10], "U"] if @member.blank?
 
       ffm_last_name = @member.last_name&.gsub("|", "")
+
+      # unprocessed policy
+      return [ffm_last_name, nil, "D"] if @overall_flag == "G"
+
       issuer_last_name = @rcni_row[10]
       match_data = /#{ffm_last_name}/i.match?(issuer_last_name) ? "M" : "I"
       @overall_flag = "N" if match_data == "I"
@@ -202,9 +245,14 @@ module Reports
     end
 
     def compare_dob
-      return [nil, @rcni_row[11], "U"] if @member.blank?
+      # If Subscriber, Member, or Policy are not found
+      return [nil, @rcni_row[11], "D"] if @overall_flag == "R" || @overall_flag == "U"
+      # return [nil, @rcni_row[11], "U"] if @member.blank?
 
       ffm_dob = @member.enrollee_demographics.dob.strftime("%Y%m%d")
+
+      # unprocessed policy
+      return [ffm_dob, nil, "D"] if @overall_flag == "G"
       issuer_dob = @rcni_row[11]
       match_data = ffm_dob == issuer_dob ? "M" : "I"
       @overall_flag = "N" if match_data == "I"
@@ -212,27 +260,42 @@ module Reports
     end
 
     def compare_gender
-      return [nil, @rcni_row[12], "U"] if @member.blank?
+      # If Subscriber, Member, or Policy are not found
+      return [nil, @rcni_row[12], "D"] if @overall_flag == "R" || @overall_flag == "U"
+      # return [nil, @rcni_row[12], "U"] if @member.blank?
 
       ffm_gender = @member.enrollee_demographics.gender_code
+
+      # unprocessed policy
+      return [ffm_gender, nil, "D"] if @overall_flag == "G"
       issuer_gender = @rcni_row[12]
       [ffm_gender, issuer_gender, "D"]
     end
 
     def compare_ssn
-      return [nil, @rcni_row[13], "U"] if @member.blank?
+      # If Subscriber, Member, or Policy are not found
+      return [nil, @rcni_row[13], "D"] if @overall_flag == "R" || @overall_flag == "U"
+      # return [nil, @rcni_row[13], "U"] if @member.blank?
 
       ffm_ssn = @member.enrollee_demographics.ssn
+
+      # unprocessed policy
+      return [ffm_ssn, nil, "D"] if @overall_flag == "G"
       issuer_ssn = @rcni_row[13]
       [ffm_ssn, issuer_ssn, "D"]
     end
 
     def subscriber_indicator
+      # If Subscriber, Member, or Policy are not found
+      return [nil, @rcni_row[14], "D"] if @overall_flag == "R" || @overall_flag == "U"
       status = @member&.is_subscriber ? 'Y' : 'N'
       members_count(status)
-      return [nil, @rcni_row[14], "U"] if @member.blank?
+      # return [nil, @rcni_row[14], "U"] if @member.blank?
 
       ffm_subscriber_status = status
+
+      # unprocessed policy
+      return [ffm_subscriber_status, nil, "D"] if @overall_flag == "G"
       issuer_subscriber_status = @rcni_row[14]
       match_data = /#{ffm_subscriber_status}/i.match?(issuer_subscriber_status) ? "M" : "I"
       @overall_flag = "N" if match_data == "I"
@@ -240,35 +303,57 @@ module Reports
     end
 
     def relation_to_subscriber_indicator
-      return [nil, @rcni_row[15], "U"] if @member.blank?
+      # If Subscriber, Member, or Policy are not found
+      return [nil, @rcni_row[15], "D"] if @overall_flag == "R" || @overall_flag == "U"
+      # return [nil, @rcni_row[15], "U"] if @member.blank?
 
       ffm_subscriber_status = fetch_relationship_code(@member.relationship_status_code)
+
+      # unprocessed policy
+      return [ffm_subscriber_status, nil, "D"] if @overall_flag == "G"
       issuer_subscriber_status = @rcni_row[15]
       [ffm_subscriber_status, issuer_subscriber_status, "D"]
     end
 
     def exchange_assigned_subscriber_id
-      return [nil, @rcni_row[16], "U"] if @policy.blank?
+      return [nil, @rcni_row[16], "U"] if @rcni_row[16].blank? && @overall_flag == "U"
+      # If Subscriber, Member, or Policy are not found
+      return [nil, @rcni_row[16], "D"] if @overall_flag == "R"
 
       ffm_subscriber_id = @policy.primary_subscriber&.hbx_member_id
+
+      # unprocessed policy
+      return [ffm_subscriber_id, nil, "D"] if @overall_flag == "G"
       issuer_subscriber_id = @rcni_row[16]
       match_data = ffm_subscriber_id == issuer_subscriber_id ? "M" : "I"
       [ffm_subscriber_id, issuer_subscriber_id, match_data]
     end
 
     def exchange_assigned_member_id
-      return [nil, @rcni_row[17], "U"] if @member.blank?
+      return [nil, @rcni_row[17], "U"] if @rcni_row[17].blank? && @overall_flag == "U"
+      # If Subscriber, Member, or Policy are not found
+      return [nil, @rcni_row[17], "D"] if @overall_flag == "R"
+      # return [nil, @rcni_row[17], "U"] if @member.blank?
 
       ffm_member_id = @member.hbx_member_id
+
+      # unprocessed policy
+      return [ffm_member_id, nil, "D"] if @overall_flag == "G"
       issuer_member_id = @rcni_row[17]
       match_data = ffm_member_id == issuer_member_id ? "M" : "I"
       [ffm_member_id, issuer_member_id, match_data]
     end
 
+    # rubocop:disable Metrics/CyclomaticComplexity
     def issuer_assigned_subscriber_id
-      return [nil, @rcni_row[18], "U"] if @policy.blank?
+      # If Subscriber, Member, or Policy are not found
+      return [nil, @rcni_row[18], "D"] if @overall_flag == "R" || @overall_flag == "U"
+      # return [nil, @rcni_row[18], "U"] if @policy.blank?
 
       ffm_issuer_subscriber_id = @policy.primary_subscriber&.issuer_assigned_member_id
+
+      # unprocessed policy
+      return [ffm_issuer_subscriber_id, nil, "D"] if @overall_flag == "G"
       issuer_issuer_subscriber_id = @rcni_row[18]
 
       return [ffm_issuer_subscriber_id, issuer_issuer_subscriber_id, "D"] if ffm_issuer_subscriber_id.blank? && issuer_issuer_subscriber_id.blank?
@@ -280,9 +365,14 @@ module Reports
     end
 
     def issuer_assigned_member_id
-      return [nil, @rcni_row[19], "U"] if @member.blank?
+      # If Subscriber, Member, or Policy are not found
+      return [nil, @rcni_row[19], "D"] if @overall_flag == "R" || @overall_flag == "U"
+      # return [nil, @rcni_row[19], "U"] if @member.blank?
 
       ffm_issuer_member_id = @member.issuer_assigned_member_id
+
+      # unprocessed policy
+      return [ffm_issuer_member_id, nil, "D"] if @overall_flag == "G"
       issuer_issuer_member_id = @rcni_row[19]
 
       return [ffm_issuer_member_id, issuer_issuer_member_id, "D"] if ffm_issuer_member_id.blank? && issuer_issuer_member_id.blank?
@@ -294,9 +384,15 @@ module Reports
     end
 
     def exchange_assigned_policy_number
-      return [nil, @rcni_row[20], "U"] if @policy.blank?
+      return [nil, @rcni_row[20], "U"] if @rcni_row[20].blank? && @overall_flag == "U"
+      # If Subscriber, Member, or Policy are not found
+      return [nil, @rcni_row[20], "D"] if @overall_flag == "R"
+      # return [nil, @rcni_row[20], "U"] if @policy.blank?
 
       ffm_exchange_policy_number = @policy.enrollment_group_id
+
+      # unprocessed policy
+      return [ffm_exchange_policy_number, nil, "D"] if @overall_flag == "G"
       issuer_exchange_policy_number = @rcni_row[20]
       match_data = ffm_exchange_policy_number == issuer_exchange_policy_number ? "M" : "I"
       @overall_flag = "N" if match_data == "I"
@@ -304,9 +400,14 @@ module Reports
     end
 
     def issuer_assigned_policy_number
-      return [nil, @rcni_row[21], "U"] if @member.blank?
+      # If Subscriber, Member, or Policy are not found
+      return [nil, @rcni_row[21], "D"] if @overall_flag == "R" || @overall_flag == "U"
+      # return [nil, @rcni_row[21], "U"] if @member.blank?
 
       ffm_issuer_policy_number = @member.issuer_assigned_policy_id
+
+      # unprocessed policy
+      return [ffm_issuer_policy_number, nil, "D"] if @overall_flag == "G"
       issuer_issuer_policy_number = @rcni_row[21]
 
       return [ffm_issuer_policy_number, issuer_issuer_policy_number, "D"] if ffm_issuer_policy_number.blank? && issuer_issuer_policy_number.blank?
@@ -318,8 +419,14 @@ module Reports
     end
 
     def qhp_id_match
-      return [nil, @rcni_row[36], "U"] if @policy.blank?
-
+      # If Subscriber, Member, or Policy are not found
+      return [nil, @rcni_row[36], "D"] if @overall_flag == "R" || @overall_flag == "U"
+      # return [nil, @rcni_row[36], "U"] if @policy.blank?
+      # unprocessed policy
+      if @overall_flag == "G"
+        unprocessed_qhp_id = "#{@policy.qhp_id}#{@policy.csr_variant}"
+        return [unprocessed_qhp_id, nil, "D"]
+      end
       ffm_qhp_id = qhp_id(@rcni_row[36])
       issuer_qhp_id = @rcni_row[36]
       match_data = ffm_qhp_id == issuer_qhp_id ? "M" : "I"
@@ -328,17 +435,26 @@ module Reports
     end
 
     def benefit_start_date
-      return [nil, @rcni_row[37], "U"] if @member.blank?
+      return [nil, @rcni_row[37], "U"] if @rcni_row[37].blank? && @overall_flag == "U"
+
+      # If Subscriber, Member, or Policy are not found
+      return [nil, @rcni_row[37], "D"] if @overall_flag == "R"
+      # return [nil, @rcni_row[37], "U"] if @member.blank?
+      # unprocessed policy
+      if @overall_flag == "G"
+        policy_sub_member = @policy.enrollees.detect { |enrollee| enrollee.hbx_member_id == @policy.exchange_subscriber_id }
+        unprocessed_start_date = policy_sub_member&.coverage_start&.strftime("%Y%m%d")
+        return [unprocessed_start_date, nil, "D"]
+      end
       segment = fetch_segment(@rcni_row[37])
-      start_date = segment&.effective_start_date
-
-      ffm_benefit_start = start_date&.strftime("%Y%m%d")
-      issuer_benefit_start = @rcni_row[37]
-
       if segment.blank?
         @overall_flag = "R"
         return [nil, @rcni_row[37], "D"]
       end
+      start_date = segment&.effective_start_date
+
+      ffm_benefit_start = start_date&.strftime("%Y%m%d")
+      issuer_benefit_start = @rcni_row[37]
 
       match_data = ffm_benefit_start == issuer_benefit_start ? "M" : "I"
       @overall_flag = "N" if match_data == "I"
@@ -346,18 +462,24 @@ module Reports
     end
 
     def benefit_end_date
+      # If Subscriber, Member, or Policy are not found
+      return [nil, @rcni_row[38], "D"] if @overall_flag == "R" || @overall_flag == "U"
+      # unprocessed policy
+      if @overall_flag == "G"
+        policy_sub_member = @policy.enrollees.detect {|enrollee| enrollee.hbx_member_id == @policy.exchange_subscriber_id}
+        unprocessed_end_date = policy_sub_member&.coverage_end&.strftime("%Y%m%d")
+        return [unprocessed_end_date, nil, "D"]
+      end
       return [nil, @rcni_row[38], "U"] if @member.blank?
       segment = fetch_segment(@rcni_row[37])
+      if segment.blank?
+        @overall_flag = "N"
+        return [nil, @rcni_row[38], "D"]
+      end
       end_date = segment&.effective_end_date
 
       ffm_benefit_end = end_date&.strftime("%Y%m%d")
       issuer_benefit_end = @rcni_row[38]
-
-      if segment.blank?
-        @overall_flag = "R"
-        return [nil, @rcni_row[38], "D"]
-      end
-
       return [ffm_benefit_end, issuer_benefit_end, "M"] if ffm_benefit_end == Date.today.end_of_year.strftime("%Y%m%d") && issuer_benefit_end.blank?
 
       if ffm_benefit_end != issuer_benefit_end
@@ -370,12 +492,20 @@ module Reports
     end
 
     def applied_aptc_value
+      # If Subscriber, Member, or Policy are not found
+      return [nil, @rcni_row[39], "D"] if @overall_flag == "R" || @overall_flag == "U"
       return [nil, @rcni_row[39], "U"] if @member.blank?
       return ["0.00", @rcni_row[39], "D"] unless @member.is_subscriber
-      segment = fetch_segment(@rcni_row[40])
+      # unprocessed policy
+      if @overall_flag == "G"
+        segment = fetch_segment(@member.coverage_start)
+        unprocessed_aptc_amount = format('%.2f', fetch_applied_aptc_amount(segment))
+        return [unprocessed_aptc_amount, nil, "D"]
+      end
 
-      if segment.blank?
-        @overall_flag = "R"
+      segment = fetch_segment(@rcni_row[37])
+      if segment.blank? && @policy.insurance_line_code == "HLT"
+        @overall_flag = "N"
         return [nil, @rcni_row[39], "D"]
       end
 
@@ -392,19 +522,27 @@ module Reports
     end
 
     def applied_aptc_start_date
+      # If Subscriber, Member, or Policy are not found
+      return [nil, @rcni_row[40], "D"] if @overall_flag == "R" || @overall_flag == "U"
       return [nil, @rcni_row[40], "U"] if @member.blank?
+      # unprocessed policy
+      if @overall_flag == "G"
+        segment = fetch_segment(@member.coverage_start)
+        start_date = segment&.effective_start_date
+
+        unprocessed_aptc_start_date = start_date&.strftime("%Y%m%d")
+        return [unprocessed_aptc_start_date, nil, "D"]
+      end
       return [nil, @rcni_row[40], "D"] if @rcni_row[40].blank?
-      segment = fetch_segment(@rcni_row[40])
+      segment = fetch_segment(@rcni_row[37])
+      if segment.blank? && @policy.insurance_line_code == "HLT"
+        @overall_flag = "N"
+        return [nil, @rcni_row[40], "D"]
+      end
       start_date = segment&.effective_start_date
 
       ffm_applied_aptc_start_date = start_date&.strftime("%Y%m%d")
       issuer_applied_start_date = @rcni_row[40]
-
-      if segment.blank?
-        @overall_flag = "R"
-        return [nil, @rcni_row[40], "D"]
-      end
-
       return [nil, issuer_applied_start_date, "D"] unless @member.is_subscriber
 
       match_data = ffm_applied_aptc_start_date == issuer_applied_start_date ? "M" : "I"
@@ -412,19 +550,29 @@ module Reports
       [ffm_applied_aptc_start_date, issuer_applied_start_date, match_data]
     end
 
+    # rubocop:disable Metrics/PerceivedComplexity
     def applied_aptc_end_date
+      # If Subscriber, Member, or Policy are not found
+      return [nil, @rcni_row[41], "D"] if @overall_flag == "R" || @overall_flag == "U"
       return [nil, @rcni_row[41], "U"] if @member.blank?
+      # unprocessed policy
+      if @overall_flag == "G"
+        segment = fetch_segment(@member.coverage_start)
+        end_date = segment&.effective_end_date
+
+        unprocessed_aptc_end_date = end_date&.strftime("%Y%m%d")
+        return [unprocessed_aptc_end_date, nil, "D"]
+      end
       return [nil, @rcni_row[41], "D"] if @rcni_row[41].blank?
-      segment = fetch_segment(@rcni_row[40])
+      segment = fetch_segment(@rcni_row[37])
+      if segment.blank? && @policy.insurance_line_code == "HLT"
+        @overall_flag = "N"
+        return [nil, @rcni_row[41], "D"]
+      end
       end_date = segment&.effective_end_date
 
       ffm_applied_aptc_end_date = end_date&.strftime("%Y%m%d")
       issuer_applied_end_date = @rcni_row[41]
-
-      if segment.blank?
-        @overall_flag = "R"
-        return [nil, @rcni_row[41], "D"]
-      end
 
       return [nil, issuer_applied_end_date, "D"] unless @member.is_subscriber
       if ffm_applied_aptc_end_date == Date.today.end_of_year.strftime("%Y%m%d") && issuer_applied_end_date.blank?
@@ -437,22 +585,39 @@ module Reports
       [ffm_applied_aptc_end_date, issuer_applied_end_date, match_data]
     end
 
+    # rubocop:disable Metrics/MethodLength
     def total_premium_amount
-      return [nil, @rcni_row[45], "U"] if @member.blank?
-      return ["0.00", @rcni_row[45],  "D"] unless @member.is_subscriber
-      segment = fetch_segment(@rcni_row[46])
+      # If Subscriber, Member, or Policy are not found
+      return [nil, @rcni_row[45], "D"] if @overall_flag == "R" || @overall_flag == "U"
+      # return [nil, @rcni_row[45], "U"] if @member.blank?
+      return [nil, @rcni_row[45],  "D"] unless @member.is_subscriber
+      # unprocessed policy
+      if @overall_flag == "G"
+        segment = fetch_segment(@member.coverage_start)
+        kind = @policy.insurance_line_code == "HLT" ? "health" : "dental"
+        premium_amount = if kind == "dental"
+                           @policy.total_premium_amount
+                         else
+                           segment&.total_premium_amount
+                         end
+        unprocessed_total_premium = begin
+          format('%.2f', premium_amount)
+        rescue StandardError
+          "0.00"
+        end
+        return [unprocessed_total_premium, nil, "D"]
+      end
+      segment = fetch_segment(@rcni_row[37])
+      if segment.blank?
+        @overall_flag = "N"
+        return [nil, @rcni_row[45], "D"]
+      end
       kind = @policy.insurance_line_code == "HLT" ? "health" : "dental"
       premium_amount = if kind == "dental"
                          @policy.total_premium_amount
                        else
                          segment&.total_premium_amount
                        end
-
-      if segment.blank?
-        @overall_flag = "R"
-        return [nil, @rcni_row[45], "D"]
-      end
-
       @total_premium_amount += premium_amount
       ffm_total_premium = begin
         format('%.2f', premium_amount)
@@ -466,16 +631,25 @@ module Reports
     end
 
     def total_premium_start_date
+      # If Subscriber, Member, or Policy are not found
+      return [nil, @rcni_row[46], "D"] if @overall_flag == "R" || @overall_flag == "U"
       return [nil, @rcni_row[46], "U"] if @member.blank?
+      # unprocessed policy
+      if @overall_flag == "G"
+        segment = fetch_segment(@member.coverage_start)
+        unprocessed_total_premium_start = segment&.effective_start_date&.strftime("%Y%m%d")
+        return [unprocessed_total_premium_start, nil, "D"]
+      end
       return [nil, @rcni_row[46], "D"] if @rcni_row[46].blank?
-      return [nil, @rcni_row[45],  "D"] unless @member.is_subscriber
-      segment = fetch_segment(@rcni_row[46])
+      return [nil, @rcni_row[46], "D"] unless @member.is_subscriber
+
+      segment = fetch_segment(@rcni_row[37])
 
       ffm_total_premium_start = segment&.effective_start_date&.strftime("%Y%m%d")
       issuer_total_premium_start = @rcni_row[46]
 
       if ffm_total_premium_start.blank?
-        @overall_flag = "R"
+        @overall_flag = "N"
         return [nil, @rcni_row[46], "D"]
       end
 
@@ -485,15 +659,23 @@ module Reports
     end
 
     def total_premium_end_date
+      # If Subscriber, Member, or Policy are not found
+      return [nil, @rcni_row[47], "D"] if @overall_flag == "R" || @overall_flag == "U"
       return [nil, @rcni_row[47], "U"] if @member.blank?
+      # unprocessed policy
+      if @overall_flag == "G"
+        segment = fetch_segment(@member.coverage_start)
+        unprocessed_total_premium_end = segment&.effective_end_date&.strftime("%Y%m%d")
+        return [unprocessed_total_premium_end, nil, "D"]
+      end
       return [nil, @rcni_row[47], "D"] if @rcni_row[47].blank?
-      return [nil, @rcni_row[45],  "D"] unless @member.is_subscriber
-      segment = fetch_segment(@rcni_row[46])
+      return [nil, @rcni_row[47], "D"] unless @member.is_subscriber
+      segment = fetch_segment(@rcni_row[37])
 
       ffm_total_premium_end = segment&.effective_end_date&.strftime("%Y%m%d")
 
       if ffm_total_premium_end.blank?
-        @overall_flag = "R"
+        @overall_flag = "N"
         return [nil, @rcni_row[47], "D"]
       end
 
@@ -509,11 +691,23 @@ module Reports
     end
 
     def individual_premium_amount
-      return [nil, @rcni_row[48], "U"] if @member.blank?
-      segment = fetch_segment(@rcni_row[49])
+      # If Subscriber, Member, or Policy are not found
+      return [nil, @rcni_row[48], "D"] if @overall_flag == "R" || @overall_flag == "U"
+      # return [nil, @rcni_row[48], "U"] if @member.blank?
+
+      # unprocessed policy
+      if @overall_flag == "G"
+        segment = fetch_segment(@member.coverage_start)
+        amount = segment.present? ? segment.individual_premium_amount : 0.00
+        premium_amount = @member.is_subscriber ? amount : @member.premium_amount
+        unprocessed_individual_premium = format('%.2f', premium_amount)
+        return [unprocessed_individual_premium, nil, "D"]
+      end
+      segment = fetch_segment(@rcni_row[37])
       issuer_premium_mount = @rcni_row[48]
+
       if segment.blank?
-        @overall_flag = "R"
+        @overall_flag = "N"
         return [nil, issuer_premium_mount, "D"]
       end
 
@@ -530,15 +724,25 @@ module Reports
     end
 
     def individual_premium_start_date
-      return [nil, @rcni_row[49], "U"] if @member.blank?
-      segment = fetch_segment(@rcni_row[49])
+      # If Subscriber, Member, or Policy are not found
+      return [nil, @rcni_row[49], "D"] if @overall_flag == "R" || @overall_flag == "U"
+      # return [nil, @rcni_row[49], "U"] if @member.blank?
+
+      # unprocessed policy
+      if @overall_flag == "G"
+        segment = fetch_segment(@member.coverage_start)
+        start_date = segment&.effective_start_date
+        unprocessed_individual_premium_start_date = start_date&.strftime("%Y%m%d")
+        return [unprocessed_individual_premium_start_date, nil, "D"]
+      end
+      segment = fetch_segment(@rcni_row[37])
       start_date = segment&.effective_start_date
 
       ffm_individual_premium_start_date =  start_date&.strftime("%Y%m%d")
       issuer_individual_premium_start_date = @rcni_row[49]
 
       if ffm_individual_premium_start_date.blank?
-        @overall_flag = "R"
+        @overall_flag = "N"
         return [nil, ffm_individual_premium_start_date, "D"]
       end
 
@@ -550,15 +754,24 @@ module Reports
     end
 
     def individual_premium_end_date
-      return [nil, @rcni_row[50], "U"] if @member.blank?
-      segment = fetch_segment(@rcni_row[49])
+      # If Subscriber, Member, or Policy are not found
+      return [nil, @rcni_row[50], "D"] if @overall_flag == "R" || @overall_flag == "U"
+      # return [nil, @rcni_row[50], "U"] if @member.blank?
+      # unprocessed policy
+      if @overall_flag == "G"
+        segment = fetch_segment(@member.coverage_start)
+        end_date = segment&.effective_end_date
+        unprocessed_individual_premium_end_date = end_date&.strftime("%Y%m%d")
+        return [unprocessed_individual_premium_end_date, nil, "D"]
+      end
+      segment = fetch_segment(@rcni_row[37])
       end_date = segment&.effective_end_date
 
       ffm_individual_premium_end_date =  end_date&.strftime("%Y%m%d")
       issuer_individual_premium_end_date = @rcni_row[50]
 
       if ffm_individual_premium_end_date.blank?
-        @overall_flag = "R"
+        @overall_flag = "N"
         return [nil, ffm_individual_premium_end_date, "D"]
       end
 
@@ -574,7 +787,13 @@ module Reports
     end
 
     def premium_paid_status
-      return [nil, @rcni_row[51], "U"] if @policy.blank?
+      # If Subscriber, Member, or Policy are not found
+      return [nil, @rcni_row[51], "D"] if @overall_flag == "R" || @overall_flag == "U"
+      # Next line likely unnecessary
+      # return [nil, @rcni_row[51], "U"] if @policy.blank?
+      # unprocessed policy
+      unprocessed_premium_status = fetch_effectuation_status if @overall_flag == "G"
+      return [unprocessed_premium_status, nil, "D"] if @overall_flag == "G"
 
       ffm_premium_status = fetch_effectuation_status
       issuer_premium_status = @rcni_row[51]
@@ -586,8 +805,15 @@ module Reports
     end
 
     def coverage_year
-      return [nil, @rcni_row[53], "U"] if @policy.blank?
+      # If Subscriber, Member, or Policy are not found
+      return [nil, @rcni_row[53], "D"] if @overall_flag == "R" || @overall_flag == "U"
+      # return [nil, @rcni_row[53], "U"] if @policy.blank?
 
+      # unprocessed policy
+      if @overall_flag == "G"
+        unprocessed_coverage_year = @policy.primary_subscriber.coverage_start.year.to_s
+        return [unprocessed_coverage_year, nil, "D"]
+      end
       ffm_coverage_year = @policy.primary_subscriber.coverage_start.year.to_s
       issuer_coverage_year = @rcni_row[53]
       match_data = ffm_coverage_year == issuer_coverage_year ? "M" : "I"
@@ -595,8 +821,10 @@ module Reports
     end
 
     def market_place_segment_id
-      return nil if @member.blank?
-      return nil if @policy.blank?
+      # If Subscriber, Member, or Policy are not found
+      return nil if @overall_flag == "R" || @overall_flag == "U"
+      # return nil if @member.blank?
+      # return nil if @policy.blank?
 
       subscriber = @policy.primary_subscriber
       date = @member.coverage_start.strftime("%Y%m%d")
@@ -604,8 +832,13 @@ module Reports
     end
 
     def overall_indicator
-      return "G" if @rcni_row[8].blank?
-      (@policy.blank? || @member.blank?) ? "U" : @overall_flag
+      # If Subscriber, Member, or Policy are not found
+      return "R" if @overall_flag == "R"
+      return "U" if @overall_flag == "U"
+      # return "G" if @rcni_row[8].blank?
+      # unprocessed policy
+      return "G" if @overall_flag == "G"
+      @overall_flag
     end
 
     def insert_missing_policy_data(csv, carrier_hios_id, rcni_file_path)
@@ -631,6 +864,7 @@ module Reports
             @policy = policy_entity
             @member = enrollee
             @segments = enrollee.segments
+            @overall_flag = "G"
             csv << insert_data
             @total_number_of_issuer_records += 1
           end
@@ -639,9 +873,6 @@ module Reports
     end
 
     # rubocop:disable Metrics/AbcSize
-    # rubocop:disable Metrics/CyclomaticComplexity
-    # rubocop:disable Metrics/PerceivedComplexity
-    # rubocop:disable Metrics/MethodLength
     def insert_data
       first_name = compare_first_name
       middle_name = compare_middle_name
