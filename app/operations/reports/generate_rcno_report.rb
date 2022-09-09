@@ -173,7 +173,7 @@ module Reports
 
     def fetch_applied_aptc_amount(segment)
       return 0.00 unless @member.is_subscriber
-      return 0.00 if [0.0, 0, 0.00].include?(@policy.applied_aptc)
+      return 0.00 if [0.0, 0, 0.00].include?(@policy.applied_aptc) if segment.blank?
 
       segment.present? ? segment.aptc_amount : @policy.applied_aptc
     end
@@ -496,6 +496,10 @@ module Reports
       return [nil, @rcni_row[39], "D"] if @overall_flag == "R" || @overall_flag == "U"
       return [nil, @rcni_row[39], "U"] if @member.blank?
       return ["0.00", @rcni_row[39], "D"] unless @member.is_subscriber
+
+      segment = fetch_segment(@rcni_row[37])
+      # Do no compare aptc if policy is canceled
+      return [segment.aptc_amount, @rcni_row[39], "D"] if fetch_effectuation_status == @rcni_row[51]
       # unprocessed policy
       if @overall_flag == "G"
         segment = fetch_segment(@member.coverage_start)
@@ -503,7 +507,6 @@ module Reports
         return [unprocessed_aptc_amount, nil, "D"]
       end
 
-      segment = fetch_segment(@rcni_row[37])
       if segment.blank? && @policy.insurance_line_code == "HLT"
         @overall_flag = "N"
         return [nil, @rcni_row[39], "D"]
