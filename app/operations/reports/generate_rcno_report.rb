@@ -173,7 +173,7 @@ module Reports
 
     def fetch_applied_aptc_amount(segment)
       return 0.00 unless @member.is_subscriber
-      return 0.00 if [0.0, 0, 0.00].include?(@policy.applied_aptc) if segment.blank?
+      return 0.00 if [0.0, 0, 0.00].include?(@policy.applied_aptc) && segment.blank?
 
       segment.present? ? segment.aptc_amount : @policy.applied_aptc
     end
