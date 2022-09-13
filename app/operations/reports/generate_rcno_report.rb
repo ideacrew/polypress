@@ -515,11 +515,7 @@ module Reports
       @total_applied_premium_amount += fetch_applied_aptc_amount(segment)
       ffm_applied_aptc_amount = format('%.2f', fetch_applied_aptc_amount(segment))
       issuer_applied_aptc_amount = @rcni_row[39]
-      match_data = if issuer_applied_aptc_amount.blank? || issuer_applied_aptc_amount == ".00"
-                     "D"
-                   else
-                     ffm_applied_aptc_amount == issuer_applied_aptc_amount ? "M" : "I"
-                   end
+      match_data = ffm_applied_aptc_amount == issuer_applied_aptc_amount ? "M" : "I"
       @overall_flag = "N" if match_data == "I"
       [ffm_applied_aptc_amount, issuer_applied_aptc_amount, match_data]
     end
