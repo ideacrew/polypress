@@ -499,7 +499,7 @@ module Reports
 
       segment = fetch_segment(@rcni_row[37])
       # Do no compare aptc if policy is canceled
-      return [segment.aptc_amount, @rcni_row[39], "D"] if fetch_effectuation_status == @rcni_row[51]
+      return [segment.aptc_amount, @rcni_row[39], "D"] if @rcni_row[51] == "C" && @policy.aasm_state == "canceled"
       # unprocessed policy
       if @overall_flag == "G"
         segment = fetch_segment(@member.coverage_start)
