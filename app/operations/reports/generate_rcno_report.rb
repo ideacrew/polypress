@@ -519,7 +519,7 @@ module Reports
                                    else
                                      [".00", "0.0", "0.00", "0"].include?(@rcni_row[39]) ? "0.00" : @rcni_row[39]
                                    end
-        match_data = ffm_applied_aptc_amount == issuer_applied_aptc_amount ? "M" : "I"
+      match_data = ffm_applied_aptc_amount == issuer_applied_aptc_amount ? "M" : "I"
       @overall_flag = "N" if match_data == "I"
       [ffm_applied_aptc_amount, issuer_applied_aptc_amount, match_data]
     end
