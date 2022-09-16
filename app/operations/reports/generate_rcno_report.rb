@@ -596,7 +596,7 @@ module Reports
       return [nil, @rcni_row[45],  "D"] unless @member.is_subscriber
 
       segment = fetch_segment(@rcni_row[37])
-      segment_premium_amount = segment.total_premium_amount
+      segment_premium_amount = segment&.total_premium_amount
       return [segment_premium_amount, @rcni_row[45], "D"] if @rcni_row[51] == "C" && @policy.aasm_state == "canceled"
 
       # unprocessed policy
