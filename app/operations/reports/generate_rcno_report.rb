@@ -173,7 +173,7 @@ module Reports
 
     def fetch_applied_aptc_amount(segment)
       return 0.00 unless @member.is_subscriber
-      return 0.00 if [0.0, 0, 0.00].include?(@policy.applied_aptc)
+      return 0.00 if [0.0, 0, 0.00].include?(@policy.applied_aptc) && segment.blank?
 
       segment.present? ? segment.aptc_amount : @policy.applied_aptc
     end
@@ -496,6 +496,10 @@ module Reports
       return [nil, @rcni_row[39], "D"] if @overall_flag == "R" || @overall_flag == "U"
       return [nil, @rcni_row[39], "U"] if @member.blank?
       return ["0.00", @rcni_row[39], "D"] unless @member.is_subscriber
+
+      segment = fetch_segment(@rcni_row[37])
+      # Do no compare aptc if policy is canceled
+      return [segment.aptc_amount, @rcni_row[39], "D"] if @rcni_row[51] == "C" && @policy.aasm_state == "canceled"
       # unprocessed policy
       if @overall_flag == "G"
         segment = fetch_segment(@member.coverage_start)
@@ -503,7 +507,6 @@ module Reports
         return [unprocessed_aptc_amount, nil, "D"]
       end
 
-      segment = fetch_segment(@rcni_row[37])
       if segment.blank? && @policy.insurance_line_code == "HLT"
         @overall_flag = "N"
         return [nil, @rcni_row[39], "D"]
@@ -511,12 +514,12 @@ module Reports
 
       @total_applied_premium_amount += fetch_applied_aptc_amount(segment)
       ffm_applied_aptc_amount = format('%.2f', fetch_applied_aptc_amount(segment))
-      issuer_applied_aptc_amount = @rcni_row[39]
-      match_data = if issuer_applied_aptc_amount.blank? || issuer_applied_aptc_amount == ".00"
-                     "D"
-                   else
-                     ffm_applied_aptc_amount == issuer_applied_aptc_amount ? "M" : "I"
-                   end
+      issuer_applied_aptc_amount = if @rcni_row[39].blank?
+                                     "0.00"
+                                   else
+                                     [".00", "0.0", "0.00", "0"].include?(@rcni_row[39]) ? "0.00" : @rcni_row[39]
+                                   end
+      match_data = ffm_applied_aptc_amount == issuer_applied_aptc_amount ? "M" : "I"
       @overall_flag = "N" if match_data == "I"
       [ffm_applied_aptc_amount, issuer_applied_aptc_amount, match_data]
     end
@@ -591,6 +594,11 @@ module Reports
       return [nil, @rcni_row[45], "D"] if @overall_flag == "R" || @overall_flag == "U"
       # return [nil, @rcni_row[45], "U"] if @member.blank?
       return [nil, @rcni_row[45],  "D"] unless @member.is_subscriber
+
+      segment = fetch_segment(@rcni_row[37])
+      segment_premium_amount = segment&.total_premium_amount
+      return [segment_premium_amount, @rcni_row[45], "D"] if @rcni_row[51] == "C" && @policy.aasm_state == "canceled"
+
       # unprocessed policy
       if @overall_flag == "G"
         segment = fetch_segment(@member.coverage_start)
@@ -607,7 +615,6 @@ module Reports
         end
         return [unprocessed_total_premium, nil, "D"]
       end
-      segment = fetch_segment(@rcni_row[37])
       if segment.blank?
         @overall_flag = "N"
         return [nil, @rcni_row[45], "D"]
@@ -716,6 +723,8 @@ module Reports
       premium_amount = @member.is_subscriber ? amount : @member.premium_amount
 
       ffm_individual_premium = format('%.2f', premium_amount)
+      empty_premiums = %w[.00 0.0 0.00].include?(issuer_premium_mount) && ffm_individual_premium == "0.00"
+      return [ffm_individual_premium, issuer_premium_mount, "D"] if empty_premiums
       return [ffm_individual_premium, issuer_premium_mount, "D"] if ["N", "C"].include?(@policy.effectuation_status)
 
       match_data = ffm_individual_premium == issuer_premium_mount ? "M" : "I"
