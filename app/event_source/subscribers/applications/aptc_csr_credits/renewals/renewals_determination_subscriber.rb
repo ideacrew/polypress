@@ -2,7 +2,7 @@
 
 module Subscribers
   module Applications
-    module AptcCsrCreditEligibilities
+    module AptcCsrCredits
       module Renewals
         # Subscriber will receive response payload from medicaid gateway and generate documents
         class RenewalsDeterminationSubscriber
