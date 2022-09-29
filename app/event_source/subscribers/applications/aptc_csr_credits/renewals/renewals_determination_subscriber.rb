@@ -5,7 +5,7 @@ module Subscribers
     module AptcCsrCreditEligibilities
       module Renewals
         # Subscriber will receive response payload from medicaid gateway and generate documents
-        class RenewalsSubscriber
+        class RenewalsDeterminationSubscriber
           include EventSource::Logging
           include ::EventSource::Subscriber[amqp: 'enroll.applications.aptc_csr_credits.renewals.notice']
 
@@ -13,7 +13,7 @@ module Subscribers
             :on_enroll_applications_aptc_csr_credits_renewals_notice
           ) do |delivery_info, _metadata, response|
             routing_key = delivery_info[:routing_key]
-            logger.info "Polypress: invoked RenewalsSubscriber with delivery_info: #{delivery_info} routing_key: #{routing_key}"
+            logger.info "Polypress: invoked RenewalsDeterminationSubscriber with delivery_info: #{delivery_info} routing_key: #{routing_key}"
 
             payload = JSON.parse(response, symbolize_names: true)
             # event_key = routing_key.split('.').last
@@ -22,7 +22,7 @@ module Subscribers
                 { payload: payload, event_key: routing_key }
               )
             if results.all?(&:success)
-              logger.info "Polypress: RenewalsSubscriber; acked for #{routing_key}"
+              logger.info "Polypress: RenewalsDeterminationSubscriber; acked for #{routing_key}"
             else
               results
                 .map(&:failure)
@@ -37,7 +37,7 @@ module Subscribers
                       result.failure.errors.to_h
                     end
                   logger.error(
-                    "Polypress: RenewalsSubscriber_error;
+                    "Polypress: RenewalsDeterminationSubscriber_error;
                   nacked due to:#{errors}; for routing_key: #{routing_key}, payload: #{payload}"
                   )
                 end
@@ -45,7 +45,7 @@ module Subscribers
             ack(delivery_info.delivery_tag)
           rescue StandardError, SystemStackError => e
             logger.error(
-              "Polypress: RenewalsSubscriber_error: nacked due to backtrace:
+              "Polypress: RenewalsDeterminationSubscriber_error: nacked due to backtrace:
               #{e.backtrace}; for routing_key: #{routing_key}, response: #{response}"
             )
             ack(delivery_info.delivery_tag)
