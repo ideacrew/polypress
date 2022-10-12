@@ -14,7 +14,8 @@ module Subscribers
 
       # Disabling notice generations for testing optimization of renewals determination
       # Enable once the testing is done. Do not merge to trunk with disabled operation.
-      logger.info "Polypress: Skipping notice for medicaid gateway renewal determinations with delivery_info: #{delivery_info} routing_key: #{routing_key}"
+      logger.info "Polypress: Skipping notice for medicaid gateway renewal determinations with
+                  delivery_info: #{delivery_info} routing_key: #{routing_key}"
       # payload = JSON.parse(response, symbolize_names: true)
       # # event_key = routing_key.split('.').last
       # results =
