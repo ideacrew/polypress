@@ -239,6 +239,7 @@ module FinancialApplicationHelper
         :is_csr_eligible => true,
         :is_eligible_for_non_magi_reasons => true,
         :csr => "94",
+        :magi_medicaid_monthly_household_income => 6_000,
         :is_non_magi_medicaid_eligible => false,
         :is_without_assistance => false,
         :category_determinations => category_determinations

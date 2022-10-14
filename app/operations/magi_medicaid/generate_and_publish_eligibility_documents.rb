@@ -51,38 +51,18 @@ module MagiMedicaid
         peds.inject([]) do |e_names, ped|
           e_name =
             if ped.is_ia_eligible
-              aqhp_event(event_key)
+              'determined_aptc_eligible'
             elsif ped.is_medicaid_chip_eligible || ped.is_magi_medicaid
-              medicaid_event(event_key)
+              'determined_magi_medicaid_eligible'
             elsif ped.is_totally_ineligible
-              ineligible_event(event_key)
+              'determined_totally_ineligible'
             elsif ped.is_uqhp_eligible
-              uqhp_event(event_key)
+              'determined_uqhp_eligible'
             end
 
           e_names << event_name(event_key, e_name)
         end
       Success(event_names.compact.uniq)
-    end
-
-    def source_enroll?(event_key)
-      event_key.include?('enroll')
-    end
-
-    def aqhp_event(event_key)
-      source_enroll?(event_key) ? 'aqhp_eligible_on_reverification' : 'determined_aptc_eligible'
-    end
-
-    def medicaid_event(event_key)
-      source_enroll?(event_key) ? 'medicaid_eligible_on_reverification' : 'determined_magi_medicaid_eligible'
-    end
-
-    def ineligible_event(event_key)
-      source_enroll?(event_key) ? 'totally_ineligible_on_reverification' : 'determined_totally_ineligible'
-    end
-
-    def uqhp_event(event_key)
-      source_enroll?(event_key) ? 'uqhp_eligible_on_reverification' : 'determined_uqhp_eligible'
     end
 
     def event_name(event_key, eligibility)
