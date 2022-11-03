@@ -30,7 +30,7 @@ module Reports
       service_uri = valid_params[:service_uri]
       user_token = valid_params[:user_token]
 
-      params = { year: Date.today.year == 2021 ? 2022 : Date.today.year,
+      params = { year: audit_datum.year,
                  hios_id: hios_id,
                  user_token: user_token }
 

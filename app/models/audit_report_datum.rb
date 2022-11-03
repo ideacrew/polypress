@@ -11,6 +11,7 @@ class AuditReportDatum
   field :status, type: String
   field :payload, type: String
   field :report_type, type: String
+  field :year, type: Integer
 
   embeds_many :policies, cascade_callbacks: true
 

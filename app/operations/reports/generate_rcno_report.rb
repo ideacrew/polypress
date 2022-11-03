@@ -22,6 +22,7 @@ module Reports
     def validate(params)
       parsed_params = JSON.parse(params[:payload]).deep_symbolize_keys!
       return Failure("No carrier hios id present") if parsed_params[:payload][:carrier_hios_id].blank?
+      return Failure("Please pass in year") if parsed_params[:payload][:year].blank?
 
       Success(parsed_params)
     end
@@ -29,6 +30,7 @@ module Reports
     def fetch_audit_report_datum(valid_params)
       report_type = AuditReportDatum.where(report_type: "rcno").present? ? "rcno" : "pre_audit"
       audit_report_datum = AuditReportDatum.where(hios_id: valid_params[:payload][:carrier_hios_id],
+                                                  year: valid_params[:payload][:year],
                                                   status: "completed",
                                                   report_type: report_type)
       Success(audit_report_datum)
