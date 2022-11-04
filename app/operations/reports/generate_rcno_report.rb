@@ -13,7 +13,7 @@ module Reports
       audit_datum = yield fetch_audit_report_datum(valid_params)
       @logger = Logger.new("#{Rails.root}/log/rcno_report_errors_for_#{valid_params[:payload][:carrier_hios_id]}")
       rcni_file_path = yield fetch_rcni_file_path(valid_params[:payload][:carrier_hios_id])
-      generate_rcno_report(rcni_file_path, valid_params[:payload][:carrier_hios_id], audit_datum)
+      generate_rcno_report(rcni_file_path, valid_params, audit_datum)
       Success(true)
     end
 
@@ -37,8 +37,8 @@ module Reports
     end
 
     # rubocop:disable Metrics/MethodLength
-    def generate_rcno_report(rcni_file_path, carrier_hios_id, audit_datum)
-      file_name = fetch_rcno_file_name(carrier_hios_id)
+    def generate_rcno_report(rcni_file_path, valid_params, audit_datum)
+      file_name = fetch_rcno_file_name(valid_params)
       @total_number_of_issuer_records = 0
       @total_subscribers = 0
       @total_dependents = 0
@@ -123,8 +123,10 @@ module Reports
       end
     end
 
-    def fetch_rcno_file_name(carrier_hios_id)
-      "#{Rails.root}/rcno_carrier_hios_id_#{carrier_hios_id}.csv"
+    def fetch_rcno_file_name(valid_params)
+      hios_id = valid_params[:payload][:carrier_hios_id]
+      year = valid_params[:payload][:year]
+      "#{Rails.root}/rcno_carrier_hios_id_#{hios_id}_for_year_#{year}.csv"
     end
 
     def fetch_relationship_code(code)

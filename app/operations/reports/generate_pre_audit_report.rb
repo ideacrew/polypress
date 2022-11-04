@@ -11,7 +11,7 @@ module Reports
     def call(params)
       valid_params = yield validate(params)
       audit_datum = yield fetch_audit_report_datum(valid_params)
-      generate_report(valid_params[:payload][:carrier_hios_id], audit_datum)
+      generate_report(valid_params[:payload][:carrier_hios_id], audit_datum, valid_params[:payload][:year])
       Success(true)
     end
 
@@ -33,8 +33,8 @@ module Reports
       Success(audit_report_datum)
     end
 
-    def generate_report(carrier_hios_id, audit_datum)
-      file_name = fetch_file_name(carrier_hios_id)
+    def generate_report(carrier_hios_id, audit_datum, year)
+      file_name = fetch_file_name(carrier_hios_id, year)
 
       CSV.open(file_name, "w", col_sep: "|") do |csv|
         audit_datum.where(status: "completed").each do |audit_data|
@@ -164,8 +164,8 @@ module Reports
       "#{policy_entity.qhp_id}#{policy_entity.csr_variant}"
     end
 
-    def fetch_file_name(carrier_hios_id)
-      "#{Rails.root}/carrier_hios_id_#{carrier_hios_id}.csv"
+    def fetch_file_name(carrier_hios_id, year)
+      "#{Rails.root}/carrier_hios_id_#{carrier_hios_id}_for_year_#{year}.csv"
     end
 
     def segment_id(id)
