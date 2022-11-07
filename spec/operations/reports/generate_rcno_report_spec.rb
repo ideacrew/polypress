@@ -7,7 +7,7 @@ RSpec.describe Reports::GenerateRcnoReport do
   include Dry::Monads[:result, :do]
 
   let!(:audit_report_datum) do
-    FactoryBot.create(:audit_report_datum, payload: json_payload, hios_id: "33653",
+    FactoryBot.create(:audit_report_datum, payload: json_payload, hios_id: "33653", year: 2022,
                                            subscriber_id: "1234567", status: "completed", report_type: "pre_audit")
   end
   let(:enrollee) do
@@ -165,7 +165,7 @@ RSpec.describe Reports::GenerateRcnoReport do
   end
 
   after :each do
-    FileUtils.rm_rf("#{Rails.root}/rcno_carrier_hios_id_#{audit_report_datum.hios_id}.csv")
+    FileUtils.rm_rf("#{Rails.root}/rcno_carrier_hios_id_#{audit_report_datum.hios_id}_for_year_2022.csv")
   end
 
   describe "with valid arguments" do
@@ -177,11 +177,11 @@ RSpec.describe Reports::GenerateRcnoReport do
       end
     end
 
-    let(:output_file) { "#{Rails.root}/rcno_carrier_hios_id_#{audit_report_datum&.hios_id}.csv" }
+    let(:output_file) { "#{Rails.root}/rcno_carrier_hios_id_#{audit_report_datum&.hios_id}_for_year_2022.csv" }
 
     it "should be success" do
       subject = described_class.new
-      payload_hash = { payload: { carrier_hios_id: audit_report_datum&.hios_id } }
+      payload_hash = { payload: { carrier_hios_id: audit_report_datum&.hios_id, year: 2022 } }
       result = subject.call({ :payload => payload_hash.to_json })
       expect(result.success?).to eq true
       expect(File.exist?(output_file)).to eq true

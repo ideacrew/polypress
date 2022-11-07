@@ -75,7 +75,7 @@ module Reports
           @logger.info "Unable to generate report due to #{e.backtrace} for member #{@member} record row #{@rcni_row}"
           Rails.logger.error("Unable to generate report due to #{e} for row #{@rcni_row}")
         end
-        insert_missing_policy_data(csv, carrier_hios_id, rcni_file_path)
+        insert_missing_policy_data(csv, valid_params[:payload][:carrier_hios_id], rcni_file_path)
         csv << insert_total_record_data
       rescue StandardError => e
         puts e

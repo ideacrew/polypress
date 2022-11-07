@@ -6,7 +6,7 @@ RSpec.describe Reports::GeneratePreAuditReport, dbclean: :before_each do
 
   let!(:audit_report_datum) do
     FactoryBot.create(:audit_report_datum, payload: json_payload, hios_id: "12345",
-                                           status: "completed", report_type: "pre_audit")
+                                           status: "completed", report_type: "pre_audit", year: 2022)
   end
   let(:enrollee_1) do
     {
@@ -156,10 +156,10 @@ RSpec.describe Reports::GeneratePreAuditReport, dbclean: :before_each do
     [@result.to_h].to_json
   end
 
-  let(:payload_hash) { { payload: { carrier_hios_id: audit_report_datum.hios_id } } }
+  let(:payload_hash) { { payload: { carrier_hios_id: audit_report_datum.hios_id, year: 2022 } } }
 
   after :each do
-    FileUtils.rm_rf("#{Rails.root}/carrier_hios_id_#{audit_report_datum.hios_id}.csv")
+    FileUtils.rm_rf("#{Rails.root}/carrier_hios_id_#{audit_report_datum.hios_id}_2022.csv")
   end
 
   describe "with valid arguments" do
@@ -169,7 +169,7 @@ RSpec.describe Reports::GeneratePreAuditReport, dbclean: :before_each do
 
     it "should be success" do
       expect(subject.success?).to eq true
-      file_content = CSV.read("#{Rails.root}/carrier_hios_id_#{audit_report_datum.hios_id}.csv", col_sep: "|", headers: false)
+      file_content = CSV.read("#{Rails.root}/carrier_hios_id_#{audit_report_datum.hios_id}_for_year_2022.csv", col_sep: "|", headers: false)
       expect(file_content.count).to eq 2
       expect(file_content[0]).to include(enrollee_1[:first_name])
       expect(file_content[0]).to include(enrollee_1[:last_name])

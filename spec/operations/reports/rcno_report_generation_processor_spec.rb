@@ -17,7 +17,7 @@ RSpec.describe Reports::RcnoReportGenerationProcessor do
 
     context 'No file exists' do
       it 'should fail' do
-        subject = described_class.new.call({ hios_id: "33653" })
+        subject = described_class.new.call({ hios_id: "33653", year: 2022 })
         expect(subject.failure?).to eq true
         expect(subject.failure).to eq 'Unable to find RCNI file for carrier hios_id 33653, please upload one'
       end
@@ -49,7 +49,7 @@ RSpec.describe Reports::RcnoReportGenerationProcessor do
       subject = described_class.new
       File.stub(:exist?).and_return(true)
       allow(subject).to receive(:fetch_rcni_file_path).and_return(Success("#{Rails.root}/spec/test_data/RCNI_33653.txt"))
-      subject.call({ hios_id: "33653" })
+      subject.call({ hios_id: "33653", year: 2022 })
 
       expect(AuditReportDatum.all.count).to eq 1
     end
