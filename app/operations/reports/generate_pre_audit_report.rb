@@ -168,9 +168,10 @@ module Reports
       "#{Rails.root}/carrier_hios_id_#{carrier_hios_id}_for_year_#{year}.csv"
     end
 
-    def segment_id(id)
+    def segment_id(id, policy_entity)
       result = id.split("-")
-      result.delete_at(2)
+      result.delete_at(1)
+      result.insert(1, policy_entity.enrollment_group_id)
       result.join("-")
     end
 
@@ -205,7 +206,7 @@ module Reports
        policy_entity.responsible_party_subscriber&.mailing_address&.zip,
        segment.effective_start_date&.strftime("%Y%m%d"), non_subscriber_end_date(enrollee, segment),
        enrollee.issuer_assigned_policy_id, qhp_id(policy_entity), policy_entity.effectuation_status,
-       policy_entity.enrollment_group_id, segment.id, aptc_amount(enrollee, segment),
+       policy_entity.enrollment_group_id, segment_id(segment.id, policy_entity), aptc_amount(enrollee, segment),
        effective_start_date(enrollee, segment), effective_end_date(enrollee, segment),
        nil, effective_start_date(enrollee, segment),
        effective_end_date(enrollee, segment), total_premium_amount(enrollee, segment, policy_entity),
