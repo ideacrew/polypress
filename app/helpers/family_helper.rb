@@ -125,7 +125,12 @@ module FamilyHelper
       ],
       :product_reference => product_reference(false),
       :issuer_profile_reference => issuer_profile_reference,
-      :consumer_role_reference => consumer_role_preference
+      :consumer_role_reference => consumer_role_preference,
+      :timestamp => {
+        submitted_at: current_date.to_datetime,
+        created_at: current_date.to_datetime,
+        modified_at: current_date.to_datetime
+      }
     }
   end
 
@@ -144,7 +149,12 @@ module FamilyHelper
       ],
       :product_reference => product_reference(false),
       :issuer_profile_reference => issuer_profile_reference,
-      :consumer_role_reference => consumer_role_preference
+      :consumer_role_reference => consumer_role_preference,
+      :timestamp => {
+        submitted_at: current_date.to_datetime,
+        created_at: current_date.to_datetime,
+        modified_at: current_date.to_datetime
+      }
     }
   end
 
