@@ -13,7 +13,7 @@ module Reports
       audit_datum = yield fetch_audit_report_datum(valid_params)
       @logger = Logger.new("#{Rails.root}/log/rcno_report_errors_for_#{valid_params[:payload][:carrier_hios_id]}")
       rcni_file_path = yield fetch_rcni_file_path(valid_params[:payload][:carrier_hios_id])
-      generate_rcno_report(rcni_file_path, valid_params[:payload][:carrier_hios_id], audit_datum)
+      generate_rcno_report(rcni_file_path, valid_params, audit_datum)
       Success(true)
     end
 
@@ -22,6 +22,7 @@ module Reports
     def validate(params)
       parsed_params = JSON.parse(params[:payload]).deep_symbolize_keys!
       return Failure("No carrier hios id present") if parsed_params[:payload][:carrier_hios_id].blank?
+      return Failure("Please pass in year") if parsed_params[:payload][:year].blank?
 
       Success(parsed_params)
     end
@@ -29,14 +30,15 @@ module Reports
     def fetch_audit_report_datum(valid_params)
       report_type = AuditReportDatum.where(report_type: "rcno").present? ? "rcno" : "pre_audit"
       audit_report_datum = AuditReportDatum.where(hios_id: valid_params[:payload][:carrier_hios_id],
+                                                  year: valid_params[:payload][:year],
                                                   status: "completed",
                                                   report_type: report_type)
       Success(audit_report_datum)
     end
 
     # rubocop:disable Metrics/MethodLength
-    def generate_rcno_report(rcni_file_path, carrier_hios_id, audit_datum)
-      file_name = fetch_rcno_file_name(carrier_hios_id)
+    def generate_rcno_report(rcni_file_path, valid_params, audit_datum)
+      file_name = fetch_rcno_file_name(valid_params)
       @total_number_of_issuer_records = 0
       @total_subscribers = 0
       @total_dependents = 0
@@ -73,7 +75,7 @@ module Reports
           @logger.info "Unable to generate report due to #{e.backtrace} for member #{@member} record row #{@rcni_row}"
           Rails.logger.error("Unable to generate report due to #{e} for row #{@rcni_row}")
         end
-        insert_missing_policy_data(csv, carrier_hios_id, rcni_file_path)
+        insert_missing_policy_data(csv, valid_params[:payload][:carrier_hios_id], rcni_file_path)
         csv << insert_total_record_data
       rescue StandardError => e
         puts e
@@ -121,8 +123,10 @@ module Reports
       end
     end
 
-    def fetch_rcno_file_name(carrier_hios_id)
-      "#{Rails.root}/rcno_carrier_hios_id_#{carrier_hios_id}.csv"
+    def fetch_rcno_file_name(valid_params)
+      hios_id = valid_params[:payload][:carrier_hios_id]
+      year = valid_params[:payload][:year]
+      "#{Rails.root}/rcno_carrier_hios_id_#{hios_id}_for_year_#{year}.csv"
     end
 
     def fetch_relationship_code(code)

@@ -8,7 +8,8 @@ module Reports
     send(:include, ::EventSource::Command)
     send(:include, ::EventSource::Logging)
 
-    def call(_params)
+    def call(params)
+      @year = params[:year]
       _enabled = yield pre_audit_feature_enabled?
       carrier_ids = yield fetch_carrier_ids
       fetch_and_store_coverage_data(carrier_ids)
@@ -31,7 +32,7 @@ module Reports
 
     def fetch_and_store_coverage_data(carrier_ids)
       carrier_ids.each do |carrier_hios_id|
-        result = Reports::FetchAndStoreSubscribersAndCoverageHistory.new.call({ carrier_hios_id: carrier_hios_id, year: Date.today.year })
+        result = Reports::FetchAndStoreSubscribersAndCoverageHistory.new.call({ carrier_hios_id: carrier_hios_id, year: @year })
         result.success? ? Success(:ok) : Failure("Unable to generate report for hios_id #{carrier_hios_id}")
       end
     end

@@ -11,7 +11,7 @@ module Reports
     def call(params)
       valid_params = yield validate(params)
       audit_datum = yield fetch_audit_report_datum(valid_params)
-      generate_report(valid_params[:payload][:carrier_hios_id], audit_datum)
+      generate_report(valid_params[:payload][:carrier_hios_id], audit_datum, valid_params[:payload][:year])
       Success(true)
     end
 
@@ -20,19 +20,21 @@ module Reports
     def validate(params)
       parsed_params = JSON.parse(params[:payload]).deep_symbolize_keys!
       return Failure("No carrier hios id present") if parsed_params[:payload][:carrier_hios_id].blank?
+      return Failure("Please pass in year") if parsed_params[:payload][:year].blank?
 
       Success(parsed_params)
     end
 
     def fetch_audit_report_datum(valid_params)
       audit_report_datum = AuditReportDatum.where(hios_id: valid_params[:payload][:carrier_hios_id],
+                                                  year: valid_params[:payload][:year],
                                                   status: "completed",
                                                   report_type: "pre_audit")
       Success(audit_report_datum)
     end
 
-    def generate_report(carrier_hios_id, audit_datum)
-      file_name = fetch_file_name(carrier_hios_id)
+    def generate_report(carrier_hios_id, audit_datum, year)
+      file_name = fetch_file_name(carrier_hios_id, year)
 
       CSV.open(file_name, "w", col_sep: "|") do |csv|
         audit_datum.where(status: "completed").each do |audit_data|
@@ -162,13 +164,14 @@ module Reports
       "#{policy_entity.qhp_id}#{policy_entity.csr_variant}"
     end
 
-    def fetch_file_name(carrier_hios_id)
-      "#{Rails.root}/carrier_hios_id_#{carrier_hios_id}.csv"
+    def fetch_file_name(carrier_hios_id, year)
+      "#{Rails.root}/carrier_hios_id_#{carrier_hios_id}_for_year_#{year}.csv"
     end
 
-    def segment_id(id)
+    def segment_id(id, policy_entity)
       result = id.split("-")
-      result.delete_at(2)
+      result.delete_at(1)
+      result.insert(1, policy_entity.enrollment_group_id)
       result.join("-")
     end
 
@@ -203,7 +206,7 @@ module Reports
        policy_entity.responsible_party_subscriber&.mailing_address&.zip,
        segment.effective_start_date&.strftime("%Y%m%d"), non_subscriber_end_date(enrollee, segment),
        enrollee.issuer_assigned_policy_id, qhp_id(policy_entity), policy_entity.effectuation_status,
-       policy_entity.enrollment_group_id, segment.id, aptc_amount(enrollee, segment),
+       policy_entity.enrollment_group_id, segment_id(segment.id, policy_entity), aptc_amount(enrollee, segment),
        effective_start_date(enrollee, segment), effective_end_date(enrollee, segment),
        nil, effective_start_date(enrollee, segment),
        effective_end_date(enrollee, segment), total_premium_amount(enrollee, segment, policy_entity),

@@ -9,7 +9,7 @@ module Reports
     def call(params)
       valid_params = yield validate(params)
       rcni_file_path = yield fetch_rcni_file_path(valid_params[:hios_id])
-      fetch_and_store_coverage_history(rcni_file_path, valid_params[:hios_id])
+      fetch_and_store_coverage_history(rcni_file_path, valid_params[:hios_id], valid_params[:year])
       Success(true)
     end
 
@@ -17,6 +17,7 @@ module Reports
 
     def validate(params)
       return Failure("Pass in HIOS Id of the carrier") if params[:hios_id].blank?
+      return Failure("Pass in year") if params[:year].blank?
 
       unless File.exist?("#{Rails.root}/RCNI_#{params[:hios_id]}")
         return Failure("Unable to find RCNI file for carrier hios_id #{params[:hios_id]}, please upload one")
@@ -33,21 +34,23 @@ module Reports
       end
     end
 
-    def fetch_and_store_coverage_history(rcni_file_path, hios_id)
+    def fetch_and_store_coverage_history(rcni_file_path, hios_id, year)
       File.readlines(rcni_file_path, chomp: true).each do |line|
         result = line.split("|")
         next if result[0] != "01"
 
-        create_audit_datum_and_fetch_data(result[16], hios_id)
+        create_audit_datum_and_fetch_data(result[16], hios_id, year)
       end
     end
 
-    def create_audit_datum_and_fetch_data(subscriber_id, hios_id)
-      audit_records = AuditReportDatum.where(hios_id: hios_id, subscriber_id: subscriber_id, report_type: "rcno")
+    def create_audit_datum_and_fetch_data(subscriber_id, hios_id, year)
+      audit_records = AuditReportDatum.where(hios_id: hios_id, subscriber_id: subscriber_id, report_type: "rcno",
+                                             year: year)
       return if audit_records.present?
 
       audit_record = AuditReportDatum.create!(report_type: "rcno", subscriber_id: subscriber_id,
-                                              status: "pending", hios_id: hios_id)
+                                              status: "pending", hios_id: hios_id,
+                                              year: year)
       fetch_coverage_history(audit_record)
     end
 

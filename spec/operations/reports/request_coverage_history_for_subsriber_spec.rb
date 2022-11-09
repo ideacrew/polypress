@@ -6,7 +6,7 @@ require 'webmock/rspec'
 RSpec.describe Reports::RequestCoverageHistoryForSubscriber do
 
   describe 'with valid arguments' do
-    let(:audit_report_datum) { FactoryBot.create(:audit_report_datum, hios_id: "12345")}
+    let(:audit_report_datum) { FactoryBot.create(:audit_report_datum, hios_id: "12345", year: 2022)}
 
     subject do
       described_class.new.call({

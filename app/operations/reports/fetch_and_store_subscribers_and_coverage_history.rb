@@ -9,6 +9,7 @@ module Reports
     send(:include, Dry::Monads[:try])
 
     def call(params)
+      @year = params[:year]
       hios_id = params[:carrier_hios_id]
       service_uri = yield fetch_subscriber_list_end_point
       user_token = yield fetch_user_token
@@ -39,7 +40,7 @@ module Reports
     end
 
     def fetch_subscribers_list(service_uri, user_token, hios_id)
-      params = { year: Date.today.year == 2021 ? 2022 : Date.today.year,
+      params = { year: @year,
                  hios_id: hios_id,
                  user_token: user_token }
 
@@ -51,7 +52,7 @@ module Reports
     def store_subscribers_list(subscribers_json, hios_id)
       parsed_subscriber_list = JSON.parse(subscribers_json)
       parsed_subscriber_list.each do |subscriber_id|
-        audit_record = AuditReportDatum.where(subscriber_id: subscriber_id, hios_id: hios_id).first
+        audit_record = AuditReportDatum.where(subscriber_id: subscriber_id, hios_id: hios_id, year: @year).first
         if audit_record.present?
           audit_record.update_attributes(status: "pending", payload: nil)
           audit_record.policies = []
@@ -59,7 +60,8 @@ module Reports
           AuditReportDatum.create!(subscriber_id: subscriber_id,
                                    status: 'pending',
                                    hios_id: hios_id,
-                                   report_type: "pre_audit")
+                                   report_type: "pre_audit",
+                                   year: @year)
         end
       end
       Success(true)
@@ -73,7 +75,7 @@ module Reports
     end
 
     def fetch_and_store_coverage_history(hios_id)
-      audit_datum = AuditReportDatum.where(hios_id: hios_id)
+      audit_datum = AuditReportDatum.where(hios_id: hios_id, year: @year)
       puts "Total number of record for carrier #{hios_id} is #{audit_datum.count}"
       audit_datum.each do |audit|
         RequestSubscriberCoverageHistoryJob.perform_later(audit.id.to_s, 0)
