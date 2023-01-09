@@ -16,6 +16,7 @@ RSpec.describe MagiMedicaid::PublishDocument do
     let(:event_key) { 'magi_medicaid.mitc.eligibilities.determined_uqhp_eligible' }
     let(:body) { '<p>Uqhp Eligible Document for {{ hbx_id }}</p>' }
 
+    let(:print_code) { 'IVLMWE' }
     let!(:template) do
       FactoryBot.create(
         :template,
@@ -24,7 +25,7 @@ RSpec.describe MagiMedicaid::PublishDocument do
           markup: body
         },
         title: title,
-        print_code: 'IVLMWE',
+        print_code: print_code,
         marketplace: 'aca_individual',
         recipient: 'AcaEntities::Families::Family',
         content_type: 'application/pdf',
@@ -284,6 +285,15 @@ RSpec.describe MagiMedicaid::PublishDocument do
           result = MagiMedicaid::PublishDocument.new.send(:get_recipient_hbx_id, entity)
           expect(result.value!).to eq recipient_hbx_id
         end
+      end
+    end
+
+    describe 'tax notices' do
+      let(:print_code) { 'IVLTAX' }
+
+      # make sure tax notices are loaded fine with tax inserts
+      it 'should return success' do
+        expect(subject.success?).to be_truthy
       end
     end
   end
