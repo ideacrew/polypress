@@ -16,7 +16,7 @@ module Subscribers
             payload = JSON.parse(response, symbolize_names: true)
             # event_key = routing_key.split('.').last
             results =
-              MagiMedicaid::GenerateAndPublishEligibilityDocuments.new.call(
+              PolicyTaxHouseholds::GenerateAndPublishTaxDocuments.new.call(
                 { payload: payload, event_key: routing_key }
               )
             if results.all?(&:success)
