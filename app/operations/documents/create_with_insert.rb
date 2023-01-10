@@ -23,7 +23,7 @@ module Documents
         )
 
       # _inserts = yield append_inserts(params, template)
-      _other_pdfs = yield append_pdfs
+      _other_pdfs = yield append_pdfs(params)
       Success(documents_hash)
     end
 
@@ -119,6 +119,13 @@ module Documents
       ]
     end
 
+    def ivl_attach_1095a_form
+      join_pdfs [
+        @main_document_path,
+        Rails.root.join('lib/pdf_templates', '2022_form_1095A.pdf')
+      ]
+    end
+
     def verifications_insert_needed?(params, insert)
       (params[:entity]&.documents_needed || params[:preview].present?) &&
         insert_present?(insert)
@@ -153,11 +160,16 @@ module Documents
       Success(true)
     end
 
-    def append_pdfs
+    def tax_notice?(params)
+      ['IVLTAX', 'IVLVTA'].include?(params[:template_model].print_code.to_s)
+    end
+
+    def append_pdfs(params)
       attach_blank_page
 
       # ivl_appeal_rights
       # ivl_non_discrimination
+      ivl_attach_1095a_form if tax_notice?(params)
       ivl_attach_envelope
       Success(true)
     end
