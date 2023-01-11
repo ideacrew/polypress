@@ -4,18 +4,15 @@ module Subscribers
   module Families
     module Notices
       module TaxFroms
-        # Subscriber will receive response payload from medicaid gateway and generate documents
+        # Subscriber will receive initial1095a_payload from EDI gateway and generate documents
         class Initial1095aNoticeGenerationSubscriber
           include EventSource::Logging
           include ::EventSource::Subscriber[amqp: 'edi_gateway.families.tax_forms.initial1095a_payload']
 
           subscribe(:on_generated) do |delivery_info, _metadata, response|
-
             routing_key = delivery_info[:routing_key]
             logger.info "Polypress: invoked Initial1095aNoticeGenerationSubscriber with delivery_info: #{delivery_info} routing_key: #{routing_key}"
-
             payload = JSON.parse(response, symbolize_names: true)
-            # event_key = routing_key.split('.').last
 
             result =
               PolicyTaxHouseholds::GenerateAndPublishTaxDocuments.new.call(

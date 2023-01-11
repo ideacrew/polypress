@@ -4,7 +4,7 @@ module Subscribers
   module Families
     module Notices
       module TaxFroms
-        # Subscriber will receive response payload from medicaid gateway and generate documents
+        # Subscriber will receive catastrophic1095a_payload from EDI gateway and generate documents
         class Catastrophic1095aNoticeGenerationSubscriber
           include EventSource::Logging
           include ::EventSource::Subscriber[amqp: 'edi_gateway.families.tax_forms.catastrophic1095a_payload']
