@@ -13,7 +13,7 @@ module Subscribers
             routing_key = delivery_info[:routing_key]
             logger.info "Polypress: invoked Void1095aNoticeGenerationSubscriber with delivery_info: #{delivery_info} routing_key: #{routing_key}"
             payload = JSON.parse(response, symbolize_names: true)
-            
+
             result =
               PolicyTaxHouseholds::GenerateAndPublishTaxDocuments.new.call(
                 { payload: payload, event_key: routing_key }
