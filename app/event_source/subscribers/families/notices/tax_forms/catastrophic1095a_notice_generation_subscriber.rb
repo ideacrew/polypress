@@ -7,9 +7,9 @@ module Subscribers
         # Subscriber will receive response payload from medicaid gateway and generate documents
         class Catastrophic1095aNoticeGenerationSubscriber
           include EventSource::Logging
-          include ::EventSource::Subscriber[amqp: 'edi_gateway.families.notices.tax_forms.catastrophic1095a']
+          include ::EventSource::Subscriber[amqp: 'edi_gateway.families.tax_forms.catastrophic1095a_payload']
 
-          subscribe(:on_requested) do |delivery_info, _metadata, response|
+          subscribe(:on_generated) do |delivery_info, _metadata, response|
             routing_key = delivery_info[:routing_key]
             logger.info "Polypress: invoked Catastrophic1095aNoticeGenerationSubscriber with delivery_info:
                           #{delivery_info} routing_key: #{routing_key}"
