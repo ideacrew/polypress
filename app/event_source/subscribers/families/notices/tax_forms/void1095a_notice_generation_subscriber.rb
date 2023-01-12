@@ -7,9 +7,9 @@ module Subscribers
         # Subscriber will receive void1095a_payload from EDI gateway and generate documents
         class Void1095aNoticeGenerationSubscriber
           include EventSource::Logging
-          include ::EventSource::Subscriber[amqp: 'edi_gateway.families.tax_forms.void1095a_payload']
+          include ::EventSource::Subscriber[amqp: 'edi_gateway.families.tax_form1095a']
 
-          subscribe(:on_generated) do |delivery_info, _metadata, response|
+          subscribe(:on_void_payload_generated) do |delivery_info, _metadata, response|
             routing_key = delivery_info[:routing_key]
             logger.info "Polypress: invoked Void1095aNoticeGenerationSubscriber with delivery_info: #{delivery_info} routing_key: #{routing_key}"
             payload = JSON.parse(response, symbolize_names: true)
