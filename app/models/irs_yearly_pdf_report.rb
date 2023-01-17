@@ -3,6 +3,7 @@
 # Appends data on to 1095A tax forms
 class IrsYearlyPdfReport < PdfReport
   include ActionView::Helpers::NumberHelper
+  include ::Config::SiteHelper
 
   attr_accessor :responsible_party_data, :calender_year
 
@@ -85,7 +86,6 @@ class IrsYearlyPdfReport < PdfReport
     col4 = mm2pt(128.50)
     col5 = mm2pt(159.50)
 
-    # 480
     y_pos = 472
 
     covered_individuals = @tax_household[:covered_individuals]
@@ -137,7 +137,7 @@ class IrsYearlyPdfReport < PdfReport
     font "Times-Roman"
 
     bounding_box([col1, y_pos], :width => 100) do
-      text 'DC'
+      text site_state_abbreviation
     end
 
     bounding_box([col2, y_pos], :width => 150) do
@@ -241,16 +241,14 @@ class IrsYearlyPdfReport < PdfReport
   # rubocop:enable Metrics/CyclomaticComplexity
   # rubocop:enable Metrics/MethodLength
 
-  # def number_to_ssn(number)
-  #   number.gsub!('-','')
-  #   delimiter = "-"
-  #   number.to_s.gsub!(/(\d{0,3})(\d{2})(\d{4})$/,"\\1#{delimiter}\\2#{delimiter}\\3")
-  # end
+  def decrypt_ssn(encrypted_ssn)
+    AcaEntities::Operations::Encryption::Decrypt.new.call({ value: encrypted_ssn }).value!
+  end
 
-  def mask_ssn(ssn)
-    return if ssn.blank?
-    # ssn = number_to_ssn(ssn)
-    last_digits = '112-112-2234'.match(/\d{4}$/)[0]
+  def mask_ssn(encrypted_ssn)
+    return if encrypted_ssn.blank?
+    ssn = decrypt_ssn(encrypted_ssn)
+    last_digits = ssn.match(/\d{4}$/)[0]
     "***-**-#{last_digits}"
   end
 end
