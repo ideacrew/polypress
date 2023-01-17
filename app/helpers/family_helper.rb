@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# rubocop:disable Metrics/ModuleLength
 # FamilyHelper
 module FamilyHelper
   include FinancialApplicationHelper
@@ -608,3 +609,4 @@ module FamilyHelper
     }
   end
 end
+# rubocop:enable Metrics/ModuleLength
