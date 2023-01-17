@@ -39,11 +39,12 @@ module FinancialApplicationHelper
 
   def family_member_reference
     {
-      :family_member_hbx_id => "1000",
+      :family_member_hbx_id => "100045",
       :first_name => "Gerald",
       :last_name => "Rivers",
       :person_hbx_id => "1009501",
-      :is_primary_family_member => true
+      :is_primary_family_member => true,
+      :relation_with_primary => "self"
     }
   end
 

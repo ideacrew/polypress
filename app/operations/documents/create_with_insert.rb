@@ -10,6 +10,7 @@ module Documents
     send(:include, Dry::Monads[:try])
     send(:include, ::EventSource::Command)
     send(:include, ::EventSource::Logging)
+    include FamilyHelper
 
     # @param [Hash] AcaEntities::MagiMedicaid::Application
     # @param[Templates::TemplateModel] :template_model
@@ -23,7 +24,8 @@ module Documents
         )
 
       # _inserts = yield append_inserts(params, template)
-      _other_pdfs = yield append_pdfs(params)
+      _tax_document_path = generate_tax_documents(params) if tax_notice?(params)
+      _other_pdfs = yield append_other_pdfs(params)
       Success(documents_hash)
     end
 
@@ -120,10 +122,30 @@ module Documents
     end
 
     def ivl_attach_1095a_form
+      Failure("no tax document found to attach") unless @tax_document_path
+
       join_pdfs [
         @main_document_path,
-        Rails.root.join('lib/pdf_templates', '2022_form_1095A.pdf')
+        @tax_document_path
       ]
+    end
+
+    def generate_tax_documents(params)
+      family_payload =
+        if params[:preview].present?
+          result = ::AcaEntities::Contracts::Families::FamilyContract.new.call(family_hash.deep_symbolize_keys)
+          ::AcaEntities::Families::Family.new(result.to_h).to_h
+        else
+          params[:entity].to_h
+        end
+
+      # returns document path
+      output = Documents::Append1095aDocuments.new.call({ payload: family_payload.to_h })
+      if output.success?
+        @tax_document_path = output.success
+      else
+        Failure("unable to generate tax documents")
+      end
     end
 
     def verifications_insert_needed?(params, insert)
@@ -164,7 +186,7 @@ module Documents
       ['IVLTAX', 'IVLVTA'].include?(params[:template_model].print_code.to_s)
     end
 
-    def append_pdfs(params)
+    def append_other_pdfs(params)
       attach_blank_page
 
       # ivl_appeal_rights
