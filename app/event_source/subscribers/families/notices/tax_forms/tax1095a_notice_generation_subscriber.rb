@@ -4,14 +4,15 @@ module Subscribers
   module Families
     module Notices
       module TaxFroms
-        # Subscriber will receive void1095a_payload from EDI gateway and generate documents
-        class Void1095aNoticeGenerationSubscriber
+        # Subscriber will receive tax_form1095a_payload from EDI gateway and generate documents
+        class Tax1095aNoticeGenerationSubscriber
           include EventSource::Logging
           include ::EventSource::Subscriber[amqp: 'edi_gateway.families.tax_form1095a']
 
-          subscribe(:on_void_payload_generated) do |delivery_info, _metadata, response|
+          subscribe(:on_edi_gateway_families_tax_form1095a) do |delivery_info, _metadata, response|
             routing_key = delivery_info[:routing_key]
-            logger.info "Polypress: invoked Void1095aNoticeGenerationSubscriber with delivery_info: #{delivery_info} routing_key: #{routing_key}"
+            logger.info "Polypress: invoked Tax1095aNoticeGenerationSubscriber with delivery_info:
+                            #{delivery_info} routing_key: #{routing_key}"
             payload = JSON.parse(response, symbolize_names: true)
 
             result =
@@ -19,7 +20,7 @@ module Subscribers
                 { payload: payload, event_key: routing_key }
               )
             if result.success?
-              logger.info "Polypress: Catastrophic1095aNoticeGenerationSubscriber; acked for #{routing_key}"
+              logger.info "Polypress: Tax1095aNoticeGenerationSubscriber; acked for #{routing_key}"
             else
               errors = if result.is_a?(String)
                          result
@@ -29,15 +30,15 @@ module Subscribers
                          result.failure.errors.to_h
                        end
               logger.error(
-                "Polypress: Catastrophic1095aNoticeGenerationSubscriber_error;
-                    nacked due to:#{errors}; for routing_key: #{routing_key}, payload: #{payload}"
+                "Polypress: Tax1095aNoticeGenerationSubscriber_error;
+                      nacked due to:#{errors}; for routing_key: #{routing_key}, payload: #{payload}"
               )
             end
             ack(delivery_info.delivery_tag)
           rescue StandardError, SystemStackError => e
             logger.error(
-              "Polypress: Void1095aNoticeGenerationSubscriber_error: nacked due to backtrace:
-                #{e.backtrace}; for routing_key: #{routing_key}, response: #{response}"
+              "Polypress: Tax1095aNoticeGenerationSubscriber_error: nacked due to backtrace:
+                  #{e.backtrace}; for routing_key: #{routing_key}, response: #{response}"
             )
             ack(delivery_info.delivery_tag)
           end
