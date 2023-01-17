@@ -15,10 +15,10 @@ module Subscribers
                             #{delivery_info} routing_key: #{routing_key}"
             payload = JSON.parse(response, symbolize_names: true)
 
-            result =
-              PolicyTaxHouseholds::GenerateAndPublishTaxDocuments.new.call(
-                { payload: payload, event_key: routing_key }
-              )
+            result = true
+            #   PolicyTaxHouseholds::GenerateAndPublishTaxDocuments.new.call(
+            #     { payload: payload, event_key: routing_key }
+            #   )
             if result.success?
               logger.info "Polypress: Tax1095aNoticeGenerationSubscriber; acked for #{routing_key}"
             else
