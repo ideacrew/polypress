@@ -15,7 +15,7 @@
   end
 
   file_name = "#{Rails.root}/#{file}"
-  next unless File.exists?(file_name)
+  next unless File.exist?(file_name)
 
   File.readlines(file_name, chomp: true).each do |line|
     row = line.split("|")
