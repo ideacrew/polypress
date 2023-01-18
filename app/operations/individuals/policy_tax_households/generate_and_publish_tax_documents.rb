@@ -17,6 +17,8 @@ module Individuals
         publish_tax_documents(family_entity, template_model)
       end
 
+      private
+
       def validate(params)
         return Failure("Missing event key for given payload: #{params[:family_hash][:hbx_id]}") unless params[:event_key]
 
