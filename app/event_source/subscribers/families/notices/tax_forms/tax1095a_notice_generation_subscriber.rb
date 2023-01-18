@@ -16,7 +16,7 @@ module Subscribers
             payload = JSON.parse(response, symbolize_names: true)
 
             result = ::Individuals::PolicyTaxHouseholds::GenerateAndPublishTaxDocuments.new.call(
-              { payload: payload[:cv3_family], event_key: routing_key }
+              { family_hash: payload[:cv3_family], event_key: routing_key }
             )
             if result.success?
               logger.info "Polypress: Tax1095aNoticeGenerationSubscriber; acked for #{routing_key}"
