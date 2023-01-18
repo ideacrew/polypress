@@ -75,7 +75,7 @@ module Reports
           @logger.info "Unable to generate report due to #{e.backtrace} for member #{@member} record row #{@rcni_row}"
           Rails.logger.error("Unable to generate report due to #{e} for row #{@rcni_row}")
         end
-        insert_missing_policy_data(csv, valid_params[:payload][:carrier_hios_id], rcni_file_path)
+        insert_missing_policy_data(csv, valid_params, rcni_file_path)
         csv << insert_total_record_data
       rescue StandardError => e
         puts e
@@ -854,8 +854,14 @@ module Reports
       @overall_flag
     end
 
-    def insert_missing_policy_data(csv, carrier_hios_id, rcni_file_path)
-      records = AuditReportDatum.all.where(hios_id: carrier_hios_id).where(:'policies.rcno_processed' => false)
+    def insert_missing_policy_data(csv, valid_params, rcni_file_path)
+      carrier_hios_id = valid_params[:payload][:carrier_hios_id]
+      year = valid_params[:payload][:year]
+      records = AuditReportDatum.where(hios_id: carrier_hios_id,
+                                       year: year,
+                                       status: "completed",
+                                       report_type: "pre_audit",
+                                       :'policies.rcno_processed' => false)
       records.each do |record|
         policies = record.policies
         policies.each do |policy|

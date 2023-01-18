@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 ["rcno_carrier_hios_id_48396.csv", "rcno_carrier_hios_id_96667.csv", "rcno_carrier_hios_id_33653.csv",
- "rcno_carrier_hios_id_50165.csv"].each do |file|
+ "rcno_carrier_hios_id_50165.csv", "rcno_carrier_hios_id_54879.csv"].each do |file|
   @hash = Hash.new
 
   [:first_name, :last_name, :dob, :subscriber_indicator, :issuer_subscriber_id, :exchange_policy_id, :issuer_member_id,
@@ -14,7 +14,10 @@
     end
   end
 
-  File.readlines("#{Rails.root}/#{file}", chomp: true).each do |line|
+  file_name = "#{Rails.root}/#{file}"
+  next unless File.exists?(file_name)
+
+  File.readlines(file_name, chomp: true).each do |line|
     row = line.split("|")
 
     def letter_code_counter(key, match)
