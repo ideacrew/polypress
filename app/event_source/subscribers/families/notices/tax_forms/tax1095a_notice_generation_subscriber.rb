@@ -3,7 +3,7 @@
 module Subscribers
   module Families
     module Notices
-      module TaxFroms
+      module TaxForms
         # Subscriber will receive tax_form1095a_payload from EDI gateway and generate documents
         class Tax1095aNoticeGenerationSubscriber
           include EventSource::Logging
@@ -15,10 +15,9 @@ module Subscribers
                             #{delivery_info} routing_key: #{routing_key}"
             payload = JSON.parse(response, symbolize_names: true)
 
-            result = true
-            #   PolicyTaxHouseholds::GenerateAndPublishTaxDocuments.new.call(
-            #     { payload: payload, event_key: routing_key }
-            #   )
+            result = ::Individuals::PolicyTaxHouseholds::GenerateAndPublishTaxDocuments.new.call(
+              { payload: payload[:cv3_family], event_key: routing_key }
+            )
             if result.success?
               logger.info "Polypress: Tax1095aNoticeGenerationSubscriber; acked for #{routing_key}"
             else
