@@ -61,7 +61,6 @@ module Documents
       )
       irs_report.process
 
-
       @folder_path = Rails.root.join('..', IRS_LOCAL_1095A_FOLDER, @family_hbx_id.to_s)
       FileUtils.mkdir_p @folder_path
       @absolute_file_path = "#{@folder_path}/#{@family_hbx_id}_#{DateTime.now.strftime('%Y%m%d%H%M%S')}.pdf"
