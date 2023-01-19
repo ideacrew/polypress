@@ -171,7 +171,12 @@ RSpec.describe MagiMedicaid::PublishDocument do
 
           let(:primary_applicant_hbx_id) { family_member_1[:person][:hbx_id] }
           let(:contact_method) { 'Only Electronic communications' }
-          let(:entity) { AcaEntities::Families::Family.new(family_hash.merge(magi_medicaid_applications: [application_hash])) }
+          let(:family_contract) do
+            AcaEntities::Contracts::Families::FamilyContract.new.call(family_hash.merge(magi_medicaid_applications: [application_hash]))
+          end
+          let(:entity) { AcaEntities::Families::Family.new(family_contract.to_h) }
+
+          # let(:entity) { AcaEntities::Families::Family.new(family_hash.merge(magi_medicaid_applications: [application_hash])) }
 
           it 'should not move document to local path' do
             subject
@@ -194,7 +199,8 @@ RSpec.describe MagiMedicaid::PublishDocument do
         context 'when the entity is AcaEntities::Families::Family' do
           include_context 'family response from enroll'
 
-          let(:entity) { AcaEntities::Families::Family.new(family_hash) }
+          let(:family_contract) { AcaEntities::Contracts::Families::FamilyContract.new.call(family_hash) }
+          let(:entity) { AcaEntities::Families::Family.new(family_contract.to_h) }
 
           context 'when the consumer has contact method' do
             context 'when the contact method is paper' do
@@ -267,7 +273,9 @@ RSpec.describe MagiMedicaid::PublishDocument do
     describe '#get_recipient_hbx_id' do
       context 'when the entity is AcaEntities::Families::Family' do
         include_context 'family response from enroll'
-        let(:entity) { AcaEntities::Families::Family.new(family_hash) }
+        let(:family_contract) { AcaEntities::Contracts::Families::FamilyContract.new.call(family_hash) }
+        let(:entity) { AcaEntities::Families::Family.new(family_contract.to_h) }
+
         let(:recipient_hbx_id) { entity[:family_members].detect { |a| a[:is_primary_applicant] == true }[:person][:hbx_id] }
 
         it "should return primary family member's person hbx_id" do
@@ -289,11 +297,21 @@ RSpec.describe MagiMedicaid::PublishDocument do
     end
 
     describe 'tax notices' do
+      include_context 'family response from enroll'
+
       let(:print_code) { 'IVLTAX' }
+      let(:family_contract) { AcaEntities::Contracts::Families::FamilyContract.new.call(family_hash) }
+      let(:entity) { AcaEntities::Families::Family.new(family_contract.to_h) }
+      let(:tax_documents_path) { "#{Rails.root}/#{Documents::Append1095aDocuments::IRS_LOCAL_1095A_FOLDER}/*" }
 
       # make sure tax notices are loaded fine with tax inserts
       it 'should return success' do
         expect(subject.success?).to be_truthy
+      end
+
+      it 'should create tax forms' do
+        subject
+        expect(Dir[tax_documents_path].select { |path| File.file?(path) }.present?).to be_truthy
       end
     end
   end

@@ -11,6 +11,8 @@ RSpec.shared_context 'family response from enroll', :shared_context => :metadata
     ]
   end
 
+  let(:current_date) { Date.today }
+
   let(:family_hash) do
     {
       :documents_needed => true,
@@ -60,12 +62,16 @@ RSpec.shared_context 'family response from enroll', :shared_context => :metadata
 
   let(:contact_method) { 'Paper, Electronic and Text Message communications' }
 
+  let(:person_name_1) do
+    { :first_name => "John", :last_name => "Smith1" }
+  end
+
   let(:family_member_1) do
     {
       :is_primary_applicant => true,
       :person => {
         :hbx_id => "475",
-        :person_name => { :first_name => "John", :last_name => "Smith1" },
+        :person_name => person_name_1,
         :person_demographics => {
           :ssn => "784796992",
           :gender => "male",
@@ -120,7 +126,8 @@ RSpec.shared_context 'family response from enroll', :shared_context => :metadata
             :coverage_household_members => []
           }
         ],
-        :hbx_enrollments => hbx_enrollments
+        :hbx_enrollments => hbx_enrollments,
+        :insurance_agreements => insurance_agreements
       }
     ]
   end
@@ -140,6 +147,242 @@ RSpec.shared_context 'family response from enroll', :shared_context => :metadata
         :product_reference => product_reference,
         :issuer_profile_reference => issuer_profile_reference,
         :consumer_role_reference => consumer_role_preference
+      }
+    ]
+  end
+
+  let(:months_of_year) do
+    [
+      {
+        month: "January",
+        coverage_information: {
+          tax_credit: {
+            cents: 5_000,
+            currency_iso: "USD"
+          },
+          total_premium: {
+            cents: 50_000,
+            currency_iso: "USD"
+          },
+          slcsp_benchmark_premium: {
+            cents: 50_000,
+            currency_iso: "USD"
+          }
+        }
+      },
+      {
+        month: "February",
+        coverage_information: {
+          tax_credit: {
+            cents: 5_000,
+            currency_iso: "USD"
+          },
+          total_premium: {
+            cents: 50_000,
+            currency_iso: "USD"
+          },
+          slcsp_benchmark_premium: {
+            cents: 50_000,
+            currency_iso: "USD"
+          }
+        }
+      }
+    ]
+  end
+
+  let(:annual_premiums) do
+    {
+      tax_credit: {
+        cents: 60_000,
+        currency_iso: "USD"
+      },
+      total_premium: {
+        cents: 600_000,
+        currency_iso: "USD"
+      },
+      slcsp_benchmark_premium: {
+        cents: 600_000,
+        currency_iso: "USD"
+      }
+    }
+  end
+
+  let(:addresses) do
+    [
+      {
+        kind: "home",
+        address_1: "S Street NW",
+        address_2: "",
+        address_3: "",
+        city: "Awesome city",
+        county_name: "Awesome county",
+        state: "DC",
+        zip: "20002"
+      }
+    ]
+  end
+
+  let(:insurance_policy_enrollments) do
+    [
+      {
+        start_on: current_date.beginning_of_year,
+        subscriber: {
+          member: {
+            hbx_id: "1000595",
+            member_id: "1000595",
+            person_name: person_name_1
+          },
+          dob: "",
+          gender: "male",
+          addresses: [
+            {
+              kind: "home",
+              address_1: "S Street NW",
+              address_2: "",
+              address_3: "",
+              city: "Awesome city",
+              county_name: "Awesome county",
+              state: "DC",
+              zip: "20002"
+            }
+          ],
+          emails: [
+            {
+              kind: "home",
+              address: "test@gmail.com"
+            }
+          ]
+        },
+        dependents: [],
+        total_premium_amount: {
+          cents: 50_000,
+          currency_iso: "USD"
+        },
+        tax_households: [
+          {
+            hbx_id: "828762",
+            tax_household_members: [
+              {
+                family_member_reference: {
+                  family_member_hbx_id: "1000595",
+                  relation_with_primary: "self"
+                },
+                tax_filer_status: "tax_filer",
+                is_subscriber: true
+              }
+            ]
+          }
+        ],
+        total_premium_adjustment_amount: {
+          cents: 5_000,
+          currency_iso: "USD"
+        }
+      }
+    ]
+  end
+
+  let(:insurance_policies) do
+    [
+      {
+        policy_id: "1000",
+        insurance_product: insurance_product,
+        hbx_enrollment_ids: [
+          "1000"
+        ],
+        start_on: current_date.beginning_of_year,
+        end_on: current_date.end_of_year,
+        enrollments: insurance_policy_enrollments,
+        aptc_csr_tax_households: aptc_csr_tax_households
+      }
+    ]
+  end
+
+  let(:insurance_product) do
+    {
+      name: "ABC plan",
+      hios_plan_id: "123456",
+      plan_year: 2023,
+      coverage_type: "health",
+      metal_level: "silver",
+      market_type: "individual",
+      ehb: "1.0"
+    }
+  end
+
+  let(:contract_holder) do
+    {
+      hbx_id: "1000595",
+      person_name: person_name_1,
+      encrypted_ssn: "yobheUbYUK2Abfc6lrq37YQCsPgBL8lLkw==\n",
+      dob: current_date - 40.years,
+      gender: "female",
+      addresses: [
+        {
+          kind: "home",
+          address_1: "S Street NW",
+          address_2: "",
+          address_3: "",
+          city: "Awesome city",
+          county_name: "Awesome county",
+          state_abbreviation: "DC",
+          zip_code: "20002"
+        }
+      ]
+    }
+  end
+
+  let(:insurance_agreements) do
+    [
+      {
+        start_on: current_date.beginning_of_year,
+        plan_year: 2023,
+        contract_holder: contract_holder,
+        insurance_provider: insurance_provider,
+        insurance_policies: insurance_policies
+      }
+    ]
+  end
+
+  let(:insurance_provider) do
+    {
+      title: "ANTHEM HEALTH PLANS OF MAINE",
+      hios_id: "123456",
+      fein: "311705652",
+      insurance_products: [insurance_product]
+    }
+  end
+
+  let(:aptc_csr_tax_households) do
+    [
+      {
+        covered_individuals: [
+          {
+            coverage_start_on: current_date.beginning_of_year,
+            coverage_end_on: current_date.end_of_year,
+            person: {
+              hbx_id: "1000595",
+              person_name: person_name_1,
+              person_demographics: {
+                gender: "female",
+                encrypted_ssn: "yobheUbYUK2Abfc6lrq37YQCsPgBL8lLkw==\n",
+                dob: current_date - 40.years
+              },
+              person_health: {},
+              is_active: true,
+              addresses: addresses,
+              emails: [
+                {
+                  kind: "home",
+                  address: "test@gmail.com"
+                }
+              ]
+            },
+            relation_with_primary: "self",
+            filer_status: "tax_filer"
+          }
+        ],
+        months_of_year: months_of_year,
+        annual_premiums: annual_premiums
       }
     ]
   end
