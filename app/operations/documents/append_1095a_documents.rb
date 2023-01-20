@@ -26,7 +26,7 @@ module Documents
     private
 
     def create_folder
-      Success(FileUtils.mkdir_p("#{Rails.root}/#{IRS_LOCAL_1095A_FOLDER}"))
+      Success(FileUtils.mkdir_p(Rails.root.join('..', IRS_LOCAL_1095A_FOLDER)))
     end
 
     def process(family_hash)
@@ -61,7 +61,7 @@ module Documents
       )
       irs_report.process
 
-      @folder_path = "#{Rails.root}/#{IRS_LOCAL_1095A_FOLDER}/#{@family_hbx_id}"
+      @folder_path = Rails.root.join('..', IRS_LOCAL_1095A_FOLDER, @family_hbx_id.to_s)
       FileUtils.mkdir_p @folder_path
       @absolute_file_path = "#{@folder_path}/#{@family_hbx_id}_#{DateTime.now.strftime('%Y%m%d%H%M%S')}.pdf"
       irs_report.render_file(@absolute_file_path)
@@ -79,7 +79,7 @@ module Documents
         end
       end
 
-      @path = "#{Rails.root}/#{IRS_LOCAL_1095A_FOLDER}/#{@recipient[:person][:hbx_id]}_#{DateTime.now.strftime('%Y%m%d%H%M%S')}.pdf"
+      @path = Rails.root.join('..', IRS_LOCAL_1095A_FOLDER, "#{@recipient[:person][:hbx_id]}_1095A_#{DateTime.now.strftime('%Y%m%d%H%M%S')}.pdf")
       if pdf.save(@path)
         Success(@path)
       else
