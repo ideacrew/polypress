@@ -334,7 +334,6 @@ RSpec.shared_context 'family response from enroll', :shared_context => :metadata
   let(:insurance_agreements) do
     [
       {
-        start_on: current_date.beginning_of_year,
         plan_year: 2023,
         contract_holder: contract_holder,
         insurance_provider: insurance_provider,

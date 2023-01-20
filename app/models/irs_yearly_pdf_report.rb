@@ -33,7 +33,7 @@ class IrsYearlyPdfReport < PdfReport
     end
     @has_aptc = @tax_household[:months_of_year].any? { |month| month[:coverage_information] && month[:coverage_information][:tax_credit][:cents] > 0 }
 
-    @calender_year = @insurance_agreement[:start_on].year
+    @calender_year = @insurance_agreement[:plan_year].to_i
     @multiple = options[:multiple]
     @corrected = options[:notice_type] == 'corrected'
 
