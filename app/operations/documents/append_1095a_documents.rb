@@ -11,7 +11,7 @@ module Documents
     include ::EventSource::Command
     include ::EventSource::Logging
 
-    IRS_LOCAL_1095A_FOLDER = 'irs_1095a'
+    IRS_LOCAL_1095A_FOLDER = 'aws/irs_1095a'
 
     # @param [Hash] AcaEntities::Families::Family
     def call(params)
