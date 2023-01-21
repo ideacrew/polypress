@@ -70,7 +70,7 @@ RSpec.shared_context 'family response from enroll', :shared_context => :metadata
     {
       :is_primary_applicant => true,
       :person => {
-        :hbx_id => "475",
+        :hbx_id => "1000595",
         :person_name => person_name_1,
         :person_demographics => {
           :ssn => "784796992",
@@ -393,7 +393,7 @@ RSpec.shared_context 'family response from enroll', :shared_context => :metadata
           :family_member_hbx_id => '1',
           :first_name => "John",
           :last_name => "Smith1",
-          :person_hbx_id => "475",
+          :person_hbx_id => "1000595",
           :dob => Date.new(1972, 4, 4)
         },
         :is_subscriber => true,

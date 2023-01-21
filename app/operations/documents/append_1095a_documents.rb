@@ -35,7 +35,7 @@ module Documents
         household[:insurance_agreements].each do |insurance_agreement|
           insurance_agreement[:insurance_policies].each do |insurance_policy|
             insurance_policy[:aptc_csr_tax_households].each do |aptc_csr_tax_household|
-              @recipient = recipient(aptc_csr_tax_household, insurance_agreement)
+              @recipient = recipient(aptc_csr_tax_household, insurance_agreement, family_hash)
 
               generate_pdf(
                 tax_household: aptc_csr_tax_household,
@@ -63,7 +63,8 @@ module Documents
 
       @folder_path = Rails.root.join('..', IRS_LOCAL_1095A_FOLDER, @family_hbx_id.to_s)
       FileUtils.mkdir_p @folder_path
-      @absolute_file_path = "#{@folder_path}/#{@family_hbx_id}_#{DateTime.now.strftime('%Y%m%d%H%M%S')}.pdf"
+      @absolute_file_path = "#{@folder_path}/#{@family_hbx_id}_#{DateTime.now.strftime('%Y%m%d%H%M%S%L')}.pdf"
+
       irs_report.render_file(@absolute_file_path)
     end
 
@@ -91,7 +92,7 @@ module Documents
       Success(FileUtils.remove_dir(@folder_path, true))
     end
 
-    def recipient(aptc_csr_tax_household, insurance_agreement)
+    def recipient(aptc_csr_tax_household, insurance_agreement, family_hash)
       tax_filers = aptc_csr_tax_household[:covered_individuals].select { |covered_individual| covered_individual[:filer_status] == 'tax_filer' }
 
       tax_filer =
@@ -101,7 +102,11 @@ module Documents
           tax_filers.detect { |tx_filer| tx_filer[:relation_with_primary] == 'self' }
         end
 
-      tax_filer || insurance_agreement[:contract_holder]
+      return tax_filer if tax_filer.present?
+
+      family_hash[:family_members].detect do |family_member|
+        family_member[:person][:hbx_id] == insurance_agreement[:contract_holder][:hbx_id]
+      end
     end
   end
 end
