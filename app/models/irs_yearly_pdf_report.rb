@@ -126,7 +126,6 @@ class IrsYearlyPdfReport < PdfReport
     x_pos_corrected = mm2pt(128.50)
     y_pos_corrected = 790.86 - mm2pt(31.80)
     y_pos_corrected = 790.86 - mm2pt(23.80) if @void && @calender_year >= 2015
-    @void = true
 
     if @corrected || @void
       bounding_box([x_pos_corrected, y_pos_corrected], :width => 100) do
