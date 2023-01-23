@@ -194,13 +194,24 @@ RSpec.describe MagiMedicaid::PublishDocument do
           MagiMedicaid::PublishDocument::DOCUMENT_LOCAL_PATH
         end
 
-        let(:result) { ::MagiMedicaid::PublishDocument.new.send(:requires_paper_communication?, entity) }
+        let(:params) { { entity: entity, template_model: template } }
+        let(:result) { ::MagiMedicaid::PublishDocument.new.send(:requires_paper_communication?, params) }
 
         context 'when the entity is AcaEntities::Families::Family' do
           include_context 'family response from enroll'
 
           let(:family_contract) { AcaEntities::Contracts::Families::FamilyContract.new.call(family_hash) }
           let(:entity) { AcaEntities::Families::Family.new(family_contract.to_h) }
+
+          context 'when the paper communication override checkbox has been selected' do
+            before do 
+              template.update(paper_communication_override: true)
+            end
+
+            it 'shoud return true' do
+              expect(result).to be_truthy
+            end
+          end
 
           context 'when the consumer has contact method' do
             context 'when the contact method is paper' do

@@ -17,6 +17,8 @@ module Templates
     field :recipient, type: String
     field :author, type: String
     field :updated_by, type: String
+    # indicates paper communication must be sent, irrespective of preferences
+    field :paper_communication_override, type: Boolean
 
     embeds_one :publisher,
                inverse_of: :publisher_event,
