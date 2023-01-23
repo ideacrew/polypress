@@ -344,7 +344,7 @@ RSpec.shared_context 'family response from enroll', :shared_context => :metadata
 
   let(:insurance_provider) do
     {
-      title: "ANTHEM HEALTH PLANS OF MAINE",
+      title: "MAINE COMMUNITY HEALTH OPTIONS",
       hios_id: "123456",
       fein: "311705652",
       insurance_products: [insurance_product]

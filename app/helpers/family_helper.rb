@@ -30,7 +30,7 @@ module FamilyHelper
   def insurance_provider
     {
       hios_id: '98765432',
-      title: 'Red Heart Healthcare',
+      title: 'MAINE COMMUNITY HEALTH OPTIONS',
       fein: "12345",
       insurance_products: [
         {
@@ -56,7 +56,6 @@ module FamilyHelper
         last_name: 'John',
         first_name: 'Smith1'
       },
-      encrypted_ssn: nil,
       dob: current_date - 50.years,
       gender: "male",
       addresses: [
@@ -122,7 +121,6 @@ module FamilyHelper
           insurer_assigned_id: 'HP597762000',
           person_name: { :first_name => "John", :last_name => "Smith1" },
           relationship_code: '1:18',
-          encrypted_ssn: nil,
           dob: Date.new(1972, 4, 4),
           gender: 'male',
           addresses: addresses,
@@ -151,7 +149,6 @@ module FamilyHelper
             first_name: 'Smith'
           },
           relationship_code: '4:19',
-          encrypted_ssn: nil,
           dob: Date.new(1983, 9, 6),
           gender: 'female',
           addresses: person_addresses
@@ -250,7 +247,6 @@ module FamilyHelper
       no_ssn: false,
       gender: 'male',
       dob: Date.today,
-      encrypted_ssn: nil,
       is_incarcerated: false
     }
   end
