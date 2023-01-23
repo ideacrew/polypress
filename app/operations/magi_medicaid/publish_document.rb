@@ -78,7 +78,7 @@ module MagiMedicaid
       end
     end
 
-    def requires_paper_communication?(entity, template_model)
+    def requires_paper_communication?(params)
       template_model = params[:template_model]
       entity = params[:entity]
       return true if template_model.paper_communication_override

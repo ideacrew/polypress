@@ -204,7 +204,7 @@ RSpec.describe MagiMedicaid::PublishDocument do
           let(:entity) { AcaEntities::Families::Family.new(family_contract.to_h) }
 
           context 'when the paper communication override checkbox has been selected' do
-            before do 
+            before do
               template.update(paper_communication_override: true)
             end
 
