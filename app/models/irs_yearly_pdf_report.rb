@@ -143,8 +143,8 @@ class IrsYearlyPdfReport < PdfReport
       text @insurance_policy[:policy_id]
     end
 
-    bounding_box([col3, y_pos], :width => 200) do
-      text @insurance_agreement[:insurance_provider][:title]
+    bounding_box([col3, y_pos], :width => 250) do
+      text(@insurance_agreement[:insurance_provider][:title])
     end
 
     move_down(12)
