@@ -13,6 +13,9 @@ module MagiMedicaid
 
     DOCUMENT_LOCAL_PATH = 'aws/ivl_mwe'
     DOCUMENT_LOCAL_ERROR_PATH = 'aws/errors/ivl_mwe'
+    IRS_DOCUMENT_LOCAL_PATH = 'aws/irs_1095a'
+    IRS_DOCUMENT_LOCAL_ERROR_PATH = 'aws/errors/irs_1095a'
+    TAX_DOCUMENTS = ['IVLTAX', 'IVLVTA', 'IVLCAP'].freeze
 
     # @param [Hash] AcaEntities::MagiMedicaid::Application or AcaEntities::Families::Family
     # @param [Templates::TemplateModel] :template_model
@@ -27,7 +30,7 @@ module MagiMedicaid
           recipient_hbx_id
         )
 
-      uploaded_document = yield upload_document(params[:entity], documents_hash, recipient_hbx_id)
+      uploaded_document = yield upload_document(params, documents_hash, recipient_hbx_id)
       event = yield build_event(uploaded_document)
       result = yield publish_response(event)
       Success(result)
@@ -78,7 +81,11 @@ module MagiMedicaid
       end
     end
 
-    def requires_paper_communication?(entity)
+    def requires_paper_communication?(params)
+      template_model = params[:template_model]
+      entity = params[:entity]
+      return true if template_model.paper_communication_override
+
       case entity
       when ::AcaEntities::Families::Family
         primary_member = entity.family_members.detect(&:is_primary_applicant)
@@ -92,7 +99,15 @@ module MagiMedicaid
       end
     end
 
-    def upload_document(entity, document_payload, resource_id)
+    def destination_folder(result, print_code)
+      if TAX_DOCUMENTS.include?(print_code)
+        result ? IRS_DOCUMENT_LOCAL_PATH : IRS_DOCUMENT_LOCAL_ERROR_PATH
+      else
+        result ? DOCUMENT_LOCAL_PATH : DOCUMENT_LOCAL_ERROR_PATH
+      end
+    end
+
+    def upload_document(params, document_payload, resource_id)
       upload =
         Documents::Upload.new.call(
           resource_id: resource_id,
@@ -102,11 +117,11 @@ module MagiMedicaid
           subjects: nil
         )
 
-      destination_folder =
-        upload.success? ? DOCUMENT_LOCAL_PATH : DOCUMENT_LOCAL_ERROR_PATH
+      print_code = document_payload[:template][:print_code]
+      destination_folder = destination_folder(upload.success?, print_code)
 
       move_document_to_local(
-        entity,
+        params,
         document_payload[:document].path,
         destination_folder
       )
@@ -116,8 +131,8 @@ module MagiMedicaid
       Success(upload.success)
     end
 
-    def move_document_to_local(entity, document_path, destination_folder)
-      return unless requires_paper_communication?(entity)
+    def move_document_to_local(params, document_path, destination_folder)
+      return unless requires_paper_communication?(params)
 
       destination_path = Rails.root.join('..', destination_folder)
       FileUtils.mkdir_p destination_path

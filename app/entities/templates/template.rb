@@ -92,6 +92,8 @@ module Templates
     # @return [Time]
     attribute :updated_at, Types::Time.meta(omittable: true)
 
+    attribute :paper_communication_override, Types::Bool.optional.meta(omittable: true)
+
     # Persist the template to the backing store
     def create_model
       values = sanitize_attributes

@@ -165,11 +165,11 @@ class IrsYearlyPdfReport < PdfReport
     move_down(11)
     y_pos = cursor
     bounding_box([col1, y_pos], :width => 100) do
-      text @insurance_agreement[:start_on]&.strftime("%m/%d/%Y")
+      text @insurance_policy[:start_on]&.strftime("%m/%d/%Y")
     end
 
     bounding_box([col2, y_pos], :width => 100) do
-      text @insurance_agreement[:end_on]&.strftime("%m/%d/%Y")
+      text @insurance_policy[:end_on]&.strftime("%m/%d/%Y")
     end
 
     bounding_box([col3, y_pos], :width => 250) do
