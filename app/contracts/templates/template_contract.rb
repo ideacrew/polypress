@@ -37,6 +37,7 @@ module Templates
       optional(:published_at).maybe(:time)
       optional(:created_at).maybe(:time)
       optional(:updated_at).maybe(:time)
+      optional(:paper_communication_override).maybe(:bool)
     end
   end
 end
