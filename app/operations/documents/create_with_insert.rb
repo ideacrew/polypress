@@ -26,6 +26,7 @@ module Documents
       # _inserts = yield append_inserts(params, template)
       _tax_document_path = generate_tax_documents(params) if tax_notice?(params)
       _other_pdfs = yield append_other_pdfs(params)
+      _clear_tax_documents = yield clear_tax_documents if tax_notice?(params)
       Success(documents_hash)
     end
 
@@ -184,6 +185,12 @@ module Documents
 
     def tax_notice?(params)
       ['IVLTAX', 'IVLVTA'].include?(params[:template_model].print_code.to_s)
+    end
+
+    def clear_tax_documents
+      return unless @tax_document_path.present?
+
+      Success(File.delete(@tax_document_path))
     end
 
     def append_other_pdfs(params)
