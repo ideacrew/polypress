@@ -53,8 +53,15 @@ RSpec.describe MagiMedicaid::PublishDocument do
           .and_return(true)
       end
 
+      let(:document_path) { Rails.root.join('..', MagiMedicaid::PublishDocument::DOCUMENT_LOCAL_PATH, '*') }
+
       it 'should return success' do
         expect(subject.success?).to be_truthy
+      end
+
+      it 'should save document' do
+        subject
+        expect(Dir[document_path].select { |path| File.file?(path) }.present?).to be_truthy
       end
 
       context 'when payload does not have primary member' do
@@ -310,10 +317,11 @@ RSpec.describe MagiMedicaid::PublishDocument do
     describe 'tax notices' do
       include_context 'family response from enroll'
 
+      let(:title) { '1095A Tax Document' }
       let(:print_code) { 'IVLTAX' }
       let(:family_contract) { AcaEntities::Contracts::Families::FamilyContract.new.call(family_hash) }
       let(:entity) { AcaEntities::Families::Family.new(family_contract.to_h) }
-      let(:tax_documents_path) { Rails.root.join('..', Documents::Append1095aDocuments::IRS_LOCAL_1095A_FOLDER, '*') }
+      let(:tax_documents_path) { Rails.root.join('..', MagiMedicaid::PublishDocument::IRS_DOCUMENT_LOCAL_PATH, '*') }
 
       # make sure tax notices are loaded fine with tax inserts
       it 'should return success' do
