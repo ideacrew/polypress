@@ -15,7 +15,7 @@ module MagiMedicaid
     DOCUMENT_LOCAL_ERROR_PATH = 'aws/errors/ivl_mwe'
     IRS_DOCUMENT_LOCAL_PATH = 'aws/irs_1095a'
     IRS_DOCUMENT_LOCAL_ERROR_PATH = 'aws/errors/irs_1095a'
-    TAX_DOCUMENTS = ['IVLTAX', 'IVLVTA', 'IVLCAP']
+    TAX_DOCUMENTS = ['IVLTAX', 'IVLVTA', 'IVLCAP'].freeze
 
     # @param [Hash] AcaEntities::MagiMedicaid::Application or AcaEntities::Families::Family
     # @param [Templates::TemplateModel] :template_model
