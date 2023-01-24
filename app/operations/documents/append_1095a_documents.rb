@@ -53,19 +53,26 @@ module Documents
     end
 
     def generate_pdf(tax_household:, insurance_agreement:, insurance_policy:)
-      irs_report = IrsYearlyPdfReport.new(
-        tax_household: tax_household,
-        recipient: @recipient,
-        insurance_agreement: insurance_agreement,
-        insurance_policy: insurance_policy
-      )
-      irs_report.process
+      covered_individuals = tax_household[:covered_individuals]
+      # 1095a form allows 5 individuals per form, so must be generated in groups of 5
+      covered_groups_of_five = covered_individuals&.each_slice(5)&.to_a
+      covered_groups_of_five.each do |group_of_five|
+        included_hbx_ids = group_of_five.map { |individual| individual[:person][:hbx_id] }
+        irs_report = IrsYearlyPdfReport.new(
+          tax_household: tax_household,
+          recipient: @recipient,
+          insurance_agreement: insurance_agreement,
+          insurance_policy: insurance_policy,
+          included_hbx_ids: included_hbx_ids
+        )
+        irs_report.process
 
-      @folder_path = Rails.root.join('..', IRS_LOCAL_1095A_FOLDER, @family_hbx_id.to_s)
-      FileUtils.mkdir_p @folder_path
-      @absolute_file_path = "#{@folder_path}/#{@family_hbx_id}_#{DateTime.now.strftime('%Y%m%d%H%M%S%L')}.pdf"
+        @folder_path = Rails.root.join('..', IRS_LOCAL_1095A_FOLDER, @family_hbx_id.to_s)
+        FileUtils.mkdir_p @folder_path
+        @absolute_file_path = "#{@folder_path}/#{@family_hbx_id}_#{DateTime.now.strftime('%Y%m%d%H%M%S%L')}.pdf"
 
-      irs_report.render_file(@absolute_file_path)
+        irs_report.render_file(@absolute_file_path)
+      end
     end
 
     def combine_tax_documents
