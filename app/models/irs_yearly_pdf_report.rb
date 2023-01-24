@@ -10,6 +10,8 @@ class IrsYearlyPdfReport < PdfReport
   def initialize(params)
     @tax_household = params[:tax_household]
     @recipient = params[:recipient]
+    # indicates which individuals are to be included on this form (5 max per form)
+    @included_hbx_ids = params[:included_hbx_ids]
     initialize_variables(params)
 
     @document_path = "#{Rails.root}/lib/pdf_templates/1095A_form.pdf"
@@ -92,6 +94,8 @@ class IrsYearlyPdfReport < PdfReport
     # covered_household = @notice.covered_household[5..9] if @multiple
 
     covered_individuals.each do |individual|
+      next unless @included_hbx_ids.include?(individual[:person][:hbx_id])
+
       bounding_box([col1, y_pos], :width => 150) do
         text("#{individual[:person][:person_name][:first_name]} #{individual[:person][:person_name][:last_name]}".titleize)
       end
