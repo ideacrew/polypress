@@ -232,7 +232,7 @@ class IrsYearlyPdfReport < PdfReport
     end
 
     annual_aptc_amount = annual_premiums[:tax_credit][:cents]
-    return unless (annual_aptc_amount.present? && annual_aptc_amount.to_f > 0)
+    return unless annual_aptc_amount.present? && annual_aptc_amount.to_f > 0
 
     bounding_box([col2, y_pos], :width => 130) do
       text cents_to_dollars(@catastrophic_corrected ? 0.0 : annual_premiums[:slcsp_benchmark_premium][:cents]), :align => :right
