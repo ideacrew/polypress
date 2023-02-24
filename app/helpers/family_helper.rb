@@ -382,6 +382,20 @@ module FamilyHelper
             filer_status: "tax_filer"
           }
         ],
+        tax_household_members: [
+          [
+            {
+              family_member_reference: {
+                family_member_hbx_id: "1000595",
+                relation_with_primary: "self"
+              },
+              tax_filer_status: "tax_filer",
+              is_subscriber: true
+            }
+          ]
+        ],
+        corrected: false,
+        void: true,
         months_of_year: months_of_year,
         annual_premiums: annual_premiums
       }

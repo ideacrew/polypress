@@ -7,9 +7,9 @@ module Subscribers
         # Subscriber will receive tax_form1095a_payload from EDI gateway and generate documents
         class Tax1095aNoticeGenerationSubscriber
           include EventSource::Logging
-          include ::EventSource::Subscriber[amqp: 'edi_gateway.families.tax_form1095a']
+          include ::EventSource::Subscriber[amqp: 'fdsh_gateway.insurance_policies']
 
-          subscribe(:on_edi_gateway_families_tax_form1095a) do |delivery_info, _metadata, response|
+          subscribe(:on_fdsh_gateway_insurance_policies) do |delivery_info, _metadata, response|
             routing_key = delivery_info[:routing_key]
             logger.info "Polypress: invoked Tax1095aNoticeGenerationSubscriber with delivery_info:
                             #{delivery_info} routing_key: #{routing_key}"
