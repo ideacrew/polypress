@@ -212,16 +212,20 @@ module FamilyHelper
     [
       {
         hbx_id: "828762",
-        tax_household_members: [
-          {
-            family_member_reference: {
-              family_member_hbx_id: "1000595",
-              relation_with_primary: "self"
-            },
-            tax_filer_status: "tax_filer",
-            is_subscriber: true
-          }
-        ]
+        tax_household_members: tax_household_members
+      }
+    ]
+  end
+
+  def tax_household_members
+    [
+      {
+        family_member_reference: {
+          family_member_hbx_id: "1000595",
+          relation_with_primary: "self"
+        },
+        tax_filer_status: "tax_filer",
+        is_subscriber: true
       }
     ]
   end
@@ -362,38 +366,31 @@ module FamilyHelper
     ]
   end
 
+  def covered_individuals
+    [
+      {
+        coverage_start_on: "2023-01-01",
+        coverage_end_on: "2023-12-31",
+        person: {
+          hbx_id: "1000595",
+          person_name: person_name,
+          person_demographics: person_demographics,
+          person_health: {},
+          is_active: true,
+          addresses: person_addresses,
+          emails: [{ kind: "home", address: "test@gmail.com" }]
+        },
+        relation_with_primary: "self",
+        filer_status: "tax_filer"
+      }
+    ]
+  end
+
   def aptc_csr_tax_households
     [
       {
-        covered_individuals: [
-          {
-            coverage_start_on: "2023-01-01",
-            coverage_end_on: "2023-12-31",
-            person: {
-              hbx_id: "1000595",
-              person_name: person_name,
-              person_demographics: person_demographics,
-              person_health: {},
-              is_active: true,
-              addresses: person_addresses,
-              emails: [{ kind: "home", address: "test@gmail.com" }]
-            },
-            relation_with_primary: "self",
-            filer_status: "tax_filer"
-          }
-        ],
-        tax_household_members: [
-          [
-            {
-              family_member_reference: {
-                family_member_hbx_id: "1000595",
-                relation_with_primary: "self"
-              },
-              tax_filer_status: "tax_filer",
-              is_subscriber: true
-            }
-          ]
-        ],
+        covered_individuals: covered_individuals,
+        tax_household_members: tax_household_members,
         corrected: false,
         void: true,
         months_of_year: months_of_year,
