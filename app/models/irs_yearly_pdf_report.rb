@@ -37,12 +37,8 @@ class IrsYearlyPdfReport < PdfReport
 
     @calender_year = @insurance_agreement[:plan_year].to_i
     @multiple = options[:multiple]
-    @corrected = options[:notice_type] == 'corrected'
-
-    # TODO: determine new vs corrected
-    instance_variable_set("@notice_#{@calender_year}", true) if ['new', 'corrected'].include?(options[:notice_type])
-
-    @void = true if options[:notice_type] == 'void'
+    @void = (@tax_household[:void]&.to_s == 'true')
+    @corrected = (@tax_household[:corrected]&.to_s == 'true')
   end
 
   def process

@@ -183,8 +183,9 @@ module Documents
       Success(true)
     end
 
+    # append 1095A for initial, void and corrected only
     def tax_notice?(params)
-      ['IVLTAX', 'IVLVTA'].include?(params[:template_model].print_code.to_s)
+      ['IVLTAX', 'IVLVTA', 'IVLTXC'].include?(params[:template_model].print_code.to_s)
     end
 
     def clear_tax_documents

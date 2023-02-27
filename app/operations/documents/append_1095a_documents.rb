@@ -76,6 +76,8 @@ module Documents
     end
 
     def combine_tax_documents
+      return Failure("no recipient found for family hbx_id: #{@family_hbx_id}") if @recipient.nil?
+
       files = Dir["#{@folder_path}/*"].select { |path| File.file?(path) }
       pdf = nil
 

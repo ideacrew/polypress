@@ -314,11 +314,31 @@ RSpec.describe MagiMedicaid::PublishDocument do
       end
     end
 
-    describe 'tax notices' do
+    describe 'IVLTAX notices' do
       include_context 'family response from enroll'
 
       let(:title) { '1095A Tax Document' }
       let(:print_code) { 'IVLTAX' }
+      let(:family_contract) { AcaEntities::Contracts::Families::FamilyContract.new.call(family_hash) }
+      let(:entity) { AcaEntities::Families::Family.new(family_contract.to_h) }
+      let(:tax_documents_path) { Rails.root.join('..', MagiMedicaid::PublishDocument::IRS_DOCUMENT_LOCAL_PATH, '*') }
+
+      # make sure tax notices are loaded fine with tax inserts
+      it 'should return success' do
+        expect(subject.success?).to be_truthy
+      end
+
+      it 'should create tax forms' do
+        subject
+        expect(Dir[tax_documents_path].select { |path| File.file?(path) }.present?).to be_truthy
+      end
+    end
+
+    describe 'IVLCAP notices' do
+      include_context 'family response from enroll'
+
+      let(:title) { '1095A Tax Document' }
+      let(:print_code) { 'IVLCAP' }
       let(:family_contract) { AcaEntities::Contracts::Families::FamilyContract.new.call(family_hash) }
       let(:entity) { AcaEntities::Families::Family.new(family_contract.to_h) }
       let(:tax_documents_path) { Rails.root.join('..', MagiMedicaid::PublishDocument::IRS_DOCUMENT_LOCAL_PATH, '*') }
