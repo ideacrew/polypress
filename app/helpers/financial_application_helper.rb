@@ -203,7 +203,7 @@ module FinancialApplicationHelper
       :assistance_year => current_date.year,
       :aptc_effective_date => aptc_effective_date,
       :applicants => applicants,
-      :tax_households => tax_households,
+      :tax_households => tax_households_faa,
       :relationships => [],
       :us_state => "DC",
       :hbx_id => "200000126",
@@ -214,7 +214,7 @@ module FinancialApplicationHelper
     }
   end
 
-  def tax_households
+  def tax_households_faa
     [
       {
         :max_aptc => 496.0,
@@ -224,7 +224,7 @@ module FinancialApplicationHelper
         csr_annual_income_limit: 142_912_000.0,
         :hbx_id => "12345",
         :is_insurance_assistance_eligible => "Yes",
-        :tax_household_members => tax_household_members
+        :tax_household_members => tax_household_members_faa
       }
     ]
   end
@@ -254,7 +254,7 @@ module FinancialApplicationHelper
     }
   end
 
-  def tax_household_members
+  def tax_household_members_faa
     [
       tax_household_member_determination('Gerald', 'Rivers', '1009501'),
       tax_household_member_determination('Alicia', 'Rivers', '1009502')
