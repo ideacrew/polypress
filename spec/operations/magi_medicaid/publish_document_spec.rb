@@ -321,7 +321,7 @@ RSpec.describe MagiMedicaid::PublishDocument do
       let(:print_code) { 'IVLTAX' }
       let(:family_contract) { AcaEntities::Contracts::Families::FamilyContract.new.call(family_hash) }
       let(:entity) { AcaEntities::Families::Family.new(family_contract.to_h) }
-      let(:tax_documents_path) { Rails.root.join('..', MagiMedicaid::PublishDocument::IRS_DOCUMENT_LOCAL_PATH, '*') }
+      let(:tax_documents_path) { Rails.root.join('..', MagiMedicaid::PublishDocument::DOCUMENT_LOCAL_PATH, '*') }
 
       # make sure tax notices are loaded fine with tax inserts
       it 'should return success' do
@@ -341,7 +341,7 @@ RSpec.describe MagiMedicaid::PublishDocument do
       let(:print_code) { 'IVLCAP' }
       let(:family_contract) { AcaEntities::Contracts::Families::FamilyContract.new.call(family_hash) }
       let(:entity) { AcaEntities::Families::Family.new(family_contract.to_h) }
-      let(:tax_documents_path) { Rails.root.join('..', MagiMedicaid::PublishDocument::IRS_DOCUMENT_LOCAL_PATH, '*') }
+      let(:tax_documents_path) { Rails.root.join('..', MagiMedicaid::PublishDocument::DOCUMENT_LOCAL_PATH, '*') }
 
       # make sure tax notices are loaded fine with tax inserts
       it 'should return success' do
