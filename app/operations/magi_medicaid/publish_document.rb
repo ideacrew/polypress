@@ -111,7 +111,6 @@ module MagiMedicaid
           subjects: nil
         )
 
-      print_code = document_payload[:template][:print_code]
       destination_folder = destination_folder(upload.success?)
 
       move_document_to_local(
