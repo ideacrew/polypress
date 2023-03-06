@@ -13,8 +13,6 @@ module MagiMedicaid
 
     DOCUMENT_LOCAL_PATH = 'aws/ivl_mwe'
     DOCUMENT_LOCAL_ERROR_PATH = 'aws/errors/ivl_mwe'
-    IRS_DOCUMENT_LOCAL_PATH = 'aws/irs_1095a'
-    IRS_DOCUMENT_LOCAL_ERROR_PATH = 'aws/errors/irs_1095a'
     TAX_DOCUMENTS = ['IVLTAX', 'IVLVTA', 'IVLCAP', 'IVLTXC'].freeze
 
     # @param [Hash] AcaEntities::MagiMedicaid::Application or AcaEntities::Families::Family
@@ -99,12 +97,8 @@ module MagiMedicaid
       end
     end
 
-    def destination_folder(result, print_code)
-      if TAX_DOCUMENTS.include?(print_code)
-        result ? IRS_DOCUMENT_LOCAL_PATH : IRS_DOCUMENT_LOCAL_ERROR_PATH
-      else
-        result ? DOCUMENT_LOCAL_PATH : DOCUMENT_LOCAL_ERROR_PATH
-      end
+    def destination_folder(result)
+      result ? DOCUMENT_LOCAL_PATH : DOCUMENT_LOCAL_ERROR_PATH
     end
 
     def upload_document(params, document_payload, resource_id)
@@ -117,8 +111,7 @@ module MagiMedicaid
           subjects: nil
         )
 
-      print_code = document_payload[:template][:print_code]
-      destination_folder = destination_folder(upload.success?, print_code)
+      destination_folder = destination_folder(upload.success?)
 
       move_document_to_local(
         params,
