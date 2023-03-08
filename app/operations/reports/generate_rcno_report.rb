@@ -11,7 +11,7 @@ module Reports
     def call(params)
       valid_params = yield validate(params)
       audit_datum = yield fetch_audit_report_datum(valid_params)
-      @logger = Logger.new("#{Rails.root}/log/rcno_report_errors_for_#{valid_params[:payload][:carrier_hios_id]}")
+      @logger = Logger.new("#{Rails.root}/log/rcno_report_errors_#{valid_params[:payload][:carrier_hios_id]}_#{valid_params[:payload][:year]}")
       rcni_file_path = yield fetch_rcni_file_path(valid_params[:payload][:carrier_hios_id])
       generate_rcno_report(rcni_file_path, valid_params, audit_datum)
       Success(true)
@@ -869,9 +869,9 @@ module Reports
           policy_contract_result = AcaEntities::Contracts::Policies::PolicyContract.new.call(JSON.parse(policy.payload))
 
           if policy_contract_result.errors.present?
-            puts "Policy id - #{policy.policy_eg_id}"
+            @logger.error("enrollment_group_id: #{policy.policy_eg_id},
+                            validations errors from AcaEntities: #{policy_contract_result.errors.messages} \n")
             Rails.logger.error("Errors for Policy in RCNO report for id - #{policy.policy_eg_id}")
-            next
           end
           policy_entity = AcaEntities::Policies::Policy.new(policy_contract_result.to_h)
 
