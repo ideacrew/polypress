@@ -11,6 +11,7 @@ module Reports
     def call(params)
       valid_params = yield validate(params)
       audit_datum = yield fetch_audit_report_datum(valid_params)
+      @logger = Logger.new("#{Rails.root}/log/pre_audit_report_errors_#{valid_params[:payload][:carrier_hios_id]}_#{valid_params[:payload][:year]}")
       generate_report(valid_params[:payload][:carrier_hios_id], audit_datum, valid_params[:payload][:year])
       Success(true)
     end
@@ -41,7 +42,11 @@ module Reports
           policies = JSON.parse(audit_data.payload)
           policies.each do |policy|
             policy_contract_result = AcaEntities::Contracts::Policies::PolicyContract.new.call(policy)
-            next if policy_contract_result.errors.present?
+            if policy_contract_result.errors.present?
+              @logger.error("policy_id: #{policy['policy_id']},
+                            enrollment_group_id: #{policy['enrollment_group_id']},
+                            validations errors from AcaEntities: #{policy_contract_result.errors.messages} \n")
+            end
 
             policy_entity = AcaEntities::Policies::Policy.new(policy_contract_result.to_h)
             next unless policy_entity.exchange_subscriber_id == audit_data.subscriber_id
@@ -53,7 +58,8 @@ module Reports
             end
           end
         rescue StandardError => e
-          Rails.logger.error("Unable to generate report due to #{e}")
+          Rails.logger.error("Unable to generate report due to #{e}, #{e.backtrace.join("\n")}")
+          @logger.error("Unable to generate report due to #{e}")
         end
       end
     end
