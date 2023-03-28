@@ -330,6 +330,7 @@ module Reports
       return [ffm_subscriber_id, nil, "D"] if @overall_flag == "G"
       issuer_subscriber_id = @rcni_row[16]
       match_data = ffm_subscriber_id == issuer_subscriber_id ? "M" : "I"
+      @overall_flag = "N" if match_data == "I"
       [ffm_subscriber_id, issuer_subscriber_id, match_data]
     end
 
@@ -345,6 +346,7 @@ module Reports
       return [ffm_member_id, nil, "D"] if @overall_flag == "G"
       issuer_member_id = @rcni_row[17]
       match_data = ffm_member_id == issuer_member_id ? "M" : "I"
+      @overall_flag = "N" if match_data == "I"
       [ffm_member_id, issuer_member_id, match_data]
     end
 
