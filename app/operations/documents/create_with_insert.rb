@@ -10,6 +10,7 @@ module Documents
     send(:include, Dry::Monads[:try])
     send(:include, ::EventSource::Command)
     send(:include, ::EventSource::Logging)
+    include FamilyHelper
 
     # @param [Hash] AcaEntities::MagiMedicaid::Application
     # @param[Templates::TemplateModel] :template_model
@@ -23,7 +24,9 @@ module Documents
         )
 
       # _inserts = yield append_inserts(params, template)
-      _other_pdfs = yield append_pdfs
+      _tax_document_path = generate_tax_documents(params) if tax_notice?(params)
+      _other_pdfs = yield append_other_pdfs(params)
+      _clear_tax_documents = yield clear_tax_documents if tax_notice?(params)
       Success(documents_hash)
     end
 
@@ -119,6 +122,33 @@ module Documents
       ]
     end
 
+    def ivl_attach_1095a_form
+      Failure("no tax document found to attach") unless @tax_document_path
+
+      join_pdfs [
+        @main_document_path,
+        @tax_document_path
+      ]
+    end
+
+    def generate_tax_documents(params)
+      family_payload =
+        if params[:preview].present?
+          result = ::AcaEntities::Contracts::Families::FamilyContract.new.call(family_hash.deep_symbolize_keys)
+          ::AcaEntities::Families::Family.new(result.to_h).to_h
+        else
+          params[:entity].to_h
+        end
+
+      # returns document path
+      output = Documents::Append1095aDocuments.new.call({ payload: family_payload.to_h })
+      if output.success?
+        @tax_document_path = output.success
+      else
+        Failure("unable to generate tax documents")
+      end
+    end
+
     def verifications_insert_needed?(params, insert)
       (params[:entity]&.documents_needed || params[:preview].present?) &&
         insert_present?(insert)
@@ -153,11 +183,23 @@ module Documents
       Success(true)
     end
 
-    def append_pdfs
+    # append 1095A for initial, void and corrected only
+    def tax_notice?(params)
+      ['IVLTAX', 'IVLVTA', 'IVLTXC'].include?(params[:template_model].print_code.to_s)
+    end
+
+    def clear_tax_documents
+      return unless @tax_document_path.present?
+
+      Success(File.delete(@tax_document_path))
+    end
+
+    def append_other_pdfs(params)
       attach_blank_page
 
       # ivl_appeal_rights
       # ivl_non_discrimination
+      ivl_attach_1095a_form if tax_notice?(params)
       ivl_attach_envelope
       Success(true)
     end

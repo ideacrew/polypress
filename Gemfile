@@ -44,7 +44,9 @@ gem 'liquid', path: './project_gems/liquid-5.0.1'
 gem 'mongoid', '~> 7.3.3'
 gem 'mongoid-locker'
 
-gem 'prawn', git: 'https://github.com/prawnpdf/prawn.git', ref: '8028ca0cd2'
+gem 'prawn', '~> 2.2'
+gem 'prawn-templates', '~> 0.1.2'
+
 gem 'pundit', '~> 2.1.0'
 
 gem 'puma', '~> 5.0'
@@ -88,6 +90,7 @@ group :development, :test do
   gem 'rspec-rails', '~> 5.0'
   gem 'shoulda-matchers', '~> 3'
   gem 'yard'
+  gem 'rubocop-git'
 end
 
 group :test do

@@ -16,6 +16,7 @@ RSpec.describe MagiMedicaid::PublishDocument do
     let(:event_key) { 'magi_medicaid.mitc.eligibilities.determined_uqhp_eligible' }
     let(:body) { '<p>Uqhp Eligible Document for {{ hbx_id }}</p>' }
 
+    let(:print_code) { 'IVLMWE' }
     let!(:template) do
       FactoryBot.create(
         :template,
@@ -24,7 +25,7 @@ RSpec.describe MagiMedicaid::PublishDocument do
           markup: body
         },
         title: title,
-        print_code: 'IVLMWE',
+        print_code: print_code,
         marketplace: 'aca_individual',
         recipient: 'AcaEntities::Families::Family',
         content_type: 'application/pdf',
@@ -52,8 +53,15 @@ RSpec.describe MagiMedicaid::PublishDocument do
           .and_return(true)
       end
 
+      let(:document_path) { Rails.root.join('..', MagiMedicaid::PublishDocument::DOCUMENT_LOCAL_PATH, '*') }
+
       it 'should return success' do
         expect(subject.success?).to be_truthy
+      end
+
+      it 'should save document' do
+        subject
+        expect(Dir[document_path].select { |path| File.file?(path) }.present?).to be_truthy
       end
 
       context 'when payload does not have primary member' do
@@ -170,7 +178,12 @@ RSpec.describe MagiMedicaid::PublishDocument do
 
           let(:primary_applicant_hbx_id) { family_member_1[:person][:hbx_id] }
           let(:contact_method) { 'Only Electronic communications' }
-          let(:entity) { AcaEntities::Families::Family.new(family_hash.merge(magi_medicaid_applications: [application_hash])) }
+          let(:family_contract) do
+            AcaEntities::Contracts::Families::FamilyContract.new.call(family_hash.merge(magi_medicaid_applications: [application_hash]))
+          end
+          let(:entity) { AcaEntities::Families::Family.new(family_contract.to_h) }
+
+          # let(:entity) { AcaEntities::Families::Family.new(family_hash.merge(magi_medicaid_applications: [application_hash])) }
 
           it 'should not move document to local path' do
             subject
@@ -188,12 +201,24 @@ RSpec.describe MagiMedicaid::PublishDocument do
           MagiMedicaid::PublishDocument::DOCUMENT_LOCAL_PATH
         end
 
-        let(:result) { ::MagiMedicaid::PublishDocument.new.send(:requires_paper_communication?, entity) }
+        let(:params) { { entity: entity, template_model: template } }
+        let(:result) { ::MagiMedicaid::PublishDocument.new.send(:requires_paper_communication?, params) }
 
         context 'when the entity is AcaEntities::Families::Family' do
           include_context 'family response from enroll'
 
-          let(:entity) { AcaEntities::Families::Family.new(family_hash) }
+          let(:family_contract) { AcaEntities::Contracts::Families::FamilyContract.new.call(family_hash) }
+          let(:entity) { AcaEntities::Families::Family.new(family_contract.to_h) }
+
+          context 'when the paper communication override checkbox has been selected' do
+            before do
+              template.update(paper_communication_override: true)
+            end
+
+            it 'shoud return true' do
+              expect(result).to be_truthy
+            end
+          end
 
           context 'when the consumer has contact method' do
             context 'when the contact method is paper' do
@@ -266,7 +291,9 @@ RSpec.describe MagiMedicaid::PublishDocument do
     describe '#get_recipient_hbx_id' do
       context 'when the entity is AcaEntities::Families::Family' do
         include_context 'family response from enroll'
-        let(:entity) { AcaEntities::Families::Family.new(family_hash) }
+        let(:family_contract) { AcaEntities::Contracts::Families::FamilyContract.new.call(family_hash) }
+        let(:entity) { AcaEntities::Families::Family.new(family_contract.to_h) }
+
         let(:recipient_hbx_id) { entity[:family_members].detect { |a| a[:is_primary_applicant] == true }[:person][:hbx_id] }
 
         it "should return primary family member's person hbx_id" do
@@ -284,6 +311,46 @@ RSpec.describe MagiMedicaid::PublishDocument do
           result = MagiMedicaid::PublishDocument.new.send(:get_recipient_hbx_id, entity)
           expect(result.value!).to eq recipient_hbx_id
         end
+      end
+    end
+
+    describe 'IVLTAX notices' do
+      include_context 'family response from enroll'
+
+      let(:title) { '1095A Tax Document' }
+      let(:print_code) { 'IVLTAX' }
+      let(:family_contract) { AcaEntities::Contracts::Families::FamilyContract.new.call(family_hash) }
+      let(:entity) { AcaEntities::Families::Family.new(family_contract.to_h) }
+      let(:tax_documents_path) { Rails.root.join('..', MagiMedicaid::PublishDocument::DOCUMENT_LOCAL_PATH, '*') }
+
+      # make sure tax notices are loaded fine with tax inserts
+      it 'should return success' do
+        expect(subject.success?).to be_truthy
+      end
+
+      it 'should create tax forms' do
+        subject
+        expect(Dir[tax_documents_path].select { |path| File.file?(path) }.present?).to be_truthy
+      end
+    end
+
+    describe 'IVLCAP notices' do
+      include_context 'family response from enroll'
+
+      let(:title) { '1095A Tax Document' }
+      let(:print_code) { 'IVLCAP' }
+      let(:family_contract) { AcaEntities::Contracts::Families::FamilyContract.new.call(family_hash) }
+      let(:entity) { AcaEntities::Families::Family.new(family_contract.to_h) }
+      let(:tax_documents_path) { Rails.root.join('..', MagiMedicaid::PublishDocument::DOCUMENT_LOCAL_PATH, '*') }
+
+      # make sure tax notices are loaded fine with tax inserts
+      it 'should return success' do
+        expect(subject.success?).to be_truthy
+      end
+
+      it 'should create tax forms' do
+        subject
+        expect(Dir[tax_documents_path].select { |path| File.file?(path) }.present?).to be_truthy
       end
     end
   end
