@@ -118,7 +118,7 @@ class IrsYearlyPdfReport < PdfReport
     end
   end
 
-  # rubocop:disable Metrics/AbcSize
+  # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity:
   def fill_subscriber_details
     col1 = mm2pt(-2)
     col2 = mm2pt(51.50)
@@ -190,7 +190,7 @@ class IrsYearlyPdfReport < PdfReport
       text address[:zip]
     end
   end
-  # rubocop:enable Metrics/AbcSize
+  # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity:
 
   # rubocop:disable Metrics/CyclomaticComplexity
   def fill_premium_details
