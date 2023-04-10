@@ -121,7 +121,7 @@ module Reports
     def phone_number(enrollee)
       return nil if enrollee.phones.blank?
 
-      enrollee.phones.last.full_phone_number
+      enrollee.phones.last&.full_phone_number&.to_s&.rjust(10, "0")
     end
 
     def email_address(enrollee)
@@ -167,7 +167,12 @@ module Reports
     end
 
     def qhp_id(policy_entity)
-      "#{policy_entity.qhp_id}#{policy_entity.csr_variant}"
+      "#{policy_entity.qhp_id}#{policy_entity.csr_variant}".first(16)
+    end
+
+    def gender_code(enrollee)
+      gc = enrollee.enrollee_demographics.gender_code
+      gc == "M" ? "Male" : "Female"
     end
 
     def fetch_file_name(carrier_hios_id, year)
@@ -197,19 +202,19 @@ module Reports
        enrollee.hbx_member_id, enrollee.issuer_assigned_member_id,
        policy_entity.primary_subscriber&.issuer_assigned_member_id, enrollee.last_name, enrollee.first_name,
        enrollee.middle_name, nil, enrollee.residential_address&.address_1, enrollee.residential_address&.address_2,
-       enrollee.residential_address&.city, enrollee.residential_address&.state, enrollee.residential_address&.zip,
-       enrollee.residential_address&.county, phone_number(enrollee), enrollee.enrollee_demographics&.ssn,
-       enrollee.enrollee_demographics&.dob&.strftime("%Y%m%d"), enrollee.enrollee_demographics.gender_code,
+       enrollee.residential_address&.city, enrollee.residential_address&.state, enrollee.residential_address&.zip&.to_s&.rjust(5, "0"),
+       enrollee.residential_address&.county, phone_number(enrollee), enrollee.enrollee_demographics&.ssn&.to_s&.rjust(9, "0"),
+       enrollee.enrollee_demographics&.dob&.strftime("%Y%m%d"), gender_code(enrollee),
        tobacco_use_code(enrollee), nil, nil, nil, nil, email_address(enrollee),
        enrollee.mailing_address&.address_1,
        enrollee.mailing_address&.address_2, enrollee.mailing_address&.city, enrollee.mailing_address&.state,
-       enrollee.mailing_address&.zip, nil, nil, nil, nil, nil, nil, nil,
+       enrollee.mailing_address&.zip&.to_s&.rjust(5, "0"), nil, nil, nil, nil, nil, nil, nil,
        policy_entity.responsible_party_subscriber&.last_name, policy_entity.responsible_party_subscriber&.first_name,
        policy_entity.responsible_party_subscriber&.mailing_address&.address_1,
        policy_entity.responsible_party_subscriber&.mailing_address&.address_2,
        policy_entity.responsible_party_subscriber&.mailing_address&.city,
        policy_entity.responsible_party_subscriber&.mailing_address&.state,
-       policy_entity.responsible_party_subscriber&.mailing_address&.zip,
+       policy_entity.responsible_party_subscriber&.mailing_address&.zip&.to_s&.rjust(5, "0"),
        segment.effective_start_date&.strftime("%Y%m%d"), non_subscriber_end_date(enrollee, segment),
        enrollee.issuer_assigned_policy_id, qhp_id(policy_entity), policy_entity.effectuation_status,
        policy_entity.enrollment_group_id, segment_id(segment.id, policy_entity), aptc_amount(enrollee, segment),
