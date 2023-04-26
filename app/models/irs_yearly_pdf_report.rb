@@ -33,6 +33,8 @@ class IrsYearlyPdfReport < PdfReport
     @spouse = @tax_household[:covered_individuals].detect do |covered_individual|
       covered_individual[:relation_with_primary] == 'spouse'
     end
+
+    @has_spouse_and_not_same_as_recipient = @spouse.present? && (@spouse[:person][:hbx_id] != @recipient[:person][:hbx_id])
     @has_aptc = @tax_household[:months_of_year].any? { |month| month[:coverage_information] && month[:coverage_information][:tax_credit][:cents] > 0 }
 
     @calender_year = @insurance_agreement[:plan_year].to_i
@@ -153,7 +155,7 @@ class IrsYearlyPdfReport < PdfReport
     fill_enrollee(@recipient, @responsible_party_data)
 
     move_down(12)
-    if @spouse && @has_aptc
+    if @has_spouse_and_not_same_as_recipient && @has_aptc
       fill_enrollee(@spouse)
     else
       move_down(13)
