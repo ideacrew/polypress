@@ -606,7 +606,6 @@ module Reports
       # unprocessed policy
       if @overall_flag == "G"
         segment = fetch_segment(@member.coverage_start)
-        kind = @policy.insurance_line_code == "HLT" ? "health" : "dental"
         unprocessed_total_premium = begin
           format('%.2f', segment&.total_premium_amount)
         rescue StandardError
@@ -618,7 +617,6 @@ module Reports
         @overall_flag = "N"
         return [nil, @rcni_row[45], "D"]
       end
-      kind = @policy.insurance_line_code == "HLT" ? "health" : "dental"
       premium_amount = segment&.total_premium_amount
       @total_premium_amount += premium_amount
       ffm_total_premium = begin
