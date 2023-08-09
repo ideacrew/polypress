@@ -15,6 +15,15 @@ module Subscribers
                             #{delivery_info} routing_key: #{routing_key}"
             payload = JSON.parse(response, symbolize_names: true)
 
+            # Add Payload logger here
+            subscriber_logger =
+              Logger.new(
+                "#{Rails.root}/log/on_payload_created_#{TimeKeeper.date_of_record.strftime('%Y_%m_%d')}.log"
+              )
+            subscriber_logger.info "Tax1095aNoticeGenerationSubscriber, response: #{payload}"
+            logger.info "Tax1095aNoticeGenerationSubscriber payload: #{payload}"
+
+
             result = ::Individuals::PolicyTaxHouseholds::GenerateAndPublishTaxDocuments.new.call(
               { family_hash: payload, event_key: routing_key }
             )
