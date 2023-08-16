@@ -269,15 +269,7 @@ module FinancialApplicationHelper
         :is_non_magi_medicaid_eligible => false,
         :is_without_assistance => false,
         :category_determinations => category_determinations,
-        :member_determinations => [{
-          :kind => 'Insurance Assistance Determination',
-          :criteria_met => true,
-          :determination_reasons => [
-            'total_ineligibility_no_state_residency',
-            'total_ineligibility_no_lawful_presence'
-          ],
-          eligibility_overrides: []
-        }]
+        :member_determinations => [ineligible_member_determination]
       },
       :applicant_reference => {
         :first_name => f_name,
@@ -285,6 +277,18 @@ module FinancialApplicationHelper
         :dob => member_dob,
         :person_hbx_id => hbx_id
       }
+    }
+  end
+
+  def ineligible_member_determination
+    {
+      :kind => 'Insurance Assistance Determination',
+      :criteria_met => true,
+      :determination_reasons => [
+        'total_ineligibility_no_state_residency',
+        'total_ineligibility_no_lawful_presence'
+      ],
+      eligibility_overrides: []
     }
   end
 
