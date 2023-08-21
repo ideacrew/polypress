@@ -243,7 +243,8 @@ module FinancialApplicationHelper
         :magi_medicaid_monthly_household_income => 6_000,
         :is_non_magi_medicaid_eligible => false,
         :is_without_assistance => false,
-        :category_determinations => category_determinations
+        :category_determinations => category_determinations,
+        :member_determinations => [eligible_member_determination]
       },
       :applicant_reference => {
         :first_name => f_name,
@@ -277,6 +278,15 @@ module FinancialApplicationHelper
         :dob => member_dob,
         :person_hbx_id => hbx_id
       }
+    }
+  end
+
+  def eligible_member_determination
+    {
+      :kind => 'Insurance Assistance Determination',
+      :criteria_met => true,
+      :determination_reasons => [],
+      eligibility_overrides: []
     }
   end
 
