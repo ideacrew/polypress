@@ -254,10 +254,49 @@ module FinancialApplicationHelper
     }
   end
 
+  def ineligible_tax_household_member_determination(f_name, l_name, hbx_id)
+    {
+      :product_eligibility_determination => {
+        :is_ia_eligible => true,
+        :is_medicaid_chip_eligible => false,
+        :is_totally_ineligible => true,
+        :is_magi_medicaid => false,
+        :is_uqhp_eligible => nil,
+        :is_csr_eligible => true,
+        :is_eligible_for_non_magi_reasons => true,
+        :csr => "94",
+        :magi_medicaid_monthly_household_income => 6_000,
+        :is_non_magi_medicaid_eligible => false,
+        :is_without_assistance => false,
+        :category_determinations => category_determinations,
+        :member_determinations => [ineligible_member_determination]
+      },
+      :applicant_reference => {
+        :first_name => f_name,
+        :last_name => l_name,
+        :dob => member_dob,
+        :person_hbx_id => hbx_id
+      }
+    }
+  end
+
+  def ineligible_member_determination
+    {
+      :kind => 'Insurance Assistance Determination',
+      :criteria_met => true,
+      :determination_reasons => [
+        'total_ineligibility_no_state_residency',
+        'total_ineligibility_no_lawful_presence'
+      ],
+      eligibility_overrides: []
+    }
+  end
+
   def tax_household_members_faa
     [
       tax_household_member_determination('Gerald', 'Rivers', '1009501'),
-      tax_household_member_determination('Alicia', 'Rivers', '1009502')
+      tax_household_member_determination('Alicia', 'Rivers', '1009502'),
+      ineligible_tax_household_member_determination('Brock', 'Rivers', '1009503')
     ]
   end
 
