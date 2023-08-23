@@ -44,7 +44,7 @@ module Subscribers
             ack(delivery_info.delivery_tag)
           rescue StandardError, SystemStackError => e
             logger.error(
-              "Polypress: FaaTotallyIneligibleNoticeSubscriber_error: nacked due to backtrace:
+              "Polypress: FaaTotallyIneligibleNoticeSubscriber_error: nacked due to error: #{e}; backtrace:
               #{e.backtrace}; for routing_key: #{routing_key}, response: #{response}"
             )
             ack(delivery_info.delivery_tag)
