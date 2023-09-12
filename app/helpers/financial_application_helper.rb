@@ -37,10 +37,10 @@ module FinancialApplicationHelper
     ]
   end
 
-  def family_member_reference
+  def family_member_reference(first_name)
     {
       :family_member_hbx_id => "100045",
-      :first_name => "Gerald",
+      :first_name => first_name,
       :last_name => "Rivers",
       :person_hbx_id => "1009501",
       :is_primary_family_member => true,
@@ -56,9 +56,9 @@ module FinancialApplicationHelper
     }
   end
 
-  def attestation
+  def attestation(is_incarcerated)
     {
-      :is_incarcerated => false,
+      :is_incarcerated => is_incarcerated,
       :is_self_attested_disabled => true,
       :is_self_attested_blind => false
     }
@@ -122,58 +122,63 @@ module FinancialApplicationHelper
     }
   end
 
-  # rubocop:disable Metrics/MethodLength
   def applicants
     [
-      {
-        :name => { :first_name => "Gerald", :last_name => "Rivers" },
-        :identifying_information => { :has_ssn => false },
-        :demographic => demographic_info,
-        :attestation => attestation,
-        :is_primary_applicant => true,
-        :native_american_information => { :indian_tribe_member => false },
-        :citizenship_immigration_status_information => citizenship_immigration_status_information,
-        :is_applying_coverage => true,
-        :family_member_reference => family_member_reference,
-        :person_hbx_id => "1009501",
-        :is_required_to_file_taxes => true,
-        :tax_filer_kind => "tax_filer",
-        :is_joint_tax_filing => true,
-        :is_claimed_as_tax_dependent => false,
-        :claimed_as_tax_dependent_by => nil,
-        :student => { :is_student => false },
-        :is_refugee => false,
-        :is_trafficking_victim => false,
-        :foster_care => { :is_former_foster_care => false },
-        :pregnancy_information => pregnancy_information,
-        :is_subject_to_five_year_bar => false,
-        :is_five_year_bar_met => false,
-        :has_job_income => true,
-        :has_self_employment_income => false,
-        :has_unemployment_income => false,
-        :has_other_income => false,
-        :has_deductions => false,
-        :has_enrolled_health_coverage => false,
-        :has_eligible_health_coverage => false,
-        :medicaid_and_chip => medicaid_and_chip,
-        :addresses => addresses,
-        :incomes => incomes,
-        :is_medicare_eligible => false,
-        :has_insurance => false,
-        :has_state_health_benefit => false,
-        :had_prior_insurance => false,
-        :age_of_applicant => 22,
-        :is_self_attested_long_term_care => false,
-        :hours_worked_per_week => 0,
-        :is_temporarily_out_of_state => false,
-        :is_claimed_as_dependent_by_non_applicant => false,
-        :benchmark_premium => benchmark_premium,
-        :is_homeless => false,
-        :mitc_income => mitc_income,
-        :mitc_relationships => [],
-        :local_mec_evidence => local_mec_evidence
-      }
+      create_applicant("Gerald", true, false),
+      create_applicant("Brock", false, true)
     ]
+  end
+
+  # rubocop:disable Metrics/MethodLength
+  def create_applicant(first_name, is_primary_aplicant, is_incarcerated)
+    {
+      :name => { :first_name => first_name, :last_name => "Rivers" },
+      :identifying_information => { :has_ssn => false },
+      :demographic => demographic_info,
+      :attestation => attestation(is_incarcerated),
+      :is_primary_applicant => is_primary_aplicant,
+      :native_american_information => { :indian_tribe_member => false },
+      :citizenship_immigration_status_information => citizenship_immigration_status_information,
+      :is_applying_coverage => true,
+      :family_member_reference => family_member_reference(first_name),
+      :person_hbx_id => "1009501",
+      :is_required_to_file_taxes => true,
+      :tax_filer_kind => "tax_filer",
+      :is_joint_tax_filing => true,
+      :is_claimed_as_tax_dependent => false,
+      :claimed_as_tax_dependent_by => nil,
+      :student => { :is_student => false },
+      :is_refugee => false,
+      :is_trafficking_victim => false,
+      :foster_care => { :is_former_foster_care => false },
+      :pregnancy_information => pregnancy_information,
+      :is_subject_to_five_year_bar => false,
+      :is_five_year_bar_met => false,
+      :has_job_income => true,
+      :has_self_employment_income => false,
+      :has_unemployment_income => false,
+      :has_other_income => false,
+      :has_deductions => false,
+      :has_enrolled_health_coverage => false,
+      :has_eligible_health_coverage => false,
+      :medicaid_and_chip => medicaid_and_chip,
+      :addresses => addresses,
+      :incomes => incomes,
+      :is_medicare_eligible => false,
+      :has_insurance => false,
+      :has_state_health_benefit => false,
+      :had_prior_insurance => false,
+      :age_of_applicant => 22,
+      :is_self_attested_long_term_care => false,
+      :hours_worked_per_week => 0,
+      :is_temporarily_out_of_state => false,
+      :is_claimed_as_dependent_by_non_applicant => false,
+      :benchmark_premium => benchmark_premium,
+      :is_homeless => false,
+      :mitc_income => mitc_income,
+      :mitc_relationships => [],
+      :local_mec_evidence => local_mec_evidence
+    }
   end
   # rubocop:enable Metrics/MethodLength
 
@@ -258,13 +263,13 @@ module FinancialApplicationHelper
   def ineligible_tax_household_member_determination(f_name, l_name, hbx_id)
     {
       :product_eligibility_determination => {
-        :is_ia_eligible => true,
+        :is_ia_eligible => false,
         :is_medicaid_chip_eligible => false,
         :is_totally_ineligible => true,
         :is_magi_medicaid => false,
         :is_uqhp_eligible => nil,
-        :is_csr_eligible => true,
-        :is_eligible_for_non_magi_reasons => true,
+        :is_csr_eligible => false,
+        :is_eligible_for_non_magi_reasons => false,
         :csr => "94",
         :magi_medicaid_monthly_household_income => 6_000,
         :is_non_magi_medicaid_eligible => false,
