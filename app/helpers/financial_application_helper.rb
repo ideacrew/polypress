@@ -267,7 +267,7 @@ module FinancialApplicationHelper
         :is_medicaid_chip_eligible => false,
         :is_totally_ineligible => true,
         :is_magi_medicaid => false,
-        :is_uqhp_eligible => nil,
+        :is_uqhp_eligible => true,
         :is_csr_eligible => false,
         :is_eligible_for_non_magi_reasons => false,
         :csr => "94",
