@@ -129,6 +129,32 @@ RSpec.describe MagiMedicaid::GenerateAndPublishEligibilityDocuments do
           expect(eligibilities.success).to eq []
         end
       end
+      
+      context 'when event key is medicaid_chip_eligible' do
+        event_keys = ['magi_medicaid.applications.aptc_csr_credits.renewals.determined_medicaid_chip_eligible', 'enroll.applications.aptc_csr_credits.renewals.notice.determined_medicaid_chip_eligible']
+        event_keys.each do |event_key|
+          let(:event_key) { event_key }
+          let(:eligibilities) do
+            MagiMedicaid::GenerateAndPublishEligibilityDocuments.new
+                                                                .determine_eligibilities(application_entity, event_key)
+          end
+          it 'should return magi_medicaid_eligible' do
+            prefix = event_key.split('.')[0..-2].join('.') # drop the last element
+            expect(eligibilities.success).to eq ["#{prefix}.determined_magi_medicaid_eligible"]
+          end
+        end
+      end
+      
+      context 'when event key is determined_aptc_eligible' do
+        let(:event_key) { 'magi_medicaid.applications.aptc_csr_credits.renewals.determined_aptc_eligible' }
+        let(:eligibilities) do
+          MagiMedicaid::GenerateAndPublishEligibilityDocuments.new
+                                                              .determine_eligibilities(application_entity, event_key)
+        end
+        it 'should return determined_aptc_eligible as is' do
+          expect(eligibilities.success).to eq [event_key]
+        end
+      end
     end
 
     context '#publish_documents' do
