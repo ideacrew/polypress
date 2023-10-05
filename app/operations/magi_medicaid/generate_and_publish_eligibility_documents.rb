@@ -43,6 +43,8 @@ module MagiMedicaid
 
     def determine_eligibilities(entity, event_key)
       unless event_key.to_s.include?('determined_mixed_determination') || event_key.to_s.include?('mixed_determination_on_reverification')
+        # The following ensures the event key is always determined_magi_medicaid_eligible to match the template model like below
+        event_key = event_key.gsub('determined_medicaid_chip_eligible', 'determined_magi_medicaid_eligible')
         return Success([event_key])
       end
 

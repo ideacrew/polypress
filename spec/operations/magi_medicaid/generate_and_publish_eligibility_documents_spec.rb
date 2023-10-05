@@ -97,14 +97,16 @@ RSpec.describe MagiMedicaid::GenerateAndPublishEligibilityDocuments do
     end
 
     context '#determine_eligibilities' do
-      let(:event_key) { 'magi_medicaid.mitc.eligibilities.determined_mixed_determination' }
-      let(:eligibilities) do
-        MagiMedicaid::GenerateAndPublishEligibilityDocuments.new
-                                                            .determine_eligibilities(application_entity, event_key)
-      end
+      shared_examples 'eligibility determination' do |event_key, expected_result|
+        let(:eligibilities) do
+          MagiMedicaid::GenerateAndPublishEligibilityDocuments.new
+                                                              .determine_eligibilities(application_entity, event_key)
+        end
 
-      it 'should return eligibilities' do
-        expect(eligibilities.success).to eq ['magi_medicaid.mitc.eligibilities.determined_aptc_eligible']
+        expected_result = expected_result.present? ? [expected_result] : []
+        it "should return #{expected_result}" do
+          expect(eligibilities.success).to eq expected_result
+        end
       end
 
       context 'when there is no eligibility' do
@@ -119,16 +121,36 @@ RSpec.describe MagiMedicaid::GenerateAndPublishEligibilityDocuments do
           application_hash
         end
 
-        let(:entity) { ::AcaEntities::MagiMedicaid::Application.new(modified_application_hash) }
-        let(:eligibilities) do
-          MagiMedicaid::GenerateAndPublishEligibilityDocuments.new
-                                                              .determine_eligibilities(application_entity, event_key)
-        end
-
-        it 'should return nil' do
-          expect(eligibilities.success).to eq []
-        end
+        let(:application_entity) { ::AcaEntities::MagiMedicaid::Application.new(modified_application_hash) }
+        it_behaves_like 'eligibility determination',
+                        'magi_medicaid.mitc.eligibilities.determined_mixed_determination',
+                        nil
       end
+
+      context 'when event key is determined_mixed_determination' do
+        it_behaves_like 'eligibility determination',
+                        'magi_medicaid.mitc.eligibilities.determined_mixed_determination',
+                        'magi_medicaid.mitc.eligibilities.determined_aptc_eligible'
+      end
+
+      context 'when event key is determined_medicaid_chip_eligible' do
+        it_behaves_like 'eligibility determination',
+                        'magi_medicaid.applications.aptc_csr_credits.renewals.determined_medicaid_chip_eligible',
+                        'magi_medicaid.applications.aptc_csr_credits.renewals.determined_magi_medicaid_eligible'
+        it_behaves_like 'eligibility determination',
+                        'enroll.applications.aptc_csr_credits.renewals.notice.determined_medicaid_chip_eligible',
+                        'enroll.applications.aptc_csr_credits.renewals.notice.determined_magi_medicaid_eligible'
+      end
+
+      context 'when event key is determined_aptc_eligible' do
+        it_behaves_like 'eligibility determination',
+                        'magi_medicaid.applications.aptc_csr_credits.renewals.determined_aptc_eligible',
+                        'magi_medicaid.applications.aptc_csr_credits.renewals.determined_aptc_eligible'
+        it_behaves_like 'eligibility determination',
+                        'enroll.applications.aptc_csr_credits.renewals.notice.determined_aptc_eligible',
+                        'enroll.applications.aptc_csr_credits.renewals.notice.determined_aptc_eligible'
+      end
+
     end
 
     context '#publish_documents' do
