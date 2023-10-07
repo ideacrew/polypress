@@ -7,7 +7,7 @@
 #     bundle exec rails r scripts/code_event_mappings_report.rb 'me'
 
 # 1. We need to update the CODE_EVENT_MAPPING in this script as we create/update notices in Production.
-# 2. Below is the script that needs to be run in the rails console to get the latest mappings for the notices in Production.
+# 2. Below is the script(from lines 13 through 17) that needs to be run in the rails console to get the latest mappings for the notices in Production.
 # NOTE: Assuming that Production is the source of truth for the notices code to event mapping.
 
 # code_event_mapping = Templates::TemplateModel.all.inject({}) do |result_hash, template_model|
