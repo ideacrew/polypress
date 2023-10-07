@@ -1,13 +1,14 @@
 # frozen_string_literal: true
 
-# Below is how to run this script:
+# Below is how to run this script to verify the code to event mappings for the notices in Production.
 #   1. For DC:
 #     bundle exec rails r scripts/code_event_mappings_report.rb 'dc'
 #   2. For ME:
 #     bundle exec rails r scripts/code_event_mappings_report.rb 'me'
 
-# 1. We need to update the CODE_EVENT_MAPPING in this script as we create/update notices in Production.
-# 2. Below is the script(from lines 13 through 17) that needs to be run in the rails console to get the latest mappings for the notices in Production.
+# 1. We need to update the DC_CODE_EVENT_MAPPING and/or ME_CODE_EVENT_MAPPING in this script as we create/update notices in Production.
+# 2. Below is the script(from lines 14 through 18) that needs to be run in the Production rails console to get the latest correct mappings for the notices.
+# 3. And update the DC_CODE_EVENT_MAPPING and/or ME_CODE_EVENT_MAPPING in this script file with the output from the rails console.
 # NOTE: Assuming that Production is the source of truth for the notices code to event mapping.
 
 # code_event_mapping = Templates::TemplateModel.all.inject({}) do |result_hash, template_model|
