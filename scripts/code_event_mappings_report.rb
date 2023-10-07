@@ -7,7 +7,8 @@
 #     bundle exec rails r scripts/code_event_mappings_report.rb 'me'
 
 # 1. We need to update the DC_CODE_EVENT_MAPPING and/or ME_CODE_EVENT_MAPPING in this script as we create/update notices in Production.
-# 2. Below is the script(from lines 14 through 18) that needs to be run in the Production rails console to get the latest correct mappings for the notices.
+# 2. Below is the script(from lines 15 through 19) that needs to be run in the Production
+#    rails console to get the latest correct mappings for the notices.
 # 3. And update the DC_CODE_EVENT_MAPPING and/or ME_CODE_EVENT_MAPPING in this script file with the output from the rails console.
 # NOTE: Assuming that Production is the source of truth for the notices code to event mapping.
 
