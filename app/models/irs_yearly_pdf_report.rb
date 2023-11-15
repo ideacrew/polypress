@@ -14,7 +14,7 @@ class IrsYearlyPdfReport < PdfReport
     @included_hbx_ids = params[:included_hbx_ids]
     initialize_variables(params)
 
-    @document_path = "#{Rails.root}/lib/pdf_templates/1095A_form.pdf"
+    @document_path = fetch_irs_form_template
     super({ :template => @document_path, :margin => [30, 55] })
     font_size 11
   end
@@ -41,6 +41,10 @@ class IrsYearlyPdfReport < PdfReport
     @multiple = options[:multiple]
     @void = (@tax_household[:void]&.to_s == 'true')
     @corrected = (@tax_household[:corrected]&.to_s == 'true')
+  end
+
+  def fetch_irs_form_template
+    "#{Rails.root}/lib/pdf_templates/#{@calender_year}_1095A_form.pdf"
   end
 
   def process
