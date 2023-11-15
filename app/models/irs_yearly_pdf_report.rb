@@ -13,9 +13,7 @@ class IrsYearlyPdfReport < PdfReport
     # indicates which individuals are to be included on this form (5 max per form)
     @included_hbx_ids = params[:included_hbx_ids]
     initialize_variables(params)
-
-    @document_path = fetch_irs_form_template
-    super({ :template => @document_path, :margin => [30, 55] })
+    super({ :template => fetch_irs_form_template, :margin => [30, 55] })
     font_size 11
   end
 
@@ -37,14 +35,14 @@ class IrsYearlyPdfReport < PdfReport
     @has_spouse_and_not_same_as_recipient = @spouse.present? && (@spouse[:person][:hbx_id] != @recipient[:person][:hbx_id])
     @has_aptc = @tax_household[:months_of_year].any? { |month| month[:coverage_information] && month[:coverage_information][:tax_credit][:cents] > 0 }
 
-    @calender_year = @insurance_agreement[:plan_year].to_i
+    @reporting_year = @calender_year = @insurance_agreement[:plan_year].to_i
     @multiple = options[:multiple]
     @void = (@tax_household[:void]&.to_s == 'true')
     @corrected = (@tax_household[:corrected]&.to_s == 'true')
   end
 
   def fetch_irs_form_template
-    "#{Rails.root}/lib/pdf_templates/#{@calender_year}_1095A_form.pdf"
+    "#{Rails.root}/lib/pdf_templates/#{@reporting_year}_1095A_form.pdf"
   end
 
   def process

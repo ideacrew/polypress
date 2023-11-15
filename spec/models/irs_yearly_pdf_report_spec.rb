@@ -17,16 +17,28 @@ RSpec.describe IrsYearlyPdfReport, type: :model do
     let(:included_hbx_ids) { tax_household[:covered_individuals].map { |individual| individual[:person][:hbx_id] } }
     let(:recipient) { entity.to_h[:family_members][0] }
 
-    it "should set correct calendar_year fetch correct irs_document based on calendr_year" do
+    it "sets correct calendar_year fetch correct irs_document based on calendar_year" do
       params = { tax_household: tax_household,
                  recipient: recipient,
                  insurance_policy: insurance_policy,
                  insurance_agreement: insurance_agreement,
                  included_hbx_ids: included_hbx_ids }
       irs_yearly_pdf_report = IrsYearlyPdfReport.new(params)
-      calender_year = irs_yearly_pdf_report.calender_year
-      expect(calender_year).to eq(insurance_agreement[:plan_year].to_i)
-      expect(irs_yearly_pdf_report.instance_variable_get(:@document_path)).to eq("#{Rails.root}/lib/pdf_templates/#{calender_year}_1095A_form.pdf")
+      reporting_year = insurance_agreement[:plan_year].to_i
+      expect(irs_yearly_pdf_report.instance_variable_get(:@reporting_year)).to eq(reporting_year)
+      expect(irs_yearly_pdf_report.instance_variable_get(:@calender_year)).to eq(reporting_year)
+      expect(irs_yearly_pdf_report.fetch_irs_form_template).to eq("#{Rails.root}/lib/pdf_templates/#{reporting_year}_1095A_form.pdf")
+    end
+
+    it "tax form should exist" do
+      params = { tax_household: tax_household,
+                 recipient: recipient,
+                 insurance_policy: insurance_policy,
+                 insurance_agreement: insurance_agreement,
+                 included_hbx_ids: included_hbx_ids }
+      IrsYearlyPdfReport.new(params)
+      reporting_year = insurance_agreement[:plan_year].to_i
+      expect(File.exist?("#{Rails.root}/lib/pdf_templates/#{reporting_year}_1095A_form.pdf")). to eq true
     end
   end
 end
