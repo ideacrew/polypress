@@ -38,7 +38,7 @@ RSpec.describe IrsYearlyPdfReport, type: :model do
                  included_hbx_ids: included_hbx_ids }
       IrsYearlyPdfReport.new(params)
       reporting_year = insurance_agreement[:plan_year].to_i
-      expect(File.exist?("#{Rails.root}/lib/pdf_templates/#{reporting_year}_1095A_form.pdf")). to eq true
+      expect(File.exist?("#{Rails.root}/lib/pdf_templates/#{reporting_year}_1095A_form.pdf")).to eq true
     end
   end
 end
