@@ -40,5 +40,21 @@ RSpec.describe IrsYearlyPdfReport, type: :model do
       reporting_year = insurance_agreement[:plan_year].to_i
       expect(File.exist?("#{Rails.root}/lib/pdf_templates/#{reporting_year}_1095A_form.pdf")).to eq true
     end
+
+    context "#fetch_insurance_provider_title" do
+      context "when insurance_provider is Community health options" do
+        let(:provider_title) { "Community Health Options" }
+        it "returns correct title for insurance_provider" do
+          params = { tax_household: tax_household,
+                     recipient: recipient,
+                     insurance_policy: insurance_policy,
+                     insurance_agreement: insurance_agreement,
+                     included_hbx_ids: included_hbx_ids }
+          irs_yearly_pdf_report = IrsYearlyPdfReport.new(params)
+          result = irs_yearly_pdf_report.fetch_insurance_provider_title(provider_title)
+          expect(result).to eq("Maine Community Health Options")
+        end
+      end
+    end
   end
 end

@@ -13,6 +13,8 @@ RSpec.shared_context 'family response from enroll', :shared_context => :metadata
 
   let(:current_date) { Date.today }
 
+  let(:provider_title) { "Community Health Options" }
+
   let(:family_hash) do
     {
       :documents_needed => true,
@@ -344,7 +346,7 @@ RSpec.shared_context 'family response from enroll', :shared_context => :metadata
 
   let(:insurance_provider) do
     {
-      title: "MAINE COMMUNITY HEALTH OPTIONS",
+      title: provider_title,
       hios_id: "123456",
       fein: "311705652",
       insurance_products: [insurance_product]
