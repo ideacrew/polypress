@@ -28,11 +28,12 @@ class IrsYearlyPdfReport < PdfReport
   def initialize_variables(options)
     @insurance_policy = options[:insurance_policy]
     @insurance_agreement = options[:insurance_agreement]
-    @spouse = @tax_household[:covered_individuals].detect do |covered_individual|
-      covered_individual[:relation_with_primary] == 'spouse'
+    @spouse = @tax_household[:tax_household_members].detect do |thh_member|
+      thh_member.dig(:family_member_reference, :relation_with_primary) == 'spouse'
     end
 
-    @has_spouse_and_not_same_as_recipient = @spouse.present? && (@spouse[:person][:hbx_id] != @recipient[:person][:hbx_id])
+    @has_spouse_and_not_same_as_recipient = @spouse.present? &&
+                                            (@spouse[:family_member_reference][:family_member_hbx_id] != @recipient[:person][:hbx_id])
     @has_aptc = @tax_household[:months_of_year].any? { |month| month[:coverage_information] && month[:coverage_information][:tax_credit][:cents] > 0 }
 
     @reporting_year = @calender_year = @insurance_agreement[:plan_year].to_i
@@ -76,6 +77,30 @@ class IrsYearlyPdfReport < PdfReport
         end
       bounding_box([col4, y_pos], :width => 100) do
         text enrollee_dob || ''
+      end
+    end
+  end
+
+  def fill_spouse(spouse)
+    col1 = mm2pt(-2)
+    col3 = mm2pt(102.50)
+    col4 = mm2pt(145.50)
+    y_pos = cursor
+
+    bounding_box([col1, y_pos], :width => 240) do
+      text("#{spouse[:family_member_reference][:first_name]} #{spouse[:family_member_reference][:last_name]}".titleize)
+    end
+
+    spouse_ssn = spouse[:family_member_reference][:encrypted_ssn]
+
+    if spouse_ssn.present?
+      bounding_box([col3, y_pos], :width => 100) do
+        text mask_ssn(spouse_ssn)
+      end
+    else
+      spouse_dob = spouse[:family_member_reference][:dob].strftime("%m/%d/%Y")
+      bounding_box([col4, y_pos], :width => 100) do
+        text spouse_dob || ''
       end
     end
   end
@@ -158,7 +183,7 @@ class IrsYearlyPdfReport < PdfReport
 
     move_down(12)
     if @has_spouse_and_not_same_as_recipient && @has_aptc
-      fill_enrollee(@spouse)
+      fill_spouse(@spouse)
     else
       move_down(13)
     end

@@ -383,16 +383,26 @@ RSpec.shared_context 'family response from enroll', :shared_context => :metadata
           }
         ],
         tax_household_members: [
-          [
-            {
-              family_member_reference: {
-                family_member_hbx_id: "1000595",
-                relation_with_primary: "self"
-              },
-              tax_filer_status: "tax_filer",
-              is_subscriber: true
-            }
-          ]
+          {
+            family_member_reference: {
+              family_member_hbx_id: "1000595",
+              relation_with_primary: "self",
+              :first_name => "John",
+              :last_name => "Smith1",
+              dob: current_date - 40.years
+            },
+            tax_filer_status: "tax_filer",
+            is_subscriber: true
+          },
+          { :family_member_reference =>
+             { :family_member_hbx_id => "1025992",
+               :relation_with_primary => "spouse",
+               :first_name => "spouse",
+               :last_name => "test",
+               :dob => Date.today - 10.years,
+               :encrypted_ssn => "yobheUbYUK2Abfc6lrq37YQCsPgBL8lLkw==\n" },
+            :tax_filer_status => "non_filer",
+            :is_subscriber => false }
         ],
         months_of_year: months_of_year,
         annual_premiums: annual_premiums
