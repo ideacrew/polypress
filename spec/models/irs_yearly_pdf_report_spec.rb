@@ -40,5 +40,17 @@ RSpec.describe IrsYearlyPdfReport, type: :model do
       reporting_year = insurance_agreement[:plan_year].to_i
       expect(File.exist?("#{Rails.root}/lib/pdf_templates/#{reporting_year}_1095A_form.pdf")).to eq true
     end
+
+    it "set spouse details" do
+      params = { tax_household: tax_household,
+                 recipient: recipient,
+                 insurance_policy: insurance_policy,
+                 insurance_agreement: insurance_agreement,
+                 included_hbx_ids: included_hbx_ids }
+      irs_yearly_pdf_report = IrsYearlyPdfReport.new(params)
+      expect(irs_yearly_pdf_report.instance_variable_get(:@spouse)).to be_present
+      spouse_details = irs_yearly_pdf_report.instance_variable_get(:@spouse)
+      expect(spouse_details.dig(:family_member_reference, :first_name)).to be_present
+    end
   end
 end
