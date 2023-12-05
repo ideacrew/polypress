@@ -220,14 +220,11 @@ class IrsYearlyPdfReport < PdfReport
   # rubocop:enable Metrics/AbcSize
 
   def fetch_insurance_provider_title(title)
-    return title if site_key.to_s != "me"
+    return title unless PolypressRegistry.feature_enabled?(:tax_notices)
 
-    {
-      "Anthem Blue Cross and Blue Shield" => "Anthem Health Plans of Maine Inc",
-      "Harvard Pilgrim Health Care" => "Harvard Pilgrim Health Care Inc",
-      "Community Health Options" => "Maine Community Health Options",
-      "Taro Health" => "Taro Health Plan of Maine Inc"
-    }[title] || title
+    mapping = PolypressRegistry[:tax_notices].settings(:carrier_names_mapping).item
+    mapped_title = mapping[title.to_sym].to_s
+    mapped_title.present? ? mapped_title : title
   end
 
   # rubocop:disable Metrics/CyclomaticComplexity
