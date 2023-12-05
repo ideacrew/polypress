@@ -61,7 +61,7 @@ RSpec.describe IrsYearlyPdfReport, type: :model do
                       'Harvard Pilgrim Health Care': "Harvard Pilgrim Health Care Inc",
                       'Community Health Options': "Maine Community Health Options",
                       'Taro Health': "Taro Health Plan of Maine Inc" }
-          allow(PolypressRegistry).to receive(:[]).with(:tax_notices).and_return(setting)
+          allow(PolypressRegistry).to receive(:[]).with(:modify_carrier_legal_names).and_return(setting)
           allow(setting).to receive(:settings).with(:carrier_names_mapping).and_return(double(item: mapping))
         end
 
@@ -101,7 +101,7 @@ RSpec.describe IrsYearlyPdfReport, type: :model do
         let(:setting) { double }
 
         before :each do
-          allow(PolypressRegistry).to receive(:feature_enabled?).with(:tax_notices).and_return(false)
+          allow(PolypressRegistry).to receive(:feature_enabled?).with(:modify_carrier_legal_names).and_return(false)
         end
 
         it "returns provider_title as is" do

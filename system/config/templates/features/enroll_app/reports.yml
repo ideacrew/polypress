@@ -8,11 +8,3 @@ registry:
         settings:
           - key: :carrier_hios_ids
             item: ["96667", "48396", "33653", "50165", "54879"]
-      - key: :tax_notices
-        is_enabled: true
-        settings:
-            - key: :carrier_names_mapping
-              item: {"Anthem Blue Cross and Blue Shield": "Anthem Health Plans of Maine Inc",
-                      "Harvard Pilgrim Health Care": "Harvard Pilgrim Health Care Inc",
-                      "Community Health Options": "Maine Community Health Options",
-                      "Taro Health": "Taro Health Plan of Maine Inc"}

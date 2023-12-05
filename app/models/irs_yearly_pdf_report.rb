@@ -220,9 +220,9 @@ class IrsYearlyPdfReport < PdfReport
   # rubocop:enable Metrics/AbcSize
 
   def fetch_insurance_provider_title(title)
-    return title unless PolypressRegistry.feature_enabled?(:tax_notices)
+    return title unless PolypressRegistry.feature_enabled?(:modify_carrier_legal_names)
 
-    mapping = PolypressRegistry[:tax_notices].settings(:carrier_names_mapping).item
+    mapping = PolypressRegistry[:modify_carrier_legal_names].settings(:carrier_names_mapping).item
     mapped_title = mapping[title.to_sym].to_s
     mapped_title.present? ? mapped_title : title
   end
