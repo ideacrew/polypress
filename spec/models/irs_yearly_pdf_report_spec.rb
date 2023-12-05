@@ -54,8 +54,15 @@ RSpec.describe IrsYearlyPdfReport, type: :model do
     end
 
     context "#fetch_insurance_provider_title" do
-      context "when insurance_provider is Community health options" do
+      context "site is ME" do
         let(:provider_title) { "Community Health Options" }
+        let(:setting) { double }
+
+        before :each do
+          allow(PolypressRegistry).to receive(:[]).with(:enroll_app).and_return(setting)
+          allow(setting).to receive(:settings).with(:site_key).and_return(double(item: :me))
+        end
+
         it "returns correct title for insurance_provider" do
           params = { tax_household: tax_household,
                      recipient: recipient,
@@ -65,6 +72,27 @@ RSpec.describe IrsYearlyPdfReport, type: :model do
           irs_yearly_pdf_report = IrsYearlyPdfReport.new(params)
           result = irs_yearly_pdf_report.fetch_insurance_provider_title(provider_title)
           expect(result).to eq("Maine Community Health Options")
+        end
+      end
+
+      context "Site is not ME" do
+        let(:provider_title) { "Community Health Options" }
+        let(:setting) { double }
+
+        before :each do
+          allow(PolypressRegistry).to receive(:[]).with(:enroll_app).and_return(setting)
+          allow(setting).to receive(:settings).with(:site_key).and_return(double(item: :dc))
+        end
+
+        it "returns correct title for insurance_provider" do
+          params = { tax_household: tax_household,
+                     recipient: recipient,
+                     insurance_policy: insurance_policy,
+                     insurance_agreement: insurance_agreement,
+                     included_hbx_ids: included_hbx_ids }
+          irs_yearly_pdf_report = IrsYearlyPdfReport.new(params)
+          result = irs_yearly_pdf_report.fetch_insurance_provider_title(provider_title)
+          expect(result).to eq("Community Health Options")
         end
       end
     end

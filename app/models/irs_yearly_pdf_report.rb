@@ -220,6 +220,8 @@ class IrsYearlyPdfReport < PdfReport
   # rubocop:enable Metrics/AbcSize
 
   def fetch_insurance_provider_title(title)
+    return title if site_key.to_s != "me"
+
     {
       "Anthem Blue Cross and Blue Shield" => "Anthem Health Plans of Maine Inc",
       "Harvard Pilgrim Health Care" => "Harvard Pilgrim Health Care Inc",
