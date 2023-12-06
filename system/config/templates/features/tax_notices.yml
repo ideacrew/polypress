@@ -1,0 +1,15 @@
+---
+registry:
+  - namespace:
+      - :polypress
+      - :aca_individual_market
+      - :tax_forms
+    features:
+      - key: :modify_carrier_legal_names
+        is_enabled: true
+        settings:
+          - key: :carrier_names_mapping
+            item: {"Anthem Blue Cross and Blue Shield": "Anthem Health Plans of Maine Inc",
+                   "Harvard Pilgrim Health Care": "Harvard Pilgrim Health Care Inc",
+                   "Community Health Options": "Maine Community Health Options",
+                   "Taro Health": "Taro Health Plan of Maine Inc"}

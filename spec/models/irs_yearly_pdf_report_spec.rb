@@ -52,5 +52,69 @@ RSpec.describe IrsYearlyPdfReport, type: :model do
       spouse_details = irs_yearly_pdf_report.instance_variable_get(:@spouse)
       expect(spouse_details.dig(:family_member_reference, :first_name)).to be_present
     end
+
+    context "#fetch_insurance_provider_title" do
+      context "tax_notices setting is enabled" do
+        let(:setting) { double }
+        before :each do
+          mapping = { 'Anthem Blue Cross and Blue Shield': "Anthem Health Plans of Maine Inc",
+                      'Harvard Pilgrim Health Care': "Harvard Pilgrim Health Care Inc",
+                      'Community Health Options': "Maine Community Health Options",
+                      'Taro Health': "Taro Health Plan of Maine Inc" }
+          allow(PolypressRegistry).to receive(:[]).with(:modify_carrier_legal_names).and_return(setting)
+          allow(setting).to receive(:settings).with(:carrier_names_mapping).and_return(double(item: mapping))
+        end
+
+        context "when insurance_provider is in mapping" do
+          let(:provider_title) { "Community Health Options" }
+
+          it "returns correct mapping title for insurance_provider" do
+            params = { tax_household: tax_household,
+                       recipient: recipient,
+                       insurance_policy: insurance_policy,
+                       insurance_agreement: insurance_agreement,
+                       included_hbx_ids: included_hbx_ids }
+            irs_yearly_pdf_report = IrsYearlyPdfReport.new(params)
+            result = irs_yearly_pdf_report.fetch_insurance_provider_title(provider_title)
+            expect(result).to eq("Maine Community Health Options")
+          end
+        end
+
+        context "when insurance_provider is not in mapping" do
+          let(:provider_title) { "Community Health Options Inc" }
+
+          it "returns provider_title as is" do
+            params = { tax_household: tax_household,
+                       recipient: recipient,
+                       insurance_policy: insurance_policy,
+                       insurance_agreement: insurance_agreement,
+                       included_hbx_ids: included_hbx_ids }
+            irs_yearly_pdf_report = IrsYearlyPdfReport.new(params)
+            result = irs_yearly_pdf_report.fetch_insurance_provider_title(provider_title)
+            expect(result).to eq("Community Health Options Inc")
+          end
+        end
+      end
+
+      context "tax_notices setting is disabled" do
+        let(:provider_title) { "Community Health Options" }
+        let(:setting) { double }
+
+        before :each do
+          allow(PolypressRegistry).to receive(:feature_enabled?).with(:modify_carrier_legal_names).and_return(false)
+        end
+
+        it "returns provider_title as is" do
+          params = { tax_household: tax_household,
+                     recipient: recipient,
+                     insurance_policy: insurance_policy,
+                     insurance_agreement: insurance_agreement,
+                     included_hbx_ids: included_hbx_ids }
+          irs_yearly_pdf_report = IrsYearlyPdfReport.new(params)
+          result = irs_yearly_pdf_report.fetch_insurance_provider_title(provider_title)
+          expect(result).to eq("Community Health Options")
+        end
+      end
+    end
   end
 end
