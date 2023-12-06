@@ -148,7 +148,7 @@ class IrsYearlyPdfReport < PdfReport
     end
 
     bounding_box([col3, y_pos], :width => 250) do
-      text(@insurance_agreement[:insurance_provider][:title])
+      text(fetch_insurance_provider_title(@insurance_agreement[:insurance_provider][:title]))
     end
 
     move_down(12)
@@ -193,6 +193,14 @@ class IrsYearlyPdfReport < PdfReport
     end
   end
   # rubocop:enable Metrics/AbcSize
+
+  def fetch_insurance_provider_title(title)
+    return title unless PolypressRegistry.feature_enabled?(:modify_carrier_legal_names)
+
+    mapping = PolypressRegistry[:modify_carrier_legal_names].settings(:carrier_names_mapping).item
+    mapped_title = mapping[title.to_sym].to_s
+    mapped_title.present? ? mapped_title : title
+  end
 
   # rubocop:disable Metrics/CyclomaticComplexity
   def fill_premium_details
