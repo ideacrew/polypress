@@ -1,7 +1,9 @@
 ---
 registry:
   - namespace:
-      - :features
+      - :polypress
+      - :aca_individual_market
+      - :tax_forms
     features:
       - key: :modify_carrier_legal_names
         is_enabled: true
