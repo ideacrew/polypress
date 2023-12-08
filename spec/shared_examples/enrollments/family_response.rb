@@ -353,57 +353,65 @@ RSpec.shared_context 'family response from enroll', :shared_context => :metadata
     }
   end
 
+  let(:covered_individuals) do
+    [
+      {
+        coverage_start_on: current_date.beginning_of_year,
+        coverage_end_on: current_date.end_of_year,
+        person: {
+          hbx_id: "1000595",
+          person_name: person_name_1,
+          person_demographics: {
+            gender: "female",
+            encrypted_ssn: "yobheUbYUK2Abfc6lrq37YQCsPgBL8lLkw==\n",
+            dob: current_date - 40.years
+          },
+          person_health: {},
+          is_active: true,
+          addresses: addresses,
+          emails: [
+            {
+              kind: "home",
+              address: "test@gmail.com"
+            }
+          ]
+        },
+        relation_with_primary: "self",
+        filer_status: "tax_filer"
+      }
+    ]
+  end
+
+  let(:tax_household_members) do
+    [
+      {
+        family_member_reference: {
+          family_member_hbx_id: "1000595",
+          relation_with_primary: "self",
+          :first_name => "John",
+          :last_name => "Smith1",
+          dob: current_date - 40.years
+        },
+        tax_filer_status: "tax_filer",
+        is_subscriber: true
+      },
+      { :family_member_reference =>
+          { :family_member_hbx_id => "1025992",
+            :relation_with_primary => "spouse",
+            :first_name => "spouse",
+            :last_name => "test",
+            :dob => Date.today - 10.years,
+            :encrypted_ssn => "yobheUbYUK2Abfc6lrq37YQCsPgBL8lLkw==\n" },
+        :tax_filer_status => "tax_filer",
+        :is_subscriber => false }
+    ]
+  end
+
   let(:aptc_csr_tax_households) do
     [
       {
-        covered_individuals: [
-          {
-            coverage_start_on: current_date.beginning_of_year,
-            coverage_end_on: current_date.end_of_year,
-            person: {
-              hbx_id: "1000595",
-              person_name: person_name_1,
-              person_demographics: {
-                gender: "female",
-                encrypted_ssn: "yobheUbYUK2Abfc6lrq37YQCsPgBL8lLkw==\n",
-                dob: current_date - 40.years
-              },
-              person_health: {},
-              is_active: true,
-              addresses: addresses,
-              emails: [
-                {
-                  kind: "home",
-                  address: "test@gmail.com"
-                }
-              ]
-            },
-            relation_with_primary: "self",
-            filer_status: "tax_filer"
-          }
-        ],
-        tax_household_members: [
-          {
-            family_member_reference: {
-              family_member_hbx_id: "1000595",
-              relation_with_primary: "self",
-              :first_name => "John",
-              :last_name => "Smith1",
-              dob: current_date - 40.years
-            },
-            tax_filer_status: "tax_filer",
-            is_subscriber: true
-          },
-          { :family_member_reference =>
-             { :family_member_hbx_id => "1025992",
-               :relation_with_primary => "spouse",
-               :first_name => "spouse",
-               :last_name => "test",
-               :dob => Date.today - 10.years,
-               :encrypted_ssn => "yobheUbYUK2Abfc6lrq37YQCsPgBL8lLkw==\n" },
-            :tax_filer_status => "non_filer",
-            :is_subscriber => false }
-        ],
+        covered_individuals: covered_individuals,
+        tax_household_members: tax_household_members,
         months_of_year: months_of_year,
         annual_premiums: annual_premiums
       }

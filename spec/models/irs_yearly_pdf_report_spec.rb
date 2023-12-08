@@ -41,16 +41,68 @@ RSpec.describe IrsYearlyPdfReport, type: :model do
       expect(File.exist?("#{Rails.root}/lib/pdf_templates/#{reporting_year}_1095A_form.pdf")).to eq true
     end
 
-    it "set spouse details" do
-      params = { tax_household: tax_household,
-                 recipient: recipient,
-                 insurance_policy: insurance_policy,
-                 insurance_agreement: insurance_agreement,
-                 included_hbx_ids: included_hbx_ids }
-      irs_yearly_pdf_report = IrsYearlyPdfReport.new(params)
-      expect(irs_yearly_pdf_report.instance_variable_get(:@spouse)).to be_present
-      spouse_details = irs_yearly_pdf_report.instance_variable_get(:@spouse)
-      expect(spouse_details.dig(:family_member_reference, :first_name)).to be_present
+    context "spouse details" do
+      context "Primary and Spouse are married filing jointly and both are enrolled" do
+        it "set spouse details" do
+          params = { tax_household: tax_household,
+                     recipient: recipient,
+                     insurance_policy: insurance_policy,
+                     insurance_agreement: insurance_agreement,
+                     included_hbx_ids: included_hbx_ids }
+          irs_yearly_pdf_report = IrsYearlyPdfReport.new(params)
+          expect(irs_yearly_pdf_report.instance_variable_get(:@spouse)).to be_present
+          spouse_details = irs_yearly_pdf_report.instance_variable_get(:@spouse)
+          recipient_details = irs_yearly_pdf_report.instance_variable_get(:@recipient)
+          expect(spouse_details.dig(:family_member_reference, :first_name)).to be_present
+          expect(spouse_details.dig(:family_member_reference, :family_member_hbx_id)).to eq "1025992"
+          expect(recipient_details.dig(:person, :hbx_id)).to eq "476"
+        end
+      end
+
+      context "Primary and Spouse are married filing jointly and only spouse is enrolled and is also recipient" do
+        let(:covered_individuals) do
+          [
+            {
+              coverage_start_on: current_date.beginning_of_year,
+              coverage_end_on: current_date.end_of_year,
+              person: {
+                hbx_id: "1025992",
+                person_name: { first_name: "spouse", last_name: "test" },
+                person_demographics: {
+                  gender: "female",
+                  encrypted_ssn: "yobheUbYUK2Abfc6lrq37YQCsPgBL8lLkw==\n",
+                  dob: Date.today - 10.years
+                },
+                person_health: {},
+                is_active: true,
+                addresses: addresses,
+                emails: [
+                  {
+                    kind: "home",
+                    address: "test@gmail.com"
+                  }
+                ]
+              },
+              relation_with_primary: "spouse",
+              filer_status: "tax_filer"
+            }
+          ]
+        end
+
+        it "set primary as the spouse" do
+          params = { tax_household: tax_household,
+                     recipient: recipient,
+                     insurance_policy: insurance_policy,
+                     insurance_agreement: insurance_agreement,
+                     included_hbx_ids: included_hbx_ids }
+          irs_yearly_pdf_report = IrsYearlyPdfReport.new(params)
+          expect(irs_yearly_pdf_report.instance_variable_get(:@spouse)).to be_present
+          spouse_details = irs_yearly_pdf_report.instance_variable_get(:@spouse)
+          recipient_details = irs_yearly_pdf_report.instance_variable_get(:@recipient)
+          expect(spouse_details.dig(:family_member_reference, :family_member_hbx_id)).to eq "1025992"
+          expect(recipient_details.dig(:person, :hbx_id)).to eq "476"
+        end
+      end
     end
 
     context "#fetch_insurance_provider_title" do

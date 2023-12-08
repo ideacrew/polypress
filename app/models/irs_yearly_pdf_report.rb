@@ -28,9 +28,7 @@ class IrsYearlyPdfReport < PdfReport
   def initialize_variables(options)
     @insurance_policy = options[:insurance_policy]
     @insurance_agreement = options[:insurance_agreement]
-    @spouse = @tax_household[:tax_household_members].detect do |thh_member|
-      thh_member.dig(:family_member_reference, :relation_with_primary) == 'spouse'
-    end
+    @spouse = fetch_spouse
 
     @has_spouse_and_not_same_as_recipient = @spouse.present? &&
                                             (@spouse[:family_member_reference][:family_member_hbx_id] != @recipient[:person][:hbx_id])
@@ -40,6 +38,29 @@ class IrsYearlyPdfReport < PdfReport
     @multiple = options[:multiple]
     @void = (@tax_household[:void]&.to_s == 'true')
     @corrected = (@tax_household[:corrected]&.to_s == 'true')
+  end
+
+  # If there is a spouse relationship and if the spouses are married filing jointly on an FAA,
+  # both of them should be listed.
+  # Example Cases:
+  # Case 1
+  # A is the subscriber and B is the spouse, and both A,B are married filing jointly present in 1 tax household
+  # and enrolled together
+  #  - A will be the recipient and B will be the spouse
+  # Case 2
+  # A is the subscriber, B is the spouse and both A,B are married filing jointly present in 1 tax household, but only
+  # B is enrolled and is a tax_filer
+  #  - In this case B is the recipient and A is the Spouse
+  def fetch_spouse
+    spouse = @tax_household[:tax_household_members].detect do |thh_member|
+      thh_member.dig(:family_member_reference, :relation_with_primary) == 'spouse'
+    end
+    return spouse if spouse.present? &&
+                     spouse[:family_member_reference][:family_member_hbx_id] != @recipient[:person][:hbx_id]
+
+    @tax_household[:tax_household_members].detect do |thh_member|
+      thh_member.dig(:family_member_reference, :relation_with_primary) == 'self'
+    end
   end
 
   def fetch_irs_form_template
