@@ -4,7 +4,7 @@ module Subscribers
   module Families
     module Notices
       module TaxForms
-        # Subscriber will receive payload from FDSH gateway and generate documents
+        # Subscriber will receive payload from EDI gateway and generate 1095a notices
         class Cap1095aNoticeGenerationSubscriber
           include EventSource::Logging
           include ::EventSource::Subscriber[amqp: 'edi_gateway.families.tax_form1095a']
@@ -19,6 +19,7 @@ module Subscribers
               { family_hash: payload, event_key: routing_key }
             )
             if result.success?
+              logger.info "Polypress: Cap1095aNoticeGenerationSubscriber; successfully generated notice for cap_1095a"
               logger.info "Polypress: Cap1095aNoticeGenerationSubscriber; acked for #{routing_key}"
             else
               errors = if result.is_a?(String)
