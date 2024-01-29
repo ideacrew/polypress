@@ -54,27 +54,27 @@ registry:
           - key: :payment_pdf_url
             item: "pdf/employers_paying_your_premiums_online.pdf"
           - key: :user_sign_in_url
-            item: "https://www.coverme.gov"
+            item: "https://www.ideacrew.com"
           - key: :website_name
-            item: https://www.coverme.gov"
+            item: https://www.ideacrew.com"
           - key: :main_web_address
-            item: "https://www.coverme.gov"
+            item: "https://www.ideacrew.com"
           - key: :website_name
-            item: "https://www.coverme.gov"
+            item: "https://www.ideacrew.com"
           - key: :main_web_address
-            item: "https://www.coverme.gov"
+            item: "https://www.ideacrew.com"
           - key: :state_name
-            item: "Maine"
+            item: "State"
           - key: :short_name
-            item: "Maine Cover ME"
+            item: "State Cover ST"
           - key: :byline
-            item: "Maine's Official Health Insurance Marketplace"
+            item: "State's Official Health Insurance Marketplace"
           - key: :long_name
             item: "CoverME.gov"
           - key: :header_message
-            item: "Maine's Official Health Insurance Marketplace"
+            item: "State's Official Health Insurance Marketplace"
           - key: :byline
-            item: "Welcome to Maine's Health Insurance Marketplace"
+            item: "Welcome to State's Health Insurance Marketplace"
           - key: :logo_file_name
             item: "logo_me.svg"
           - key: :make_their_premium_payments_online
@@ -133,7 +133,7 @@ registry:
           - key: :forms
             item: ""
           - key: :website_url
-            item: "www.CoverME.gov"
+            item: "www.ideacrew.com"
           - key: :healthcare_name
             item: "www.healthcare.gov"
           - key: :healthcare_url
@@ -143,11 +143,11 @@ registry:
           - key: :exchange_hbx_id
             item: "ME0"
           - key: :mail_address
-            item: "info@coverme.gov"
+            item: "info@ideacrew.com"
           - key: :no_reply_email
-            item: "noreply@coverme.gov"
+            item: "noreply@ideacrew.com"
           - key: :mail_address
-            item: "info@coverme.gov"
+            item: "info@ideacrew.com"
           - key: :producer_email_address
             item: 'mehl.producer@coverme.gov'
           - key: :privacy_policy
@@ -175,15 +175,15 @@ registry:
           - key: :staging_tax_info_url
             item: "https://www.maine.gov/revenue/tax-return-forms/individual-income-tax-2020"
           - key: :statewide_area
-            item: "Maine"
+            item: "State"
           - key: :exchange_name
-            item: "CoverME.gov"
+            item: "ideacrew.com"
           - key: :social_media
             item: ''
           - key: :state_long_title
-            item: "the state of Maine"
+            item: "the state of State"
           - key: :state_dmv_link
-            item: "https://www.maine.gov/sos/bmv/"
+            item: "https://www.ideacrew.com"
           - key: :contact_center_po_box
             item: "POB 616"
           - key: :contact_center_city
@@ -195,13 +195,13 @@ registry:
           - key: :contact_center_zip_code
             item: "04332-6626"
           - key: :contact_center_email_address
-            item: "smallbusiness@coverme.gov"
+            item: "smallbusiness@ideacrew.com"
           - key: :social_media
             item: ''
           - key: :health_benefit_exchange_authority_phone_number
             item: "(866) 636-0355 TTY:711"
           - key: :contact_center_name
-            item: "CoverME.gov Consumer Assistance Center"
+            item: "IdeaCrew.com Consumer Assistance Center"
           - key: :contact_center_short_number
             item: "(866) 636-0355 TTY:711"
           - key: :contact_center_tty_number # Need to figure out what this should be for Maine
@@ -209,7 +209,7 @@ registry:
           - key: :producer_advisory_committee_url
             item: ""
           - key: :mailer_logo_file_name
-            item: "coverme.jpg"
+            item: "ea-logo.jpg"
           - key: :broker_course_administering_organization_number
             item: '(877) 880-1335'
           - key: :broker_course_administering_organization

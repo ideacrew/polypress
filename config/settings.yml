@@ -1,12 +1,12 @@
 site:
-  key: :me
-  subdomain: "cme"
-  domain_name: "cme.enroll.openhbx.org"
-  site_title: "Maine CoverME"
-  home_url: "https://cme.enroll.openhbx.org/"
+  key: :ic
+  subdomain: "ic"
+  domain_name: "ic.enroll.openhbx.org"
+  site_title: "IdeaCrew"
+  home_url: "https://sbm.enroll.openhbx.org/"
   home_business_url: "https://www.accesshealthct.com/AHCT/LandingPageCTHIX"
   # copyright_period_start: "2013"
-  help_url: "https://www.coverme.gov/help/"
+  help_url: "https://www.ideacrew.gov/help/"
   # faqs_url: "https://www.dchealthlink.com/Frequently-Asked-Questions"
   # business_resource_center_url: "https://dchealthlink.com/smallbusiness/"
   # nondiscrimination_notice_url: "https://www.dchealthlink.com/nondiscrimination"
@@ -19,14 +19,14 @@ site:
   main_web_address: "https://www.accesshealthct.com/AHCT/LandingPageCTHIX"
   health_care_website: "www.healthcare.gov"
   health_care_website_url: "https://www.healthcare.gov"
-  short_name: "CoverME"
-  byline: "Maine's Official Health Insurance Marketplace"
-  long_name: "Maine CoverME"
-  header_message: "Maine's Official Health Insurance Marketplace"
+  short_name: "IdeaCrew"
+  byline: "The State's Official Health Insurance Marketplace"
+  long_name: "SBM ideacrew"
+  header_message: "The State's Official Health Insurance Marketplace"
   logo_file_name: "logo_me.svg"
   make_their_premium_payments_online: "https://www.e-billexpress.com/ebpp/DCHEALTHPAY/"
   tab_icon: 'favicon_me.ico'
-  mailer_logo_file_name: "coverme.png"
+  mailer_logo_file_name: "ea-logo.png"
   employer_application_deadline_link: "https://dchealthlink.com/smallbusiness/employer-coverage-deadlines"
   s3_prefix: "dchbx"
   broker_quoting_enabled: false
@@ -37,7 +37,7 @@ site:
   create_routes: ['/insured/employee/privacy','/employers/employer_profiles/new', '/insured/consumer_role/privacy']
   sign_in_routes: ['/families/home']
   shop_find_your_doctor_url: "https://dc.checkbookhealth.org/dc/"
-  document_verification_checklist_url: "https://www.coverme.gov/help/"
+  document_verification_checklist_url: "https://www.ideacrew.gov/help/"
   terms_and_conditions_url: ""
   certification_url: "https://www.dchealthlink.com/brokers/overview"
   registration_path: "https://www.dchealthlink.com/smallbusiness"
@@ -45,13 +45,13 @@ site:
   forms_name: "DCHealthLink.com/forms"
   short_url: "dchealthlink.com"
   forms: "https://dchealthlink.com/forms#en"
-  website_url: "www.coverme.gov"
+  website_url: "www.ideacrew.gov"
   healthcare_name: "www.healthcare.gov"
   healthcare_url: "https://www.healthcare.gov/"
   irs_url: "https://www.irs.gov/"
   exchange_hbx_id: "ME0"
-  mail_address: "info@coverme.gov"
-  privacy_policy: "https://www.coverme.gov"
+  mail_address: "info@ideacrew.gov"
+  privacy_policy: "https://www.ideacrew.gov"
   late_rates_message: "Due to a delay, premiums for some coverage effective dates are not available yet. Please check again soon to see if this information has been updated. You can also contact Customer Service or your broker if you need help."
   faa_enabled: false # TODO: Remove this after configuring the settings.
   ivl_responsibility_url: ""
@@ -62,17 +62,17 @@ site:
   publisher: "dchl"
   prod_tax_info: ""
   staging_tax_info_url: ""
-  statewide_area: "DC Metro"
+  statewide_area: "State Metro"
   elligibile_immigration_statuses_url: ""
 
-  exchange_name: "Maine CoverME"
+  exchange_name: "SBM ideacrew"
   social_media:
     facebook_url: ""
 
 contact_center:
-  state_and_city: "Augusta, ME"
-  name: "Maine CoverME's Customer Care Center"
-  alt_name: "Maine CoverME Customer Service"
+  state_and_city: "City, ST"
+  name: "IdeaCrew's Customer Care Center"
+  alt_name: "IdeaCrew's Customer Service"
   po_box: "PO Box 97022"
   phone_number: "1-800-965-7476"
   fax: "1-617-933-3099"
@@ -84,37 +84,37 @@ contact_center:
   payment_phone_number: "855-532-LINK"
   ivl_number: "1-877-623-6765"
   ivl_phone_number: "1-877-623-6765"
-  email_address: "smallbusiness@coverme.gov"
-  city: "Augusta"
-  state: "ME"
+  email_address: "smallbusiness@ideacrew.gov"
+  city: "City"
+  state: "ST"
   zip_code: "04330"
-  small_business_email: "smallbusiness@coverme.gov"
-  non_discrimination_email: "info@coverme.gov"
+  small_business_email: "smallbusiness@ideacrew.gov"
+  non_discrimination_email: "info@ideacrew.gov"
 
-  appeals: "info@coverme.gov"
+  appeals: "info@ideacrew.gov"
 
   # Voting Info for FA Engine Steps
-  # TOOD: This needs to be updated. These are pulled of Maine government website.
-  # # https://www.maine.gov/sos/cec/elec/voter-info/index.html
+  # TOOD: This needs to be updated. These are pulled of SBM government website.
+  # # https://www.SBM.gov/sos/cec/elec/voter-info/index.html
   board_of_elections_entity: "Elections Division<br>Department of the Secretary of State"
   board_of_elections_address: "Burton M. Cross Building<br>111 Sewall St (101 SHS)<br>Augusta, ME 04333-0101"
-  board_of_elections_email: "cec.elections@maine.gov"
+  board_of_elections_email: "cec.elections@SBM.gov"
   board_of_elections_phone_number: "(207) 624-7650"
 
   mailing_address:
-    name: "Maine CoverME"
+    name: "SBM ideacrew"
     address_1: "PO Box 97022"
     address_2:
-    city: "Washington"
-    state: "DC"
+    city: "City"
+    state: "ST"
     zip_code: "20090"
 
   appeal_center:
-    name: "Maine CoverME"
+    name: "SBM ideacrew"
     address_1: "PO Box 97022"
     address_2:
-    city: "Washington"
-    state: "DC"
+    city: "City"
+    state: "ST"
     zip_code: "20090"
 
   non_discrimination:
@@ -148,12 +148,12 @@ invoices:
   minimum_invoice_display_year: 2015
 
 aca:
-  state_key : "me"
-  state_name: "Maine"
-  state_abbreviation: "ME"
+  state_key : "ST"
+  state_name: "SBM"
+  state_abbreviation: "ST"
   market_kinds: ["shop", "individual", "fehb"]
 
-  hbx_abbreviation: "Maine CoverME"
+  hbx_abbreviation: "SBM ideacrew"
   nationwide_markets: true
   general_agency_enabled: true
   broker_carrier_appointments_enabled: true
@@ -203,7 +203,7 @@ aca:
       end_on: <%= Date.new(2022,01,31) %>
 
   shop_market:
-    valid_employer_attestation_documents_url: 'https://www.coverme.gov/business/business-resource-center/employer-verification-checklist'
+    valid_employer_attestation_documents_url: 'https://www.ideacrew.gov/business/business-resource-center/employer-verification-checklist'
     small_market_employee_count_maximum: 50
     employer_contribution_percent_minimum: 50
     employer_dental_contribution_percent_minimum: 0
@@ -349,14 +349,14 @@ notices:
     mail_address:
       address_1: "PO Box 44018"
       city: "Augusta"
-      state: "Maine"
+      state: "SBM"
       zip_code: "20026"
     medicaid:
       agency_name: "Office for Family Independence"
-      program_name: "MaineCare (Medicaid)"
+      program_name: "SBMCare (Medicaid)"
       agency_phone: "(855) 797-4357"
-      chip_long_name: "MaineCare (Medicaid) or CubCare (Children’s Health Insurance Program)"
-      chip_short_name: "MaineCare or CubCare"
+      chip_long_name: "SBMCare (Medicaid) or CubCare (Children’s Health Insurance Program)"
+      chip_short_name: "SBMCare or CubCare"
 
   shop_market:
     mail_address:
