@@ -54,15 +54,15 @@ registry:
           - key: :payment_pdf_url
             item: "pdf/employers_paying_your_premiums_online.pdf"
           - key: :user_sign_in_url
-            item: "https://www.ideacrew.com"
+            item: "https://www.ideacrewdemo.gov"
           - key: :website_name
-            item: https://www.ideacrew.com"
+            item: https://www.ideacrewdemo.gov"
           - key: :main_web_address
-            item: "https://www.ideacrew.com"
+            item: "https://www.ideacrewdemo.gov"
           - key: :website_name
-            item: "https://www.ideacrew.com"
+            item: "https://www.ideacrewdemo.gov"
           - key: :main_web_address
-            item: "https://www.ideacrew.com"
+            item: "https://www.ideacrewdemo.gov"
           - key: :state_name
             item: "State"
           - key: :short_name
@@ -133,7 +133,7 @@ registry:
           - key: :forms
             item: ""
           - key: :website_url
-            item: "www.ideacrew.com"
+            item: "www.ideacrewdemo.gov"
           - key: :healthcare_name
             item: "www.healthcare.gov"
           - key: :healthcare_url
@@ -143,11 +143,11 @@ registry:
           - key: :exchange_hbx_id
             item: "ME0"
           - key: :mail_address
-            item: "info@ideacrew.com"
+            item: "info@ideacrewdemo.gov"
           - key: :no_reply_email
-            item: "noreply@ideacrew.com"
+            item: "noreply@ideacrewdemo.gov"
           - key: :mail_address
-            item: "info@ideacrew.com"
+            item: "info@ideacrewdemo.gov"
           - key: :producer_email_address
             item: 'mehl.producer@coverme.gov'
           - key: :privacy_policy
@@ -177,13 +177,13 @@ registry:
           - key: :statewide_area
             item: "State"
           - key: :exchange_name
-            item: "ideacrew.com"
+            item: "ideacrewdemo.gov"
           - key: :social_media
             item: ''
           - key: :state_long_title
             item: "the state of State"
           - key: :state_dmv_link
-            item: "https://www.ideacrew.com"
+            item: "https://www.ideacrewdemo.gov"
           - key: :contact_center_po_box
             item: "POB 616"
           - key: :contact_center_city
@@ -195,13 +195,13 @@ registry:
           - key: :contact_center_zip_code
             item: "04332-6626"
           - key: :contact_center_email_address
-            item: "smallbusiness@ideacrew.com"
+            item: "smallbusiness@ideacrewdemo.gov"
           - key: :social_media
             item: ''
           - key: :health_benefit_exchange_authority_phone_number
             item: "(866) 636-0355 TTY:711"
           - key: :contact_center_name
-            item: "IdeaCrew.com Consumer Assistance Center"
+            item: "IdeaCrewDemo.com Consumer Assistance Center"
           - key: :contact_center_short_number
             item: "(866) 636-0355 TTY:711"
           - key: :contact_center_tty_number # Need to figure out what this should be for Maine
