@@ -6,7 +6,7 @@ site:
   home_url: "https://sbm.enroll.openhbx.org/"
   home_business_url: "https://www.accesshealthct.com/AHCT/LandingPageCTHIX"
   # copyright_period_start: "2013"
-  help_url: "https://www.ideacrew.gov/help/"
+  help_url: "https://www.ideacrew.com/help/"
   # faqs_url: "https://www.dchealthlink.com/Frequently-Asked-Questions"
   # business_resource_center_url: "https://dchealthlink.com/smallbusiness/"
   # nondiscrimination_notice_url: "https://www.dchealthlink.com/nondiscrimination"
@@ -37,7 +37,7 @@ site:
   create_routes: ['/insured/employee/privacy','/employers/employer_profiles/new', '/insured/consumer_role/privacy']
   sign_in_routes: ['/families/home']
   shop_find_your_doctor_url: "https://dc.checkbookhealth.org/dc/"
-  document_verification_checklist_url: "https://www.ideacrew.gov/help/"
+  document_verification_checklist_url: "https://www.ideacrew.com/help/"
   terms_and_conditions_url: ""
   certification_url: "https://www.dchealthlink.com/brokers/overview"
   registration_path: "https://www.dchealthlink.com/smallbusiness"
@@ -45,13 +45,13 @@ site:
   forms_name: "DCHealthLink.com/forms"
   short_url: "dchealthlink.com"
   forms: "https://dchealthlink.com/forms#en"
-  website_url: "www.ideacrew.gov"
+  website_url: "www.ideacrew.com"
   healthcare_name: "www.healthcare.gov"
   healthcare_url: "https://www.healthcare.gov/"
   irs_url: "https://www.irs.gov/"
   exchange_hbx_id: "ME0"
-  mail_address: "info@ideacrew.gov"
-  privacy_policy: "https://www.ideacrew.gov"
+  mail_address: "info@ideacrew.com"
+  privacy_policy: "https://www.ideacrew.com"
   late_rates_message: "Due to a delay, premiums for some coverage effective dates are not available yet. Please check again soon to see if this information has been updated. You can also contact Customer Service or your broker if you need help."
   faa_enabled: false # TODO: Remove this after configuring the settings.
   ivl_responsibility_url: ""
@@ -84,14 +84,14 @@ contact_center:
   payment_phone_number: "855-532-LINK"
   ivl_number: "1-877-623-6765"
   ivl_phone_number: "1-877-623-6765"
-  email_address: "smallbusiness@ideacrew.gov"
+  email_address: "smallbusiness@ideacrew.com"
   city: "City"
   state: "ST"
   zip_code: "04330"
-  small_business_email: "smallbusiness@ideacrew.gov"
-  non_discrimination_email: "info@ideacrew.gov"
+  small_business_email: "smallbusiness@ideacrew.com"
+  non_discrimination_email: "info@ideacrew.com"
 
-  appeals: "info@ideacrew.gov"
+  appeals: "info@ideacrew.com"
 
   # Voting Info for FA Engine Steps
   # TOOD: This needs to be updated. These are pulled of SBM government website.
@@ -203,7 +203,7 @@ aca:
       end_on: <%= Date.new(2022,01,31) %>
 
   shop_market:
-    valid_employer_attestation_documents_url: 'https://www.ideacrew.gov/business/business-resource-center/employer-verification-checklist'
+    valid_employer_attestation_documents_url: 'https://www.ideacrew.com/business/business-resource-center/employer-verification-checklist'
     small_market_employee_count_maximum: 50
     employer_contribution_percent_minimum: 50
     employer_dental_contribution_percent_minimum: 0
