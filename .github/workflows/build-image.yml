@@ -195,7 +195,7 @@ jobs:
         run: |
           ${GITHUB_WORKSPACE}/cache/sysdig-cli-scanner \
             --apiurl "${SYSDIG_SECURE_ENDPOINT}" \
-            ${{ format('{0}/{1}-{2}', needs.prep.outputs.registryEcr, needs.prep.outputs.taggedImage, matrix.client) }} \
+            ${{ format('{0}/{1}', needs.prep.outputs.registryEcr, needs.prep.outputs.taggedImage) }} \
             --console-log \
             --dbpath="${GITHUB_WORKSPACE}/cache/db/" \
             --cachepath="${GITHUB_WORKSPACE}/cache/scanner-cache/"
