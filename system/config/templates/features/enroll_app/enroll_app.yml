@@ -203,7 +203,7 @@ registry:
           - key: :contact_center_name
             item: "IdeaCrewDemo.com Consumer Assistance Center"
           - key: :contact_center_short_number
-            item: "(866) 636-0355 TTY:711"
+            item: "(866) 555-0355 TTY:711"
           - key: :contact_center_tty_number # Need to figure out what this should be for Maine
             item: "711"
           - key: :producer_advisory_committee_url
