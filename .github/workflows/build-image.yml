@@ -154,6 +154,13 @@ jobs:
           build-args: |
             HOSTNAME=172.17.0.1
 
+      - name: Setup cache
+        uses: actions/cache@v3
+        with:
+          path: cache
+          key: ${{ runner.os }}-cache-${{ hashFiles('**/sysdig-cli-scanner', '**/latest_version.txt', '**/db/main.db.meta.json', '**/scanner-cache/inlineScannerCache.db') }}
+          restore-keys: ${{ runner.os }}-cache-
+
       - name: Scan docker image
         if: github.event_name != 'pull_request'
         id: scan
@@ -164,21 +171,10 @@ jobs:
           fail-build: false
           severity-cutoff: critical
 
-      - name: Upload anchore scan SARIF report
-        if: github.event_name != 'pull_request'
-        uses: github/codeql-action/upload-sarif@v2
-        with:
-          sarif_file: ${{ steps.scan.outputs.sarif }}
-
-      - name: Setup cache
-        uses: actions/cache@v3
-        with:
-          path: cache
-          key: ${{ runner.os }}-cache-${{ hashFiles('**/sysdig-cli-scanner', '**/latest_version.txt', '**/db/main.db.meta.json', '**/scanner-cache/inlineScannerCache.db') }}
-          restore-keys: ${{ runner.os }}-cache-
-
-      - name: Download sysdig-cli-scanner if needed
-        run:  |
+      - name: Download sysdig-cli-scanner if needed and scan the image with sysdig scanner
+        env:
+          SECURE_API_TOKEN: ${{ secrets.SECURE_API_TOKEN }}
+        run: |
           curl -sLO https://download.sysdig.com/scanning/sysdig-cli-scanner/latest_version.txt
           mkdir -p "${GITHUB_WORKSPACE}/cache/db/"
           if [ ! -f "${GITHUB_WORKSPACE}/cache/latest_version.txt" ] || [ "$(cat ./latest_version.txt)" != "$(cat ${GITHUB_WORKSPACE}/cache/latest_version.txt)" ]; then
@@ -188,19 +184,18 @@ jobs:
           else
             echo "Latest version of sysdig cli scanner is already downloaded"
           fi
-
-      - name: Scan the image using sysdig-cli-scanner
-        env:
-          SECURE_API_TOKEN: ${{ secrets.SECURE_API_TOKEN }}
-        run: |
           ${GITHUB_WORKSPACE}/cache/sysdig-cli-scanner \
             --apiurl "${SYSDIG_SECURE_ENDPOINT}" \
-            ${{ format('{0}/{1}', needs.prep.outputs.registryEcr, needs.prep.outputs.taggedImage) }} \
+            ${{ format('{0}/{1}', needs.prep.outputs.registryGhcr, needs.prep.outputs.taggedImage) }} \
             --console-log \
             --dbpath="${GITHUB_WORKSPACE}/cache/db/" \
             --cachepath="${GITHUB_WORKSPACE}/cache/scanner-cache/"
 
-      - name: Move cache
+      - name: Upload anchore scan SARIF report and remove cache
+        if: github.event_name != 'pull_request'
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: ${{ steps.scan.outputs.sarif }}
         run: |
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
