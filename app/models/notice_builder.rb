@@ -4,7 +4,7 @@
 # Builds notice with all the required information
 module NoticeBuilder
   include ApplicationHelper
-  include ActionView::Helpers::SanitizeHelper
+  include ::SanitizeConcern
   NoticeRecipient = Struct.new(:hbx_id)
 
   def to_html(_options = {})
@@ -607,12 +607,7 @@ module NoticeBuilder
   protected
 
   def execute_html_pdf_render
-    @execute_html_pdf_render ||=
-      ActionController::Base.helpers.sanitize(
-        self.to_html({ kind: 'pdf' }),
-        tags: Loofah::HTML5::WhiteList::ACCEPTABLE_ELEMENTS.add('style'),
-        attributes: Loofah::HTML5::WhiteList::ACCEPTABLE_ATTRIBUTES
-      )
+    @execute_html_pdf_render ||= sanitize_pdf(self.to_html({ kind: 'pdf' }))
   end
 
   def recipient_target

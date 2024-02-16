@@ -21,14 +21,14 @@ RSpec.describe Documents::Create do
         :template,
         key: event_key,
         body: {
-          markup: body
+          markup: body,
         },
         title: title,
         print_code: 'ERA',
         marketplace: 'aca_individual',
         recipient: 'AcaEntities::Families::Family',
         content_type: 'application/pdf',
-        description: 'Uqhp Descriptoin'
+        description: 'Uqhp Descriptoin',
       )
     end
 
@@ -41,7 +41,7 @@ RSpec.describe Documents::Create do
         template_model: template_model,
         entity: entity,
         document_name: document_name,
-        recipient_hbx_id: primary_applicant_hbx_id
+        recipient_hbx_id: primary_applicant_hbx_id,
       )
     end
 
@@ -52,7 +52,7 @@ RSpec.describe Documents::Create do
 
       it 'should create document' do
         expect(
-          subject.success[:document].path.include?(document_name)
+          subject.success[:document].path.include?(document_name),
         ).to be_truthy
       end
     end
@@ -63,7 +63,7 @@ RSpec.describe Documents::Create do
           template_model: template_model,
           entity: entity,
           document_name: document_name,
-          recipient_hbx_id: primary_applicant_hbx_id
+          recipient_hbx_id: primary_applicant_hbx_id,
         }
       end
       let(:template) do
@@ -78,7 +78,7 @@ RSpec.describe Documents::Create do
 
       it 'should include mailing address when present' do
         expect(rendered_template[:entity][:mailing_address][:kind]).to eq(
-          'mailing'
+          'mailing',
         )
       end
 
@@ -98,14 +98,14 @@ RSpec.describe Documents::Create do
               validation_status: 'ValidMatch',
               start_on: aptc_effective_date,
               end_on: nil,
-              lives_outside_state_temporarily: false
-            }
+              lives_outside_state_temporarily: false,
+            },
           ]
         end
 
         it 'should include home address' do
           expect(rendered_template[:entity][:mailing_address][:kind]).to eq(
-            'home'
+            'home',
           )
         end
       end
@@ -160,8 +160,8 @@ RSpec.describe Documents::Create do
             validation_status: 'ValidMatch',
             start_on: aptc_effective_date,
             end_on: nil,
-            lives_outside_state_temporarily: false
-          }
+            lives_outside_state_temporarily: false,
+          },
         ]
       end
       let(:body) do
@@ -174,7 +174,7 @@ RSpec.describe Documents::Create do
           template_model: template_model,
           entity: entity,
           document_name: document_name,
-          recipient_hbx_id: primary_applicant_hbx_id
+          recipient_hbx_id: primary_applicant_hbx_id,
         }
       end
       let(:template) do
@@ -197,7 +197,7 @@ RSpec.describe Documents::Create do
         expect(sanitized_template).not_to include('<script>')
         expect(sanitized_template).to include('http://thiswillneverload')
         expect(sanitized_template).not_to include('onerror')
-        expect(sanitized_template).not_to include('<style>')
+        expect(sanitized_template).to include('<style>')
       end
     end
   end

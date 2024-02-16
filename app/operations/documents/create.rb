@@ -4,6 +4,7 @@ module Documents
   # Transform payload into a Document
   class Create
     send(:include, Dry::Monads[:result, :do, :try])
+    include ::SanitizeConcern
 
     # @param [options] Additional options for serializer
     # @param [Dry::Struct] AcaEntities::Entity to proccess
@@ -53,13 +54,7 @@ module Documents
     end
 
     def sanitize_template(template)
-      Try() do
-        ActionController::Base.helpers.sanitize(
-          template,
-          tags: Loofah::HTML5::WhiteList::ACCEPTABLE_ELEMENTS.add('style'),
-          attributes: Loofah::HTML5::WhiteList::ACCEPTABLE_ATTRIBUTES
-        )
-      end.to_result
+      Try() { sanitize_pdf(template) }.to_result
     end
 
     def create_document(template, rendered_template, params, sanitized_template)
