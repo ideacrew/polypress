@@ -116,6 +116,7 @@ module NoticeBuilder
     end
   end
 
+  # rubocop:disable Metrics/MethodLength
   def pdf_options
     options = {
       margin: set_margin_for_market,
@@ -154,6 +155,8 @@ module NoticeBuilder
     end
     options
   end
+
+  # rubocop:enable Metrics/MethodLength
 
   def set_margin_for_market
     if consumer?
@@ -215,12 +218,11 @@ module NoticeBuilder
   end
 
   def voter_application
-    if ['projected_eligibility_notice'].include?(event_name)
-      join_pdfs [
-        notice_path,
-        Rails.root.join('lib/pdf_templates', 'voter_application.pdf')
-      ]
-    end
+    return unless ['projected_eligibility_notice'].include?(event_name)
+    join_pdfs [
+      notice_path,
+      Rails.root.join('lib/pdf_templates', 'voter_application.pdf')
+    ]
   end
 
   def ivl_blank_page
@@ -401,6 +403,7 @@ module NoticeBuilder
     ).deliver_now
   end
 
+  # rubocop:disable Metrics/MethodLength
   def store_paper_notice
     unless send_paper_notices? && valid_resource? &&
            resource.can_receive_paper_communication?
@@ -430,10 +433,9 @@ module NoticeBuilder
       Rails
         .logger.error "Unable to upload paper notices to Amazon due to #{e.inspect}"
     end
-    # paper_notices_folder = "#{Rails.root.to_s}/public/paper_notices/"
-    # FileUtils.cp(notice_path, "#{Rails.root.to_s}/public/paper_notices/")
-    # File.rename(paper_notices_folder + , paper_notices_folder + "#{recipient.hbx_id}_" + notice_filename + File.extname(notice_path))
   end
+
+  # rubocop:enable Metrics/MethodLength
 
   def create_recipient_document(doc_uri)
     receiver = resource
