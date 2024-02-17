@@ -3,7 +3,8 @@
 module Documents
   # Transform payload into a Document
   class Create
-    send(:include, Dry::Monads[:result, :do])
+    send(:include, Dry::Monads[:result, :do, :try])
+    include ::SanitizeConcern
 
     # @param [options] Additional options for serializer
     # @param [Dry::Struct] AcaEntities::Entity to proccess
@@ -11,7 +12,15 @@ module Documents
     def call(params)
       template_entity = yield fetch_template(params)
       rendered_template = yield render_liquid_template(template_entity, params)
-      output = yield create_document(template_entity, rendered_template, params)
+      sanitized_template =
+        yield sanitize_template(rendered_template[:rendered_template])
+      output =
+        yield create_document(
+          template_entity,
+          rendered_template,
+          params,
+          sanitized_template
+        )
       Success(output)
     end
 
@@ -44,16 +53,19 @@ module Documents
       )
     end
 
-    def create_document(template, rendered_template, params)
+    def sanitize_template(template)
+      Try() { sanitize_pdf(template) }.to_result
+    end
+
+    def create_document(template, rendered_template, params, sanitized_template)
       doc_params =
         params.merge(
           {
-            rendered_template: rendered_template[:rendered_template],
+            rendered_template: sanitized_template,
             template: template,
             entity: rendered_template[:entity]
           }
         )
-
       case template.content_type
       when 'application/pdf'
         SerializePdf.new.call(doc_params)
