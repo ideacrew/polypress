@@ -4,15 +4,24 @@
 # Builds notice with all the required information
 module NoticeBuilder
   include ApplicationHelper
+  include ::SanitizeConcern
   NoticeRecipient = Struct.new(:hbx_id)
 
   def to_html(_options = {})
-    data_object = (resource.present? ? construct_notice_object : stubbed_object(recipient.constantize))
-    render_envelope({ recipient: data_object }) + render_notice_body({ recipient_klass_name => data_object })
+    data_object =
+      (
+        if resource.present?
+          construct_notice_object
+        else
+          stubbed_object(recipient.constantize)
+        end
+      )
+    render_envelope({ recipient: data_object }) +
+      render_notice_body({ recipient_klass_name => data_object })
   end
 
   def notice_recipient
-    return NoticeRecipient.new(hbx_id: "100009") if resource.blank?
+    return NoticeRecipient.new(hbx_id: '100009') if resource.blank?
     sub_resource? ? resource.person : resource
   end
 
@@ -35,38 +44,53 @@ module NoticeBuilder
         elements = elements[0..date_ele_index]
         elements[date_ele_index] = date_element.scan(/[a-zA-Z_]+/).first
       end
-      element_retriver = elements.reject {|ele| ele == recipient_klass_name.to_s}.join('_')
+      element_retriver =
+        elements.reject { |ele| ele == recipient_klass_name.to_s }.join('_')
       builder.instance_eval(element_retriver)
     end
     builder.merge_model
   end
 
   def render_envelope(params)
-    template_location = if initial_invoice?
-                          'notice_kinds/initial_invoice/invoice_template.html.erb'
-                        else
-                          envelope
-                        end
-    NoticeKindsController.new.render_to_string({
-                                                 :template => template_location,
-                                                 :layout => false,
-                                                 :locals => params.merge(notice_number: self.notice_number, notice: self,
-                                                                         notice_recipient: notice_recipient)
-                                               })
+    template_location =
+      if initial_invoice?
+        'notice_kinds/initial_invoice/invoice_template.html.erb'
+      else
+        envelope
+      end
+    NoticeKindsController.new.render_to_string(
+      {
+        template: template_location,
+        layout: false,
+        locals:
+          params.merge(
+            notice_number: self.notice_number,
+            notice: self,
+            notice_recipient: notice_recipient
+          )
+      }
+    )
   end
 
   def render_notice_body(params)
     NoticeKindsController.new.render_to_string(
       {
-        :inline => template.raw_body.gsub('${', '<%=').gsub('#{', '<%=').gsub('}', '%>').gsub('[[', '<%').gsub(']]', '%>'),
-        :layout => layout,
-        :locals => params
+        inline:
+          template
+            .raw_body
+            .gsub('${', '<%=')
+            .gsub('#{', '<%=')
+            .gsub('}', '%>')
+            .gsub('[[', '<%')
+            .gsub(']]', '%>'),
+        layout: layout,
+        locals: params
       }
     )
   end
 
   def save_html
-    File.open(Rails.root.join("tmp", "notice.html"), 'wb') do |file|
+    File.open(Rails.root.join('tmp', 'notice.html'), 'wb') do |file|
       file << execute_html_pdf_render
     end
   end
@@ -77,9 +101,7 @@ module NoticeBuilder
 
   def generate_pdf_notice
     save_html
-    File.open(notice_path, 'wb') do |file|
-      file << self.to_pdf
-    end
+    File.open(notice_path, 'wb') { |file| file << self.to_pdf }
 
     if shop_market?
       attach_envelope
@@ -94,6 +116,7 @@ module NoticeBuilder
     end
   end
 
+  # rubocop:disable Metrics/MethodLength
   def pdf_options
     options = {
       margin: set_margin_for_market,
@@ -103,46 +126,48 @@ module NoticeBuilder
       formats: :html,
       encoding: 'utf8',
       header: {
-        content: ApplicationController.new.render_to_string({
-                                                              template: header,
-                                                              layout: false,
-                                                              locals: { notice: self, recipient: notice_recipient }
-                                                            })
+        content:
+          ApplicationController.new.render_to_string(
+            {
+              template: header,
+              layout: false,
+              locals: {
+                notice: self,
+                recipient: notice_recipient
+              }
+            }
+          )
       }
     }
+
     # TODO: Add footer partial
     if Settings.site.key == :dc
-      options.merge!({ footer: {
-                       content: ApplicationController.new.render_to_string({
-                                                                             template: footer,
-                                                                             layout: false,
-                                                                             locals: { notice: self }
-                                                                           })
-                     } })
+      options.merge!(
+        {
+          footer: {
+            content:
+              ApplicationController.new.render_to_string(
+                { template: footer, layout: false, locals: { notice: self } }
+              )
+          }
+        }
+      )
     end
     options
   end
 
+  # rubocop:enable Metrics/MethodLength
+
   def set_margin_for_market
     if consumer?
-      {
-        top: 10,
-        bottom: 20,
-        left: 22,
-        right: 22
-      }
+      { top: 10, bottom: 20, left: 22, right: 22 }
     else
-      {
-        top: 15,
-        bottom: 22,
-        left: 22,
-        right: 22
-      }
+      { top: 15, bottom: 22, left: 22, right: 22 }
     end
   end
 
   def notice_path
-    Rails.root.join("tmp", "#{notice_filename}.pdf")
+    Rails.root.join('tmp', "#{notice_filename}.pdf")
   end
 
   def subject
@@ -150,7 +175,11 @@ module NoticeBuilder
   end
 
   def layout
-    shop_market? ? Settings.notices.shop.partials.layout : Settings.notices.individual.partials.layout
+    if shop_market?
+      Settings.notices.shop.partials.layout
+    else
+      Settings.notices.individual.partials.layout
+    end
   end
 
   def notice_filename
@@ -162,19 +191,38 @@ module NoticeBuilder
   end
 
   def non_discrimination_attachment
-    join_pdfs [notice_path, Rails.root.join('lib/pdf_templates', shop_non_discrimination_attachment)]
+    join_pdfs [
+      notice_path,
+      Rails.root.join(
+        'lib/pdf_templates',
+        shop_non_discrimination_attachment
+      )
+    ]
   end
 
   def ivl_non_discrimination
-    join_pdfs [notice_path, Rails.root.join('lib/pdf_templates', 'ivl_non_discrimination.pdf')]
+    join_pdfs [
+      notice_path,
+      Rails.root.join(
+        'lib/pdf_templates',
+        'ivl_non_discrimination.pdf'
+      )
+    ]
   end
 
   def ivl_attach_envelope
-    join_pdfs [notice_path, Rails.root.join('lib/pdf_templates', 'ivl_envelope.pdf')]
+    join_pdfs [
+      notice_path,
+      Rails.root.join('lib/pdf_templates', 'ivl_envelope.pdf')
+    ]
   end
 
   def voter_application
-    join_pdfs [notice_path, Rails.root.join('lib/pdf_templates', 'voter_application.pdf')] if ['projected_eligibility_notice'].include?(event_name)
+    return unless ['projected_eligibility_notice'].include?(event_name)
+    join_pdfs [
+      notice_path,
+      Rails.root.join('lib/pdf_templates', 'voter_application.pdf')
+    ]
   end
 
   def ivl_blank_page
@@ -182,27 +230,50 @@ module NoticeBuilder
   end
 
   def attach_envelope
-    join_pdfs [notice_path, Rails.root.join('lib/pdf_templates', shop_envelope_without_address)]
+    join_pdfs [
+      notice_path,
+      Rails.root.join(
+        'lib/pdf_templates',
+        shop_envelope_without_address
+      )
+    ]
   end
 
   def ivl_appeal_rights
-    return unless ['final_eligibility_notice', 'final_eligibility_notice_renewal'].include?(event_name)
+    unless %w[
+      final_eligibility_notice
+      final_eligibility_notice_renewal
+    ].include?(event_name)
+      return
+    end
 
-    join_pdfs [notice_path, Rails.root.join('lib/pdf_templates', 'ivl_appeal_rights.pdf')]
+    join_pdfs [
+      notice_path,
+      Rails.root.join('lib/pdf_templates', 'ivl_appeal_rights.pdf')
+    ]
   end
 
   def employee_appeal_rights
-    join_pdfs [notice_path, Rails.root.join('lib/pdf_templates', 'employee_appeal_rights.pdf')]
+    join_pdfs [
+      notice_path,
+      Rails.root.join(
+        'lib/pdf_templates',
+        'employee_appeal_rights.pdf'
+      )
+    ]
   end
 
   def ivl_taglines
-    join_pdfs [notice_path, Rails.root.join('lib/pdf_templates', 'taglines.pdf')]
+    join_pdfs [
+      notice_path,
+      Rails.root.join('lib/pdf_templates', 'taglines.pdf')
+    ]
   end
 
   def attach_blank_page(template_path = nil)
     path = template_path.nil? ? notice_path : template_path
     blank_page = Rails.root.join('lib/pdf_templates', 'blank.pdf')
-    page_count = Prawn::Document.new(:template => path).page_count
+    page_count = Prawn::Document.new(template: path).page_count
     join_pdfs([path, blank_page], path) if page_count.odd?
   end
 
@@ -215,7 +286,7 @@ module NoticeBuilder
 
   def upload_and_send_secure_message
     doc_uri = upload_to_amazon
-    notice  = create_recipient_document(doc_uri)
+    notice = create_recipient_document(doc_uri)
     create_secure_inbox_message(notice)
   end
 
@@ -234,8 +305,8 @@ module NoticeBuilder
   end
 
   def invoice_date
-    date_string = file_name.split("_")[1]
-    Date.strptime(date_string, "%m%d%Y%H%M")
+    date_string = file_name.split('_')[1]
+    Date.strptime(date_string, '%m%d%Y%H%M')
   end
 
   def recipient_name
@@ -269,7 +340,8 @@ module NoticeBuilder
   def send_generic_notice_alert
     return if valid_resource? && !resource.can_receive_electronic_communication?
 
-    UserMailer.generic_notice_alert(recipient_name, subject, recipient_to).deliver_now
+    UserMailer.generic_notice_alert(recipient_name, subject, recipient_to)
+              .deliver_now
   end
 
   def send_generic_notice_alert_to_broker_and_ga
@@ -286,7 +358,8 @@ module NoticeBuilder
     end
     return unless resource.general_agency_profile.present?
 
-    general_agency_staff_person = resource.general_agency_profile.primary_staff.person
+    general_agency_staff_person =
+      resource.general_agency_profile.primary_staff.person
     general_agent_name = general_agency_staff_person.full_name
     ga_email = general_agency_staff_person.work_email_or_best
     send_user_mailer(general_agent_name, ga_email, resource.legal_name.titleize)
@@ -294,59 +367,93 @@ module NoticeBuilder
 
   def send_alerts_to_employee_agents
     if resource.employer_profile.broker_agency_profile.present?
-      broker_person = resource.employer_profile.broker_agency_profile.primary_broker_role.person
+      broker_person =
+        resource
+        .employer_profile
+        .broker_agency_profile
+        .primary_broker_role
+        .person
       broker_name = broker_person.full_name
       broker_email = broker_person.work_email_or_best
-      send_user_mailer(broker_name, broker_email, resource.person.full_name.titleize)
+      send_user_mailer(
+        broker_name,
+        broker_email,
+        resource.person.full_name.titleize
+      )
     end
 
     return unless resource.employer_profile.general_agency_profile.present?
 
-    general_agency_staff_person = resource.employer_profile.general_agency_profile.primary_staff.person
+    general_agency_staff_person =
+      resource.employer_profile.general_agency_profile.primary_staff.person
     general_agent_name = general_agency_staff_person.full_name
     ga_email = general_agency_staff_person.work_email_or_best
-    send_user_mailer(general_agent_name, ga_email, resource.person.full_name.titleize)
+    send_user_mailer(
+      general_agent_name,
+      ga_email,
+      resource.person.full_name.titleize
+    )
   end
 
   def send_user_mailer(agent_name, email, resource_name)
-    UserMailer.generic_notice_alert_to_ba_and_ga(agent_name, email, resource_name).deliver_now
+    UserMailer.generic_notice_alert_to_ba_and_ga(
+      agent_name,
+      email,
+      resource_name
+    ).deliver_now
   end
 
+  # rubocop:disable Metrics/MethodLength
   def store_paper_notice
-    return unless send_paper_notices? && valid_resource? && resource.can_receive_paper_communication?
+    unless send_paper_notices? && valid_resource? &&
+           resource.can_receive_paper_communication?
+      return
+    end
 
     bucket_name = Settings.paper_notice
-    notice_filename_for_paper_notice = if employer?
-                                         "#{resource.organization.hbx_id}_#{subject.titleize.gsub(/\s+/,
-                                                                                                  '')}_#{notice_number.delete('_')}_#{notice_type}"
-                                       else
-                                         "#{resource.person.hbx_id}_#{subject.titleize.gsub(/\s+/, '')}_#{notice_number.delete('_')}_#{notice_type}"
-                                       end
-    notice_path_for_paper_notice = Rails.root.join("tmp", "#{notice_filename_for_paper_notice}.pdf")
+    notice_filename_for_paper_notice =
+      if employer?
+        "#{resource.organization.hbx_id}_#{
+          subject.titleize.gsub(/\s+/, '')
+        }_#{notice_number.delete('_')}_#{notice_type}"
+      else
+        "#{resource.person.hbx_id}_#{subject.titleize.gsub(/\s+/, '')}_#{notice_number.delete('_')}_#{notice_type}"
+      end
+    notice_path_for_paper_notice =
+      Rails.root.join('tmp', "#{notice_filename_for_paper_notice}.pdf")
     begin
       FileUtils.cp(notice_path, notice_path_for_paper_notice)
-      Aws::S3Storage.save(notice_path_for_paper_notice, bucket_name, "#{notice_filename_for_paper_notice}.pdf")
+      Aws::S3Storage.save(
+        notice_path_for_paper_notice,
+        bucket_name,
+        "#{notice_filename_for_paper_notice}.pdf"
+      )
       File.delete(notice_path_for_paper_notice)
     rescue StandardError => e
-      Rails.logger.error "Unable to upload paper notices to Amazon due to #{e.inspect}"
+      Rails
+        .logger.error "Unable to upload paper notices to Amazon due to #{e.inspect}"
     end
-    # paper_notices_folder = "#{Rails.root.to_s}/public/paper_notices/"
-    # FileUtils.cp(notice_path, "#{Rails.root.to_s}/public/paper_notices/")
-    # File.rename(paper_notices_folder + , paper_notices_folder + "#{recipient.hbx_id}_" + notice_filename + File.extname(notice_path))
   end
+
+  # rubocop:enable Metrics/MethodLength
 
   def create_recipient_document(doc_uri)
     receiver = resource
     receiver = resource.person if sub_resource?
 
-    title = (event_name == 'generate_initial_employer_invoice') ? file_name : display_file_name
+    title =
+      if event_name == 'generate_initial_employer_invoice'
+        file_name
+      else
+        display_file_name
+      end
 
     doc_params = {
       title: title,
-      creator: "hbx_staff",
+      creator: 'hbx_staff',
       subject: document_subject,
       identifier: doc_uri,
-      format: "application/pdf"
+      format: 'application/pdf'
     }
 
     doc_params[:date] = invoice_date if initial_invoice?
@@ -355,7 +462,9 @@ module NoticeBuilder
     if notice.save
       notice
     else
-      Rails.logger.error { "Unable to build notice document for #{receiver.id}" }
+      Rails.logger.error do
+        "Unable to build notice document for #{receiver.id}"
+      end
     end
   end
 
@@ -369,23 +478,31 @@ module NoticeBuilder
 
     body =
       if initial_invoice?
-        "Your Initial invoice is now available in your employer profile under Billing tab. Thank You"
+        'Your Initial invoice is now available in your employer profile under Billing tab. Thank You'
       else
         path = authorized_download_path(receiver, notice)
-        "<br>You can download the notice by clicking this link " \
-          "<a href=" \
+        '<br>You can download the notice by clicking this link ' \
+          '<a href=' \
           "#{path}?content_type=#{notice.format}&filename=#{notice.title.gsub(/[^0-9a-z]/i, '')}.pdf&disposition=inline" \
           "target='_blank'>" \
           "#{notice.title.gsub(/[^0-9a-z]/i, '')}" \
-          "</a>"
+          '</a>'
       end
 
-    message = receiver.inbox.messages.build({ subject: subject, body: body, from: site_short_name })
+    message =
+      receiver.inbox.messages.build(
+        { subject: subject, body: body, from: site_short_name }
+      )
     message.save!
   end
 
   def authorized_download_path(receiver, notice)
-    Rails.application.routes.url_helpers.authorized_document_download_path(receiver.class.to_s, receiver.id, 'documents', notice.id)
+    Rails.application.routes.url_helpers.authorized_document_download_path(
+      receiver.class.to_s,
+      receiver.id,
+      'documents',
+      notice.id
+    )
   end
 
   def clear_tmp
@@ -398,11 +515,11 @@ module NoticeBuilder
 
   def notice_type
     if consumer?
-      "IVL"
+      'IVL'
     elsif employee?
-      "EE"
+      'EE'
     elsif employer?
-      "ER"
+      'ER'
     end
   end
 
@@ -411,23 +528,42 @@ module NoticeBuilder
   end
 
   def sub_resource?
-    (resource.is_a?(EmployeeRole) || resource.is_a?(BrokerRole) || resource.is_a?(ConsumerRole))
+    (
+      resource.is_a?(EmployeeRole) || resource.is_a?(BrokerRole) ||
+        resource.is_a?(ConsumerRole)
+    )
   end
 
   def envelope
-    shop_market? ? Settings.notices.shop.partials.template : Settings.notices.individual.partials.template
+    if shop_market?
+      Settings.notices.shop.partials.template
+    else
+      Settings.notices.individual.partials.template
+    end
   end
 
   def send_paper_notices?
-    shop_market? ? Settings.notices.shop.store_paper_notice : Settings.notices.individual.store_paper_notice
+    if shop_market?
+      Settings.notices.shop.store_paper_notice
+    else
+      Settings.notices.individual.store_paper_notice
+    end
   end
 
   def header
-    shop_market? ? Settings.notices.shop.partials.header : Settings.notices.individual.partials.header
+    if shop_market?
+      Settings.notices.shop.partials.header
+    else
+      Settings.notices.individual.partials.header
+    end
   end
 
   def footer
-    shop_market? ? Settings.notices.shop.partials.footer : Settings.notices.individual.partials.footer
+    if shop_market?
+      Settings.notices.shop.partials.footer
+    else
+      Settings.notices.individual.partials.footer
+    end
   end
 
   def stubbed_object(klass)
@@ -446,7 +582,8 @@ module NoticeBuilder
       indian_tribe_member: true,
       citizen_status: 'true',
       addresses: address_hash,
-      phones: [], emails: []
+      phones: [],
+      emails: []
     }
   end
 
@@ -472,15 +609,16 @@ module NoticeBuilder
   protected
 
   def execute_html_pdf_render
-    @execute_html_pdf_render ||= self.to_html({ kind: 'pdf' })
+    @execute_html_pdf_render ||= sanitize_pdf(self.to_html({ kind: 'pdf' }))
   end
 
   def recipient_target
-    @recipient_target ||= if employer?
-                            resource.staff_roles.first
-                          elsif employee? || consumer?
-                            resource.person
-                          end
+    @recipient_target ||=
+      if employer?
+        resource.staff_roles.first
+      elsif employee? || consumer?
+        resource.person
+      end
   end
 end
 # rubocop:enable Metrics/ModuleLength
