@@ -13,9 +13,7 @@ class IrsYearlyPdfReport < PdfReport
     # indicates which individuals are to be included on this form (5 max per form)
     @included_hbx_ids = params[:included_hbx_ids]
     initialize_variables(params)
-
-    @document_path = "#{Rails.root}/lib/pdf_templates/1095A_form.pdf"
-    super({ :template => @document_path, :margin => [30, 55] })
+    super({ :template => fetch_irs_form_template, :margin => [30, 55] })
     font_size 11
   end
 
@@ -30,17 +28,43 @@ class IrsYearlyPdfReport < PdfReport
   def initialize_variables(options)
     @insurance_policy = options[:insurance_policy]
     @insurance_agreement = options[:insurance_agreement]
-    @spouse = @tax_household[:covered_individuals].detect do |covered_individual|
-      covered_individual[:relation_with_primary] == 'spouse'
-    end
+    @spouse = fetch_spouse
 
-    @has_spouse_and_not_same_as_recipient = @spouse.present? && (@spouse[:person][:hbx_id] != @recipient[:person][:hbx_id])
+    @has_spouse_and_not_same_as_recipient = @spouse.present? &&
+                                            (@spouse[:family_member_reference][:family_member_hbx_id] != @recipient[:person][:hbx_id])
     @has_aptc = @tax_household[:months_of_year].any? { |month| month[:coverage_information] && month[:coverage_information][:tax_credit][:cents] > 0 }
 
-    @calender_year = @insurance_agreement[:plan_year].to_i
+    @reporting_year = @calender_year = @insurance_agreement[:plan_year].to_i
     @multiple = options[:multiple]
     @void = (@tax_household[:void]&.to_s == 'true')
     @corrected = (@tax_household[:corrected]&.to_s == 'true')
+  end
+
+  # If there is a spouse relationship and if the spouses are married filing jointly on an FAA,
+  # both of them should be listed.
+  # Example Cases:
+  # Case 1
+  # A is the subscriber and B is the spouse, and both A,B are married filing jointly present in 1 tax household
+  # and enrolled together
+  #  - A will be the recipient and B will be the spouse
+  # Case 2
+  # A is the subscriber, B is the spouse and both A,B are married filing jointly present in 1 tax household, but only
+  # B is enrolled and is a tax_filer
+  #  - In this case B is the recipient and A is the Spouse
+  def fetch_spouse
+    spouse = @tax_household[:tax_household_members].detect do |thh_member|
+      thh_member.dig(:family_member_reference, :relation_with_primary) == 'spouse'
+    end
+    return spouse if spouse.present? &&
+                     spouse[:family_member_reference][:family_member_hbx_id] != @recipient[:person][:hbx_id]
+
+    @tax_household[:tax_household_members].detect do |thh_member|
+      thh_member.dig(:family_member_reference, :relation_with_primary) == 'self'
+    end
+  end
+
+  def fetch_irs_form_template
+    "#{Rails.root}/lib/pdf_templates/#{@reporting_year}_1095A_form.pdf"
   end
 
   def process
@@ -74,6 +98,30 @@ class IrsYearlyPdfReport < PdfReport
         end
       bounding_box([col4, y_pos], :width => 100) do
         text enrollee_dob || ''
+      end
+    end
+  end
+
+  def fill_spouse(spouse)
+    col1 = mm2pt(-2)
+    col3 = mm2pt(102.50)
+    col4 = mm2pt(145.50)
+    y_pos = cursor
+
+    bounding_box([col1, y_pos], :width => 240) do
+      text("#{spouse[:family_member_reference][:first_name]} #{spouse[:family_member_reference][:last_name]}".titleize)
+    end
+
+    spouse_ssn = spouse[:family_member_reference][:encrypted_ssn]
+
+    if spouse_ssn.present?
+      bounding_box([col3, y_pos], :width => 100) do
+        text mask_ssn(spouse_ssn)
+      end
+    else
+      spouse_dob = spouse[:family_member_reference][:dob].strftime("%m/%d/%Y")
+      bounding_box([col4, y_pos], :width => 100) do
+        text spouse_dob || ''
       end
     end
   end
@@ -146,7 +194,7 @@ class IrsYearlyPdfReport < PdfReport
     end
 
     bounding_box([col3, y_pos], :width => 250) do
-      text(@insurance_agreement[:insurance_provider][:title])
+      text(fetch_insurance_provider_title(@insurance_agreement[:insurance_provider][:title]))
     end
 
     move_down(12)
@@ -156,7 +204,7 @@ class IrsYearlyPdfReport < PdfReport
 
     move_down(12)
     if @has_spouse_and_not_same_as_recipient && @has_aptc
-      fill_enrollee(@spouse)
+      fill_spouse(@spouse)
     else
       move_down(13)
     end
@@ -191,6 +239,14 @@ class IrsYearlyPdfReport < PdfReport
     end
   end
   # rubocop:enable Metrics/AbcSize
+
+  def fetch_insurance_provider_title(title)
+    return title unless PolypressRegistry.feature_enabled?(:modify_carrier_legal_names)
+
+    mapping = PolypressRegistry[:modify_carrier_legal_names].settings(:carrier_names_mapping).item
+    mapped_title = mapping[title.to_sym].to_s
+    mapped_title.present? ? mapped_title : title
+  end
 
   # rubocop:disable Metrics/CyclomaticComplexity
   def fill_premium_details
