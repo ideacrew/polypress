@@ -165,8 +165,7 @@ RSpec.describe Documents::Create do
         ]
       end
       let(:body) do
-        '<style>b {color: red}</style><script> x=new XMLHttpRequest; x.onload=function(){document.write(this.responseText)};
-        x.open(\"GET\",\"file:////etc/passwd\");x.send() </script>
+        '<style>b {color: red}</style>
         <p>Uqhp Eligible Document for {{ family_reference.hbx_id }} {{ mailing_address.address_1 }}</p>'
       end
       let(:params) do
@@ -194,7 +193,9 @@ RSpec.describe Documents::Create do
       end
 
       it 'should not include onerror or other scripts' do
-        expect(sanitized_template).not_to include('<script>')
+        # expect(sanitized_template).not_to include('<script>')
+        # we are sanitizing scripts on template creation so we cannot now
+        # convered the same test in template spec
         expect(sanitized_template).to include('http://thiswillneverload')
         expect(sanitized_template).not_to include('onerror')
         expect(sanitized_template).to include('<style>')

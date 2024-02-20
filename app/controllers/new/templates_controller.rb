@@ -8,6 +8,9 @@ module New
     protect_from_forgery except: [:new], with: :exception
     layout 'application'
 
+    before_action :sanatize_template_body, only: [:create, :update]
+    before_action :sanatize_instance_preview_params, only: [:instant_preview]
+
     def index
       @notice_kinds = Templates::TemplateModel.all
       @datatable = Effective::Datatables::NoticesDatatable.new
@@ -48,9 +51,8 @@ module New
           redirect_to action: :edit, id: record.success.id
         else
           @errors = Array.wrap(record.failure)
-          @templates = Templates::TemplateModel.all
-
-          render action: 'index'
+          flash[:error] = "Unable to create template due to #{@errors}"
+          redirect_to action: :index
         end
       else
         flash[:error] = "Unable to create template due to #{result.errors}"
@@ -62,8 +64,13 @@ module New
       result = Templates::TemplateContract.new.call(template_params.to_h)
 
       if result.success?
-        Templates::Template.new(result.to_h).update_model(params['id'])
-        flash[:notice] = 'Notice content updated successfully'
+        record = Templates::Template.new(result.to_h).update_model(params['id'])
+        if record.success?
+          flash[:notice] = 'Notice content updated successfully'
+        else
+          @errors = Array.wrap(record.failure)
+          flash[:error] = "Unable to create template due to #{@errors}"
+        end
         redirect_to action: :index
       else
         flash[:error] = "Unable to update template due to #{result.errors}"
@@ -227,6 +234,25 @@ module New
     def builder_param
       entities_contracts_mapping[params['builder']] ||
         '::AcaEntities::MagiMedicaid::Contracts::ApplicationContract'
+    end
+
+    def sanatize_instance_preview_params
+      template = instant_preview_params
+      raw_text = [template['title'], template['subject'], template['body']].join('\n\n')
+      validate_params(raw_text)
+    end
+
+    def sanatize_template_body
+      template = template_params
+      raw_text = [template['title'], template['description'], template['body']].join('\n\n')
+      validate_params(raw_text)
+    end
+
+    def validate_params(raw_text)
+      result = Templates::TemplateModel::BLOCKED_ELEMENTS.any? {|str| raw_text.include?(str)}
+      return unless result
+      flash[:error] = "Template contains unauthorized content"
+      redirect_to main_app.root_path
     end
   end
 end
