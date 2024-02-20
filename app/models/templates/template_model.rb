@@ -6,7 +6,8 @@ module Templates
     include Mongoid::Document
     include Mongoid::Timestamps
 
-    BLOCKED_ELEMENTS = ['<script', '%script', 'iframe', 'file://', 'dict://', 'ftp://', 'gopher://', '%x', 'system', 'exec', 'Kernel.spawn', 'Open3', '`', 'IO'].freeze
+    BLOCKED_ELEMENTS = ['<script', '%script', 'iframe', 'file://', 'dict://', 'ftp://', 'gopher://', '%x', 'system', 'exec', 'Kernel.spawn', 'Open3',
+                        '`', 'IO'].freeze
 
     field :key, type: String
     field :title, type: String
