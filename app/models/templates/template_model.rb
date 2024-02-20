@@ -6,6 +6,8 @@ module Templates
     include Mongoid::Document
     include Mongoid::Timestamps
 
+    BLOCKED_ELEMENTS = ['<script', '%script', 'iframe', 'file://', 'dict://', 'ftp://', 'gopher://', '%x', 'system', 'exec', 'Kernel.spawn', 'Open3', '`', 'IO'].freeze
+
     field :key, type: String
     field :title, type: String
     field :description, type: String
@@ -31,6 +33,8 @@ module Templates
                cascade_callbacks: true
 
     embeds_one :body, class_name: 'Bodies::BodyModel', cascade_callbacks: true
+
+    validate :check_template_elements
 
     accepts_nested_attributes_for :body, :publisher, :subscriber
 
@@ -215,6 +219,13 @@ module Templates
         },
         content_type: template_row[7]
       )
+    end
+
+    private
+
+    def check_template_elements
+      raw_text = [key, title, description].join('\n\n').to_s.downcase
+      errors.add(:base, 'has invalid elements') if BLOCKED_ELEMENTS.any? {|str| raw_text.include?(str)}
     end
   end
 end
