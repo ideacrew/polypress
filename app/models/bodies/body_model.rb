@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module Bodies
+  # BodyModel
   class BodyModel
     include Mongoid::Document
     include Mongoid::Timestamps
