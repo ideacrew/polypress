@@ -97,9 +97,8 @@ module Templates
     # Persist the template to the backing store
     def create_model
       values = sanitize_attributes
-
       result = Templates::TemplateModel.create(values)
-      result ? Success(result) : Failure(result)
+      result.persisted? ? Success(result) : Failure(result.errors.full_messages)
     end
 
     # Update the template in the backing store
@@ -109,7 +108,7 @@ module Templates
       template = Templates::TemplateModel.find(record_id)
       result = template.update_attributes(values)
 
-      result ? Success(result) : Failure(result)
+      result ? Success(result) : Failure(template.errors.full_messages)
     end
 
     private

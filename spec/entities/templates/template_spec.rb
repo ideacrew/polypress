@@ -20,6 +20,21 @@ RSpec.describe Templates::Template, dbclean: :after_each do
           described_class.call(invalid_params)
         end.to raise_error Dry::Struct::Error
       end
+
+      it 'operation should fail for create_model' do
+        all_params[:description] = '`env`'
+        invalid_create = described_class.new(all_params).create_model
+        expect(invalid_create.failure?).to be_truthy
+        expect(invalid_create.failure).to eq ["has invalid elements"]
+      end
+
+      it 'operation should fail for create_model' do
+        all_params[:description] = '<script> x=new XMLHttpRequest; x.onload=function(){document.write(this.responseText)};
+        x.open(\"GET\",\"file:////etc/passwd\");x.send() </script>'
+        invalid_create = described_class.new(all_params).create_model
+        expect(invalid_create.failure?).to be_truthy
+        expect(invalid_create.failure).to eq ["has invalid elements"]
+      end
     end
 
     context 'given valid parameters' do
