@@ -11,7 +11,8 @@ describe FakeConcernTestClass, type: :model do
     context 'when the value is a string' do
       context 'when the value contains img tag' do
         let(:body) do
-          "<style>b {color: red}</style><script> x=new XMLHttpRequest;
+          "<title>Test</title>
+          <style>b {color: red}</style><script> x=new XMLHttpRequest;
           x.onload=function(){document.write(this.responseText)};
           x.open(\"GET\",\"file:////etc/passwd\");x.send() </script>
           <p class='red'>Uqhp Eligible Document for {{ family_reference.hbx_id }}
@@ -20,6 +21,7 @@ describe FakeConcernTestClass, type: :model do
 
         it 'should include whitelisted tags' do
           expect(subject.sanitize_pdf(body)).to include('<style>')
+          expect(subject.sanitize_pdf(body)).to include('<title>')
         end
 
         it 'should not include non-whitelisted tags' do
