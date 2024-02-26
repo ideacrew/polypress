@@ -17,7 +17,7 @@ module SanitizeConcern
 
       ActionController::Base.helpers.sanitize(
         pdf_string,
-        tags: Loofah::HTML5::SafeList::ACCEPTABLE_ELEMENTS.dup.delete("select").add('style', 'title'),
+        tags: Loofah::HTML5::SafeList::ACCEPTABLE_ELEMENTS.dup.delete("select").merge(['style', 'title']),
         attributes: Loofah::HTML5::SafeList::ACCEPTABLE_ATTRIBUTES
       )
     end
