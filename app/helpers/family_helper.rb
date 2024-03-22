@@ -76,7 +76,7 @@ module FamilyHelper
   def insurance_agreements
     [
       {
-        plan_year: current_date.year,
+        plan_year: current_date.year - 1,
         start_on: current_date.beginning_of_year,
         contract_holder: contract_holder,
         insurance_provider: insurance_provider,
