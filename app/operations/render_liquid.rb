@@ -3,7 +3,8 @@
 # rubocop:disable Layout/MultilineMethodCallIndentation
 # rubocop:disable Layout/MultilineOperationIndentation
 
-# RenderLiquid
+# Renders a Liquid template to HTML using an entity and its properties as the
+# data.
 class RenderLiquid
   send(:include, Config::SiteHelper)
   send(:include, FinancialApplicationHelper)
@@ -30,6 +31,15 @@ class RenderLiquid
 
   private
 
+  def sanitize_values(entity_hash)
+    return nil if entity_hash.blank?
+
+    result = entity_hash.deep_stringify_keys
+    result.deep_transform_values do |value|
+      value.is_a?(String) ? ActionController::Base.helpers.sanitize(value) : value
+    end
+  end
+
   def render_cover_page(params)
     return Success(String.new) if params[:section_preview]
 
@@ -53,7 +63,7 @@ class RenderLiquid
 
     Templates::Render.new.call(
       template: template,
-      attributes: entity&.deep_stringify_keys
+      attributes: sanitize_values(entity)
     )
   end
 
@@ -61,7 +71,7 @@ class RenderLiquid
     entity = construct_defaults(params)
     Templates::Render.new.call(
       template: params[:template],
-      attributes: entity&.deep_stringify_keys
+      attributes: sanitize_values(entity)
     )
   end
 
@@ -74,7 +84,7 @@ class RenderLiquid
         layout: 'layouts/ivl_pdf_layout'
       )
 
-    Success({ rendered_template: template, entity: entity })
+    Success({ rendered_template: template, entity: sanitize_values(entity) })
   end
 
   def parse_cover_page
@@ -166,12 +176,12 @@ class RenderLiquid
   def render(body, cover_page, params)
     entity = construct_defaults(params)
     rendered_body =
-      body.render(entity&.deep_stringify_keys, { strict_variables: true })
+      body.render(sanitize_values(entity), { strict_variables: true })
     document_body =
       if cover_page
         rendered_cover_page =
           cover_page.render(
-            entity&.deep_stringify_keys,
+            sanitize_values(entity),
             { strict_variables: true }
           )
         rendered_cover_page + rendered_body
@@ -186,7 +196,7 @@ class RenderLiquid
 
     return Failure(body.errors) if body.errors.present?
 
-    Success({ rendered_template: template, entity: entity })
+    Success({ rendered_template: template, entity: sanitize_values(entity) })
   end
 end
 # rubocop:enable Layout/MultilineMethodCallIndentation

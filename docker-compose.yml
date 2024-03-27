@@ -2,7 +2,6 @@ version: "3.9"
 
 services:
   polypress:
-    image: polypress:release_0.7.0
     build:
       context: .
       dockerfile: ./.docker/development/Dockerfile
@@ -14,8 +13,8 @@ services:
       - bundle:/bundle
       - node_modules:/polypress/node_modules
       - packs:/polypress/public/packs
-    env_file:
-      - ./.env
+#    env_file:
+#      - ./.env
     environment:
       BLIND_INDEX_MASTER_KEY: ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
       # INTERFACE: "0.0.0.0"
@@ -23,12 +22,12 @@ services:
       RABBITMQ_VHOST: event_source
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-guest}
       RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
-      RABBITMQ_URL_EVENT_SOURCE: ${RABBITMQ_URL_EVENT_SOURCE:-amqp://guest:guest@amqp:5672}
+      RABBITMQ_URL_EVENT_SOURCE: ${RABBITMQ_URL_EVENT_SOURCE:-amqp://guest:guest@rabbitmq:5672}
       RABBITMQ_USERNAME: ${AMQP_USERNAME:-guest}
       RAILS_ENV: ${RAILS_ENV:-development}
     depends_on:
       - mongodb
-      # - rabbitmq
+      - rabbitmq
     tmpfs:
       - /tmp
     command: bash -c "rm -rf tmp/pids/server.pid && mkdir -p tmp/pids && bundle exec bundle install &&  bin/rails server --port 3000 --binding 0.0.0.0"

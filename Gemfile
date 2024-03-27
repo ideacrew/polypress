@@ -86,7 +86,7 @@ group :development, :test do
   gem 'byebug', platforms: %i[mri mingw x64_mingw]
   gem 'database_cleaner-mongoid'
   gem 'factory_bot_rails'
-  gem 'pry-byebug'
+  gem 'pry-byebug', require: false
   gem 'rspec-rails', '~> 5.0'
   gem 'shoulda-matchers', '~> 3'
   gem 'yard'
