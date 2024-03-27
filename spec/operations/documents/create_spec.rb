@@ -77,7 +77,7 @@ RSpec.describe Documents::Create do
       end
 
       it 'should include mailing address when present' do
-        expect(rendered_template[:entity][:mailing_address][:kind]).to eq(
+        expect(rendered_template[:entity]["mailing_address"]["kind"]).to eq(
           'mailing'
         )
       end
@@ -104,7 +104,7 @@ RSpec.describe Documents::Create do
         end
 
         it 'should include home address' do
-          expect(rendered_template[:entity][:mailing_address][:kind]).to eq(
+          expect(rendered_template[:entity]["mailing_address"]["kind"]).to eq(
             'home'
           )
         end

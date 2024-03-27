@@ -1,4 +1,4 @@
-FROM ruby:2.7.3 AS polypress
+FROM --platform=linux/amd64 ruby:2.7.3 AS polypress
 
 LABEL author="IdeaCrew"
 
@@ -10,7 +10,7 @@ RUN curl -sL https://deb.nodesource.com/setup_12.x | bash -
 
 RUN apt-get update \
   && apt-get -yq dist-upgrade \
-  && apt-get install -y tzdata build-essential nodejs vim \
+  && apt-get install -y tzdata build-essential nodejs libsodium-dev \
   && apt-get autoremove -y \
   && npm install --global yarn
 
