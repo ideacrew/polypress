@@ -45,11 +45,19 @@
 <body onload="subst()">
   <br />
   <table class="footer-section" style="color: #333333;" width="100%" border="0">
-    <tr>
-      <td style="padding:3px 10px; font-size:8px;" align="center">Questions? <br>
-      Go to www.CoverME.gov or call <%= contact_center_short_number %>
-      </td>
-    </tr>
+    <% if Settings.site.key.to_s == 'me'%>
+      <tr>
+        <td style="padding:3px 10px; font-size:8px;" align="center">Questions? <br>
+        Go to www.CoverME.gov or call <%= contact_center_short_number %>
+        </td>
+      </tr>
+    <% else %>
+      <tr>
+        <td style="padding:3px 10px; font-size:8px;" align="center">
+          Questions? Call <%= Settings.site.short_name %> at <%= Settings.contact_center.contact_center_number_for_display %>, or go to <%= Settings.site.short_url %>
+        </td>
+      </tr>
+    <% end %>
   </table>
 </body>
 </html>
