@@ -11,6 +11,8 @@ class RenderLiquid
   send(:include, FamilyHelper)
   send(:include, Dry::Monads[:result, :do])
 
+  include ActionView::Helpers::TagHelper
+
   # @param [String] :body
   # @param [String] :subject MPI indicator for a given notice
   # @param [Array<Dry::Struct>] :entities
@@ -36,7 +38,7 @@ class RenderLiquid
 
     result = entity_hash.deep_stringify_keys
     result.deep_transform_values do |value|
-      value.is_a?(String) ? ActionController::Base.helpers.sanitize(value) : value
+      value.is_a?(String) ? escape_once(value) : value
     end
   end
 

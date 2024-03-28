@@ -197,7 +197,7 @@ RSpec.describe Documents::Create do
         # we are sanitizing scripts on template creation so we cannot now
         # convered the same test in template spec
         expect(sanitized_template).to include('http://thiswillneverload')
-        expect(sanitized_template).not_to include('onerror')
+        expect(sanitized_template).not_to include('<img')
         expect(sanitized_template).to include('<style>')
       end
     end

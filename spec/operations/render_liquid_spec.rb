@@ -3,6 +3,7 @@
 require "rails_helper"
 
 describe RenderLiquid, "asked to sanitize some values" do
+  include ActionView::Helpers::TagHelper
 
   let(:now) { DateTime.now }
   let(:bad_html_value) { "<img src=http://0ab3iy52xv954qnfzsa9zn9tfklc98xx.bc.nhbrsec.com>" }
@@ -21,12 +22,14 @@ describe RenderLiquid, "asked to sanitize some values" do
     }
   end
 
+  let(:escaped_value) { escape_once(bad_html_value) }
+
   let(:operation) { RenderLiquid.new }
 
   subject { operation.send(:sanitize_values, entity_hash) }
 
   it "sanitizes the html" do
-    expect(subject["yet_another"][0]["more_complex"][1]).not_to include(bad_html_value)
+    expect(subject["yet_another"][0]["more_complex"][1]).to eq(escaped_value)
   end
 
   it "does not alter the numeric value" do
